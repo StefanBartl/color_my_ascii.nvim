@@ -4,6 +4,8 @@
 
 local M = {}
 
+local fn = vim.fn
+
 --- Check if a module can be loaded
 ---@param module_name string Name of the module to check
 ---@return boolean success True if module can be loaded
@@ -21,7 +23,7 @@ end
 ---@param pattern string File pattern (e.g., '*.lua')
 ---@return integer count Number of files found
 local function count_files(path, pattern)
-  local files = vim.fn.globpath(path, pattern, false, true)
+  local files = fn.globpath(path, pattern, false, true)
   return #files
 end
 
@@ -118,11 +120,11 @@ function M.check()
   health.info('Checking file structure...')
 
   local source = debug.getinfo(1, "S").source:sub(2)
-  local dir = vim.fn.fnamemodify(source, ":h")
+  local dir = fn.fnamemodify(source, ":h")
 
   -- Check languages directory
   local lang_path = dir .. '/languages'
-  if vim.fn.isdirectory(lang_path) == 1 then
+  if fn.isdirectory(lang_path) == 1 then
     local lang_file_count = count_files(lang_path, '*.lua')
     health.ok(string.format('Languages directory found with %d file(s)', lang_file_count))
   else
@@ -131,7 +133,7 @@ function M.check()
 
   -- Check groups directory
   local group_path = dir .. '/groups'
-  if vim.fn.isdirectory(group_path) == 1 then
+  if fn.isdirectory(group_path) == 1 then
     local group_file_count = count_files(group_path, '*.lua')
     health.ok(string.format('Groups directory found with %d file(s)', group_file_count))
   else
@@ -140,7 +142,7 @@ function M.check()
 
   -- Check for color schemes
   local schemes_path = dir .. '/schemes'
-  if vim.fn.isdirectory(schemes_path) == 1 then
+  if fn.isdirectory(schemes_path) == 1 then
     local scheme_file_count = count_files(schemes_path, '*.lua')
     health.ok(string.format('Color schemes directory found with %d scheme(s)', scheme_file_count))
   else

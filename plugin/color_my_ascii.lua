@@ -3,6 +3,8 @@
 --- This file is automatically loaded by Neovim when the plugin is installed.
 --- It sets up the necessary autocommands and commands for the plugin.
 
+local api = vim.api
+
 -- Prevent double-loading
 if vim.g.loaded_color_my_ascii then
   return
@@ -14,21 +16,21 @@ vim.g.loaded_color_my_ascii = 1
 require('color_my_ascii').setup()
 
 -- Create user command to manually trigger highlighting
-vim.api.nvim_create_user_command('ColorMyAscii', function()
+api.nvim_create_user_command('ColorMyAscii', function()
   require('color_my_ascii').highlight_buffer()
 end, {
   desc = 'Highlight ASCII art in current buffer',
 })
 
 -- Create user command to toggle the plugin
-vim.api.nvim_create_user_command('ColorMyAsciiToggle', function()
+api.nvim_create_user_command('ColorMyAsciiToggle', function()
   require('color_my_ascii').toggle()
 end, {
   desc = 'Toggle ASCII art highlighting',
 })
 
 -- Create debug command to show loaded configuration
-vim.api.nvim_create_user_command('ColorMyAsciiDebug', function()
+api.nvim_create_user_command('ColorMyAsciiLoadedConfig', function()
   local config = require('color_my_ascii.config')
   local cfg = config.get()
 
@@ -55,10 +57,10 @@ end, {
 })
 
 -- Create autogroup for plugin autocommands
-local group = vim.api.nvim_create_augroup('ColorMyAscii', { clear = true })
+local group = api.nvim_create_augroup('ColorMyAscii', { clear = true })
 
 -- Setup highlighting for markdown files
-vim.api.nvim_create_autocmd({ 'FileType' }, {
+api.nvim_create_autocmd({ 'FileType' }, {
   group = group,
   pattern = 'markdown',
   callback = function(args)

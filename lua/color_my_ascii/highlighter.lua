@@ -8,9 +8,11 @@ local config = require('color_my_ascii.config')
 local parser = require('color_my_ascii.parser')
 local language_detector = require('color_my_ascii.language_detector')
 
+local api = vim.api
+
 --- Namespace ID for extmarks
 ---@type integer
-local namespace = vim.api.nvim_create_namespace('ColorMyAscii')
+local namespace = api.nvim_create_namespace('ColorMyAscii')
 
 --- Storage for extmark IDs per buffer for efficient cleanup
 ---@type table<integer, integer[]>
@@ -19,7 +21,7 @@ local buffer_extmarks = {}
 --- Clear all highlights in a buffer
 ---@param bufnr integer Buffer number to clear
 function M.clear_buffer(bufnr)
-  vim.api.nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
+  api.nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
   buffer_extmarks[bufnr] = nil
 end
 
@@ -30,7 +32,7 @@ end
 ---@param col_end integer End column (0-indexed, byte offset, exclusive)
 ---@param hl_group string|ColorMyAscii.CustomHighlight Highlight group name
 local function highlight_range(bufnr, line, col_start, col_end, hl_group)
-  local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, namespace, line, col_start, {
+  local extmark_id = api.nvim_buf_set_extmark(bufnr, namespace, line, col_start, {
     end_col = col_end,
     hl_group = hl_group,
     priority = 100,

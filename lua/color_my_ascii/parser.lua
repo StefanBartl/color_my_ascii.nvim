@@ -4,6 +4,8 @@
 
 local M = {}
 
+local api = vim.api
+
 --- Check if a line is an opening fence for an ASCII code block.
 --- Supports fenced code blocks using ``` or ~~~.
 --- Recognized forms:
@@ -45,12 +47,22 @@ end
 ---@param bufnr integer Buffer number to search
 ---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
 function M.find_ascii_blocks(bufnr)
+	if type(bufnr) ~= "number" or bufnr < 0 then
+		return {}
+	end
+	if not vim.api.nvim_buf_is_valid(bufnr) then
+		return {}
+	end
+
 	local cfg = require("color_my_ascii.config").get()
 
 	---@type ColorMyAscii.Block[]
 	local blocks = {}
 
-	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+	local ok, lines = pcall(vim.api.nvim_buf_get_lines, bufnr, 0, -1, false)
+	if not ok or type(lines) ~= "table" then
+		return {}
+	end
 	local line_count = #lines
 
 	local i = 1
@@ -97,13 +109,19 @@ end
 function M.tokenize_line(line)
 	---@type string[]
 	local tokens = {}
+	local gmatch = string.gmatch
+	local find = string.find
+	local insert = table.insert
 
-	-- Match sequences of alphanumeric characters and underscores.
-	for word in line:gmatch("[%w_]+") do
-		table.insert(tokens, word)
+	-- Pre-allocate table
+	tokens[100] = nil
+
+	-- Match sequences of alphanumeric characters
+	for word in gmatch(line, "[%w_]+") do
+		insert(tokens, word)
 	end
 
-	-- Match common multi-character operators explicitly.
+	-- Operators with local reference to avoid table lookup
 	local operators = {
 		":=",
 		"==",
@@ -132,9 +150,10 @@ function M.tokenize_line(line)
 		"<<=",
 	}
 
-	for _, op in ipairs(operators) do
-		if line:find(op, 1, true) then
-			table.insert(tokens, op)
+	for i = 1, #operators do
+		local op = operators[i]
+		if find(line, op, 1, true) then
+			insert(tokens, op)
 		end
 	end
 
@@ -183,7 +202,7 @@ function M.find_inline_codes(bufnr)
 	---@type ColorMyAscii.InlineCode[]
 	local inline_codes = {}
 
-	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+	local lines = api.nvim_buf_get_lines(bufnr, 0, -1, false)
 
 	for line_num, line in ipairs(lines) do
 		local i = 1

@@ -5,6 +5,9 @@
 
 local M = {}
 
+local notify = vim.notify
+local fn = vim.fn
+
 --- Cache for dynamically created highlight groups
 ---@type table<string, boolean>
 local created_highlight_groups = {}
@@ -15,21 +18,21 @@ local function load_languages()
   local languages = {}
 
   local source = debug.getinfo(1, "S").source:sub(2)
-  local dir = vim.fn.fnamemodify(source, ":h")
+  local dir = fn.fnamemodify(source, ":h")
   local lang_path = dir .. '/languages'
 
-  if vim.fn.isdirectory(lang_path) == 0 then
-    vim.notify(
+  if fn.isdirectory(lang_path) == 0 then
+    notify(
       'color_my_ascii: CRITICAL - languages/ directory not found at: ' .. lang_path,
       vim.log.levels.ERROR
     )
     return languages
   end
 
-  local files = vim.fn.globpath(lang_path, '*.lua', false, true)
+  local files = fn.globpath(lang_path, '*.lua', false, true)
 
   if #files == 0 then
-    vim.notify(
+    notify(
       'color_my_ascii: WARNING - No language files found in: ' .. lang_path,
       vim.log.levels.WARN
     )
@@ -37,13 +40,13 @@ local function load_languages()
   end
 
   for _, file in ipairs(files) do
-    local lang_name = vim.fn.fnamemodify(file, ':t:r')
+    local lang_name = fn.fnamemodify(file, ':t:r')
     local ok, lang_module = pcall(require, 'color_my_ascii.languages.' .. lang_name)
 
     if ok and type(lang_module) == 'table' then
       languages[lang_name] = lang_module
     else
-      vim.notify(
+      notify(
         string.format('color_my_ascii: Failed to load language "%s": %s',
           lang_name,
           tostring(lang_module)
@@ -62,21 +65,21 @@ local function load_groups()
   local groups = {}
 
   local source = debug.getinfo(1, "S").source:sub(2)
-  local dir = vim.fn.fnamemodify(source, ":h")
+  local dir = fn.fnamemodify(source, ":h")
   local group_path = dir .. '/groups'
 
-  if vim.fn.isdirectory(group_path) == 0 then
-    vim.notify(
+  if fn.isdirectory(group_path) == 0 then
+    notify(
       'color_my_ascii: CRITICAL - groups/ directory not found at: ' .. group_path,
       vim.log.levels.ERROR
     )
     return groups
   end
 
-  local files = vim.fn.globpath(group_path, '*.lua', false, true)
+  local files = fn.globpath(group_path, '*.lua', false, true)
 
   if #files == 0 then
-    vim.notify(
+    notify(
       'color_my_ascii: WARNING - No group files found in: ' .. group_path,
       vim.log.levels.WARN
     )
@@ -84,13 +87,13 @@ local function load_groups()
   end
 
   for _, file in ipairs(files) do
-    local group_name = vim.fn.fnamemodify(file, ':t:r')
+    local group_name = fn.fnamemodify(file, ':t:r')
     local ok, group_module = pcall(require, 'color_my_ascii.groups.' .. group_name)
 
     if ok and type(group_module) == 'table' then
       groups[group_name] = group_module
     else
-      vim.notify(
+      notify(
         string.format('color_my_ascii: Failed to load group "%s": %s',
           group_name,
           tostring(group_module)
@@ -170,13 +173,14 @@ local function build_char_lookup()
   -- Step 1: Add all group characters
   for _, group in pairs(current_config.groups) do
     local hl_group = resolve_highlight(group.hl)
-    local chars = vim.fn.split(group.chars, '\\zs')
+    local chars = fn.split(group.chars, '\\zs')
     for _, char in ipairs(chars) do
       lookup[char] = hl_group
     end
   end
 
   -- Step 2: Add brackets if bracket highlighting is enabled AND not already in groups
+    -- FIX: Brackets are in config now. this step should respect that and should be modified to respect that.
   if current_config.enable_bracket_highlighting then
     local bracket_hl = resolve_highlight('Operator')
     local brackets = { '(', ')', '[', ']', '{', '}' }

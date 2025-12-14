@@ -4,6 +4,9 @@
 
 local M = {}
 
+local api = vim.api
+local notify = vim.notify
+
 ---@type ColorMyAscii.State
 local state = {
   enabled = true,
@@ -38,10 +41,10 @@ function M.setup_buffer(bufnr)
   M.highlight_buffer(bufnr)
 
   -- Setup autocommands for this buffer
-  local group = vim.api.nvim_create_augroup('ColorMyAsciiBuffer_' .. bufnr, { clear = true })
+  local group = api.nvim_create_augroup('ColorMyAsciiBuffer_' .. bufnr, { clear = true })
 
   -- Re-highlight on text change
-  vim.api.nvim_create_autocmd({ 'TextChanged', 'TextChangedI' }, {
+  api.nvim_create_autocmd({ 'TextChanged', 'TextChangedI' }, {
     group = group,
     buffer = bufnr,
     callback = function()
@@ -62,7 +65,7 @@ function M.setup_buffer(bufnr)
   })
 
   -- Cleanup on buffer delete
-  vim.api.nvim_create_autocmd('BufDelete', {
+  api.nvim_create_autocmd('BufDelete', {
     group = group,
     buffer = bufnr,
     callback = function()
@@ -83,7 +86,7 @@ end
 --- Highlight all ASCII blocks in the specified buffer
 ---@param bufnr? integer Buffer number (defaults to current buffer)
 function M.highlight_buffer(bufnr)
-  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  bufnr = bufnr or api.nvim_get_current_buf()
 
   if not state.enabled or not state.buffers[bufnr] then
     return
@@ -114,13 +117,13 @@ function M.toggle()
     for bufnr, _ in pairs(state.buffers) do
       M.highlight_buffer(bufnr)
     end
-    vim.notify('color_my_ascii.nvim enabled', vim.log.levels.INFO)
+    notify('color_my_ascii.nvim enabled', vim.log.levels.INFO)
   else
     -- Disable: clear all highlights
     for bufnr, _ in pairs(state.buffers) do
       highlighter.clear_buffer(bufnr)
     end
-    vim.notify('color_my_ascii.nvim disabled', vim.log.levels.INFO)
+    notify('color_my_ascii.nvim disabled', vim.log.levels.INFO)
   end
 
   return state.enabled

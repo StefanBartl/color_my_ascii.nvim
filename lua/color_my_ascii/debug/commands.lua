@@ -3,13 +3,15 @@
 
 local M = {}
 
+local api = vim.api
+
 ---Register all debug user commands
 ---@return nil
 function M.register()
   local inspect = require('color_my_ascii.debug.inspect')
 
   -- :ColorMyAsciiInspectChar <char>
-  vim.api.nvim_create_user_command('ColorMyAsciiInspectChar', function(opts)
+  api.nvim_create_user_command('ColorMyAsciiInspectChar', function(opts)
     local char = opts.args
     if #char == 0 then
       print('Usage: :ColorMyAsciiInspectChar <character>')
@@ -28,7 +30,7 @@ function M.register()
   })
 
   -- :ColorMyAsciiInspectGroup <group>
-  vim.api.nvim_create_user_command('ColorMyAsciiInspectGroup', function(opts)
+  api.nvim_create_user_command('ColorMyAsciiInspectGroup', function(opts)
     local group_name = opts.args
     if #group_name == 0 then
       print('Usage: :ColorMyAsciiInspectGroup <group_name>')
@@ -55,8 +57,8 @@ function M.register()
   })
 
   -- :ColorMyAsciiInspectInline
-  vim.api.nvim_create_user_command('ColorMyAsciiInspectInline', function()
-    local line = vim.api.nvim_get_current_line()
+  api.nvim_create_user_command('ColorMyAsciiInspectInline', function()
+    local line = api.nvim_get_current_line()
     local results = inspect.inspect_inline_code(line)
 
     print('=== Inline Code Inspection ===')
@@ -85,7 +87,7 @@ function M.register()
   })
 
   -- :ColorMyAsciiInspectHighlight <hl_group>
-  vim.api.nvim_create_user_command('ColorMyAsciiInspectHighlight', function(opts)
+  api.nvim_create_user_command('ColorMyAsciiInspectHighlight', function(opts)
     local highlight = opts.args
     if #highlight == 0 then
       print('Usage: :ColorMyAsciiInspectHighlight <highlight_group>')
@@ -105,7 +107,7 @@ function M.register()
   })
 
   -- :ColorMyAsciiStats
-  vim.api.nvim_create_user_command('ColorMyAsciiStats', function()
+  api.nvim_create_user_command('ColorMyAsciiStats', function()
     local stats = inspect.get_statistics()
 
     print('=== color_my_ascii.nvim Statistics ===')

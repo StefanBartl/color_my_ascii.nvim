@@ -23,6 +23,8 @@
 ---@field hl string|ColorMyAscii.CustomHighlight Highlight specification
 
 ---@class ColorMyAscii.Config
+---@field debug_enabled? boolean Toggle debug mode (usercommands)
+---@field debug_verbose? boolean Toggle write debug logs to file
 ---@field groups? table<string, ColorMyAscii.CharGroup> Named character groups with their highlight settings
 ---@field keywords? table<string, ColorMyAscii.KeywordGroup> Language-specific keyword definitions
 ---@field custom_groups? table<string, ColorMyAscii.CustomGroup> User-defined character groups with custom highlights

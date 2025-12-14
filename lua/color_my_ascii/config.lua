@@ -106,6 +106,7 @@ end
 --- Default configuration
 ---@type ColorMyAscii.Config
 local defaults = {
+  debug_enabled = false,
   groups = {},
   keywords = {},
   overrides = {},
@@ -263,6 +264,15 @@ function M.setup(opts)
   M.char_lookup = build_char_lookup()
   M.keyword_lookup = build_keyword_lookup()
   M.unique_keyword_lookup = build_unique_keyword_lookup()
+
+  -- Initialize debug module if enabled
+  if current_config.debug_enabled then
+    local debug = require('color_my_ascii.debug')
+    debug.setup({
+      enabled = true,
+      verbose = current_config.debug_verbose or false,
+    })
+  end
 end
 
 --- Get the current configuration

@@ -1,7 +1,8 @@
 ---@module 'color_my_ascii.config'
 --- Configuration management for color_my_ascii.nvim plugin.
 --- Handles user configuration, defaults, and provides access to settings.
---- Supports modular language and group definitions, custom highlights, and dynamic highlight groups.
+--- Supports modular language and group definitions, custom highlights, dynamic highlight groups,
+--- and simplified scheme loading via string identifiers.
 
 local M = {}
 
@@ -180,7 +181,6 @@ local function build_char_lookup()
   end
 
   -- Step 2: Add brackets if bracket highlighting is enabled AND not already in groups
-    -- FIX: Brackets are in config now. this step should respect that and should be modified to respect that.
   if current_config.enable_bracket_highlighting then
     local bracket_hl = resolve_highlight('Operator')
     local brackets = { '(', ')', '[', ']', '{', '}' }
@@ -244,7 +244,7 @@ local function build_unique_keyword_lookup()
 end
 
 --- Setup the configuration with user options
----@param opts? ColorMyAscii.Config User configuration to merge with defaults
+---@param opts? ColorMyAscii.Config|{scheme: string} User configuration to merge with defaults
 function M.setup(opts)
   -- Load modular definitions
   local loaded_groups = load_groups()
@@ -253,8 +253,29 @@ function M.setup(opts)
   defaults.groups = loaded_groups
   defaults.keywords = loaded_languages
 
-  if opts then
-    current_config = vim.tbl_deep_extend('force', defaults, opts)
+  -- Handle scheme parameter
+  local config_to_merge = opts
+  if opts and opts.scheme then
+    local scheme_loader = require('color_my_ascii.scheme_loader')
+    local scheme_config, err = scheme_loader.load_scheme(opts.scheme)
+
+    if not scheme_config then
+      notify(
+        string.format('color_my_ascii: %s', err),
+        vim.log.levels.ERROR
+      )
+      config_to_merge = vim.tbl_extend('force', {}, opts)
+      config_to_merge.scheme = nil  -- Remove invalid scheme parameter
+    else
+      -- Merge user opts with scheme config (user opts take precedence)
+      local user_opts = vim.tbl_extend('force', {}, opts)
+      user_opts.scheme = nil  -- Remove scheme key from merge
+      config_to_merge = vim.tbl_deep_extend('force', scheme_config, user_opts)
+    end
+  end
+
+  if config_to_merge then
+    current_config = vim.tbl_deep_extend('force', defaults, config_to_merge)
   else
     current_config = vim.deepcopy(defaults)
   end

@@ -1,21 +1,23 @@
 ---@module 'color_my_ascii.config'
 --- Configuration management for color_my_ascii.nvim plugin.
 --- Handles user configuration, defaults, and provides access to settings.
---- Supports modular language and group definitions.
+--- Supports modular language and group definitions, custom highlights, and dynamic highlight groups.
 
 local M = {}
+
+--- Cache for dynamically created highlight groups
+---@type table<string, boolean>
+local created_highlight_groups = {}
 
 --- Load all language definitions from the languages/ directory
 ---@return table<string, ColorMyAscii.KeywordGroup> languages Map of language name to keyword group
 local function load_languages()
   local languages = {}
 
-  -- Get the directory of this config file
   local source = debug.getinfo(1, "S").source:sub(2)
   local dir = vim.fn.fnamemodify(source, ":h")
   local lang_path = dir .. '/languages'
 
-  -- Check if directory exists
   if vim.fn.isdirectory(lang_path) == 0 then
     vim.notify(
       'color_my_ascii: CRITICAL - languages/ directory not found at: ' .. lang_path,
@@ -24,7 +26,6 @@ local function load_languages()
     return languages
   end
 
-  -- Iterate through all .lua files in languages directory
   local files = vim.fn.globpath(lang_path, '*.lua', false, true)
 
   if #files == 0 then
@@ -60,12 +61,10 @@ end
 local function load_groups()
   local groups = {}
 
-  -- Get the directory of this config file
   local source = debug.getinfo(1, "S").source:sub(2)
   local dir = vim.fn.fnamemodify(source, ":h")
   local group_path = dir .. '/groups'
 
-  -- Check if directory exists
   if vim.fn.isdirectory(group_path) == 0 then
     vim.notify(
       'color_my_ascii: CRITICAL - groups/ directory not found at: ' .. group_path,
@@ -74,7 +73,6 @@ local function load_groups()
     return groups
   end
 
-  -- Iterate through all .lua files in groups directory
   local files = vim.fn.globpath(group_path, '*.lua', false, true)
 
   if #files == 0 then
@@ -119,11 +117,49 @@ local defaults = {
   enable_treesitter = false,
   treat_empty_fence_as_ascii = false,
   enable_inline_code = false,
+  enable_function_names = false,
+  enable_bracket_highlighting = false,
 }
 
---- Current configuration (starts with defaults)
+--- Current configuration
 ---@type ColorMyAscii.Config
 local current_config = vim.deepcopy(defaults)
+
+--- Create or get a custom highlight group
+---@param spec string|ColorMyAscii.CustomHighlight Highlight specification
+---@return string highlight_group_name Name of the highlight group to use
+local function resolve_highlight(spec)
+  if type(spec) == 'string' then
+    return spec
+  end
+
+  local hl_def = spec
+  local name = string.format(
+    'ColorMyAsciiCustom_%s_%s_%s_%s_%s_%s_%s',
+    hl_def.fg or 'none',
+    hl_def.bg or 'none',
+    hl_def.bold and 'b' or '',
+    hl_def.italic and 'i' or '',
+    hl_def.underline and 'u' or '',
+    hl_def.undercurl and 'c' or '',
+    hl_def.strikethrough and 's' or ''
+  ):gsub('#', '')  -- Remove # from hex colors for group name
+
+  if not created_highlight_groups[name] then
+    vim.api.nvim_set_hl(0, name, {
+      fg = hl_def.fg,
+      bg = hl_def.bg,
+      bold = hl_def.bold,
+      italic = hl_def.italic,
+      underline = hl_def.underline,
+      undercurl = hl_def.undercurl,
+      strikethrough = hl_def.strikethrough,
+    })
+    created_highlight_groups[name] = true
+  end
+
+  return name
+end
 
 --- Build a lookup table for fast character-to-highlight-group resolution
 ---@return table<string, string> Map of character to highlight group name
@@ -132,16 +168,28 @@ local function build_char_lookup()
 
   -- Step 1: Add all group characters
   for _, group in pairs(current_config.groups) do
-    -- Use vim.str_utf_pos for proper UTF-8 iteration
-    local char_list = vim.fn.split(group.chars, '\\zs')
-    for _, char in ipairs(char_list) do
-      lookup[char] = group.hl
+    local hl_group = resolve_highlight(group.hl)
+    local chars = vim.fn.split(group.chars, '\\zs')
+    for _, char in ipairs(chars) do
+      lookup[char] = hl_group
     end
   end
 
-  -- Step 2: Apply overrides (highest priority)
+  -- Step 2: Add brackets if bracket highlighting is enabled AND not already in groups
+  if current_config.enable_bracket_highlighting then
+    local bracket_hl = resolve_highlight('Operator')
+    local brackets = { '(', ')', '[', ']', '{', '}' }
+    for _, bracket in ipairs(brackets) do
+      -- Only add if not already defined (groups have priority)
+      if not lookup[bracket] then
+        lookup[bracket] = bracket_hl
+      end
+    end
+  end
+
+  -- Step 3: Apply overrides (highest priority)
   for char, hl in pairs(current_config.overrides) do
-    lookup[char] = hl
+    lookup[char] = resolve_highlight(hl)
   end
 
   return lookup
@@ -157,11 +205,12 @@ local function build_keyword_lookup()
   local lookup = {}
 
   for lang_name, lang_config in pairs(current_config.keywords) do
+    local hl_group = resolve_highlight(lang_config.hl)
     for _, word in ipairs(lang_config.words) do
       lookup[word] = lookup[word] or {}
       table.insert(lookup[word], {
         language = lang_name,
-        hl = lang_config.hl,
+        hl = hl_group,
       })
     end
   end
@@ -196,7 +245,6 @@ function M.setup(opts)
   local loaded_groups = load_groups()
   local loaded_languages = load_languages()
 
-  -- Merge with defaults
   defaults.groups = loaded_groups
   defaults.keywords = loaded_languages
 
@@ -204,6 +252,11 @@ function M.setup(opts)
     current_config = vim.tbl_deep_extend('force', defaults, opts)
   else
     current_config = vim.deepcopy(defaults)
+  end
+
+  -- Resolve default_text_hl if it's a custom highlight
+  if current_config.default_text_hl then
+    current_config.default_text_hl = resolve_highlight(current_config.default_text_hl)
   end
 
   -- Rebuild lookup tables after configuration change
@@ -248,6 +301,12 @@ function M.get_available_languages()
   end
   table.sort(langs)
   return langs
+end
+
+--- Check if function name detection is enabled
+---@return boolean enabled True if function name detection is enabled
+function M.is_function_detection_enabled()
+  return current_config.enable_function_names
 end
 
 -- Initialize lookup tables (will be empty until setup() is called)

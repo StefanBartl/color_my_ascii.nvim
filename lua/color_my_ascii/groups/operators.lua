@@ -7,7 +7,7 @@ local group = {
   hl = 'Operator',
 }
 
--- Build character string
+-- Build character string (each character only ONCE)
 local chars = {
   -- Arithmetic operators
   '+', '-', '*', '/', '%', '=',
@@ -15,7 +15,7 @@ local chars = {
   '<', '>',
   -- Logical operators
   '!', '&', '|', '^', '~',
-  -- Brackets and braces
+  -- Brackets and braces (optional, can be controlled by enable_bracket_highlighting)
   '(', ')', '[', ']', '{', '}',
   -- Other punctuation
   ':', ';', ',', '.', '?',

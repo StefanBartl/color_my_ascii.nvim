@@ -1,6 +1,35 @@
 # Changelog
 
-## v0.2.0
+## Table of content
+
+  - [v0.2.0 (Upcoming)](#v020-upcoming)
+    - [Major Changes](#major-changes)
+      - [Simplified Scheme Loading](#simplified-scheme-loading)
+      - [New Color Schemes](#new-color-schemes)
+    - [Documentation](#documentation)
+      - [English Documentation](#english-documentation)
+      - [New Feature Guides](#new-feature-guides)
+      - [Updated Documentation](#updated-documentation)
+    - [Files Changed](#files-changed)
+      - [New Files](#new-files)
+      - [Modified Files](#modified-files)
+    - [Breaking Changes](#breaking-changes)
+    - [Migration Guide](#migration-guide)
+      - [From v0.1.x to v0.2.0](#from-v01x-to-v020)
+    - [New Examples](#new-examples)
+      - [Using New Schemes](#using-new-schemes)
+      - [Custom Colors (New Documentation)](#custom-colors-new-documentation)
+    - [Internal Changes](#internal-changes)
+    - [Testing](#testing)
+    - [Next Steps (v0.3.0)](#next-steps-v030)
+  - [v0.1.0 (Initial Release)](#v010-initial-release)
+    - [Features](#features)
+    - [Supported Languages](#supported-languages)
+    - [Color Schemes](#color-schemes)
+
+---
+
+## v0.2.0 (Upcoming)
 
 ### Major Changes
 

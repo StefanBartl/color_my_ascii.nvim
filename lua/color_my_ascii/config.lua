@@ -14,97 +14,145 @@ local fn = vim.fn
 local created_highlight_groups = {}
 
 --- Load all language definitions from the languages/ directory
+--- Implements safe loading with error recovery and validation
 ---@return table<string, ColorMyAscii.KeywordGroup> languages Map of language name to keyword group
+---@return string[] errors List of loading errors (non-fatal)
 local function load_languages()
   local languages = {}
+  local errors = {}
 
-  local source = debug.getinfo(1, "S").source:sub(2)
+  -- Safe path resolution
+  local ok1, source = pcall(function()
+    return debug.getinfo(1, "S").source:sub(2)
+  end)
+
+  if not o1k then
+    table.insert(errors, 'Failed to determine plugin path')
+    return languages, errors
+  end
+
   local dir = fn.fnamemodify(source, ":h")
   local lang_path = dir .. '/languages'
 
+  -- Check directory existence
   if fn.isdirectory(lang_path) == 0 then
+    table.insert(errors, string.format('Languages directory not found: %s', lang_path))
     notify(
       'color_my_ascii: CRITICAL - languages/ directory not found at: ' .. lang_path,
       vim.log.levels.ERROR
     )
-    return languages
+    return languages, errors
   end
 
-  local files = fn.globpath(lang_path, '*.lua', false, true)
+  -- Safe file globbing
+  local glob_ok, files = pcall(fn.globpath, lang_path, '*.lua', false, true)
+  if not glob_ok then
+    table.insert(errors, 'Failed to list language files')
+    return languages, errors
+  end
 
   if #files == 0 then
+    table.insert(errors, 'No language files found')
     notify(
       'color_my_ascii: WARNING - No language files found in: ' .. lang_path,
       vim.log.levels.WARN
     )
-    return languages
+    return languages, errors
   end
 
+  -- Load each language file with error recovery
   for _, file in ipairs(files) do
     local lang_name = fn.fnamemodify(file, ':t:r')
-    local ok, lang_module = pcall(require, 'color_my_ascii.languages.' .. lang_name)
+    local ok2, lang_module = pcall(require, 'color_my_ascii.languages.' .. lang_name)
 
-    if ok and type(lang_module) == 'table' then
-      languages[lang_name] = lang_module
+    if ok2 and type(lang_module) == 'table' then
+      -- Validate language module structure
+      if type(lang_module.words) == 'table' and type(lang_module.hl) ~= 'nil' then
+        languages[lang_name] = lang_module
+      else
+        local err = string.format('Language "%s" has invalid structure', lang_name)
+        table.insert(errors, err)
+        notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
+      end
     else
-      notify(
-        string.format('color_my_ascii: Failed to load language "%s": %s',
-          lang_name,
-          tostring(lang_module)
-        ),
-        vim.log.levels.WARN
-      )
+      local err = string.format('Failed to load language "%s": %s', lang_name, tostring(lang_module))
+      table.insert(errors, err)
+      notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
     end
   end
 
-  return languages
+  return languages, errors
 end
 
 --- Load all character group definitions from the groups/ directory
+--- Implements safe loading with error recovery and validation
 ---@return table<string, ColorMyAscii.CharGroup> groups Map of group name to character group
+---@return string[] errors List of loading errors (non-fatal)
 local function load_groups()
   local groups = {}
+  local errors = {}
 
-  local source = debug.getinfo(1, "S").source:sub(2)
+  -- Safe path resolution
+  local ok3, source = pcall(function()
+    return debug.getinfo(1, "S").source:sub(2)
+  end)
+
+  if not ok3 then
+    table.insert(errors, 'Failed to determine plugin path')
+    return groups, errors
+  end
+
   local dir = fn.fnamemodify(source, ":h")
   local group_path = dir .. '/groups'
 
+  -- Check directory existence
   if fn.isdirectory(group_path) == 0 then
+    table.insert(errors, string.format('Groups directory not found: %s', group_path))
     notify(
       'color_my_ascii: CRITICAL - groups/ directory not found at: ' .. group_path,
       vim.log.levels.ERROR
     )
-    return groups
+    return groups, errors
   end
 
-  local files = fn.globpath(group_path, '*.lua', false, true)
+  -- Safe file globbing
+  local glob_ok, files = pcall(fn.globpath, group_path, '*.lua', false, true)
+  if not glob_ok then
+    table.insert(errors, 'Failed to list group files')
+    return groups, errors
+  end
 
   if #files == 0 then
+    table.insert(errors, 'No group files found')
     notify(
       'color_my_ascii: WARNING - No group files found in: ' .. group_path,
       vim.log.levels.WARN
     )
-    return groups
+    return groups, errors
   end
 
+  -- Load each group file with error recovery
   for _, file in ipairs(files) do
     local group_name = fn.fnamemodify(file, ':t:r')
-    local ok, group_module = pcall(require, 'color_my_ascii.groups.' .. group_name)
+    local ok4, group_module = pcall(require, 'color_my_ascii.groups.' .. group_name)
 
-    if ok and type(group_module) == 'table' then
-      groups[group_name] = group_module
+    if ok4 and type(group_module) == 'table' then
+      -- Validate group module structure
+      if type(group_module.chars) == 'string' and type(group_module.hl) ~= 'nil' then
+        groups[group_name] = group_module
+      else
+        local err = string.format('Group "%s" has invalid structure', group_name)
+        table.insert(errors, err)
+        notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
+      end
     else
-      notify(
-        string.format('color_my_ascii: Failed to load group "%s": %s',
-          group_name,
-          tostring(group_module)
-        ),
-        vim.log.levels.WARN
-      )
+      local err = string.format('Failed to load group "%s": %s', group_name, tostring(group_module))
+      table.insert(errors, err)
+      notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
     end
   end
 
-  return groups
+  return groups, errors
 end
 
 --- Default configuration

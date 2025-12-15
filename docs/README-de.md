@@ -77,13 +77,11 @@ Das Plugin aktiviert sich automatisch für Markdown-Dateien.
 
 ### Beispiel
 
-````markdown
 ```ascii
 ┌─────────────────────┐
 │  Hello World!       │
 └─────────────────────┘
 ```
-````
 
 → Box-Zeichen werden automatisch farbig hervorgehoben
 

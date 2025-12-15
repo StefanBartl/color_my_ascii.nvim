@@ -26,7 +26,7 @@ local function load_languages()
     return debug.getinfo(1, "S").source:sub(2)
   end)
 
-  if not o1k then
+  if not ok1 then
     table.insert(errors, 'Failed to determine plugin path')
     return languages, errors
   end

@@ -12,23 +12,12 @@
 
 local M = {}
 
---- Cache entry structure
----@class CacheEntry
----@field blocks ColorMyAscii.Block[] Parsed ASCII blocks
----@field inline_codes ColorMyAscii.InlineCode[] Parsed inline code segments
----@field timestamp number Cache creation timestamp (ms)
----@field changedtick number Buffer changedtick at cache time
----@field line_count integer Number of lines in buffer at cache time
-
 --- Cache storage with weak keys for automatic cleanup
 ---@type table<integer, CacheEntry>
 local cache = setmetatable({}, { __mode = 'k' })
 
 --- Cache configuration
----@class CacheConfig
----@field timeout integer Cache validity timeout in milliseconds
----@field max_size integer Maximum number of cached buffers
----@field enable_stats boolean Whether to collect statistics
+---@type CacheConfig
 local config = {
   timeout = 5000,        -- 5 seconds
   max_size = 50,         -- Maximum 50 buffers
@@ -36,11 +25,7 @@ local config = {
 }
 
 --- Cache statistics
----@class CacheStats
----@field hits integer Number of cache hits
----@field misses integer Number of cache misses
----@field invalidations integer Number of cache invalidations
----@field evictions integer Number of cache evictions
+---@type CacheStats
 local stats = {
   hits = 0,
   misses = 0,

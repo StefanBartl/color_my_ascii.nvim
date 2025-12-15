@@ -12,14 +12,7 @@
 local M = {}
 
 --- Debounce configuration thresholds
----@class DebounceConfig
----@field small_file_threshold integer Line count threshold for small files
----@field medium_file_threshold integer Line count threshold for medium files
----@field small_delay integer Delay for small files (ms)
----@field medium_delay integer Delay for medium files (ms)
----@field large_delay integer Delay for large files (ms)
----@field min_delay integer Minimum debounce delay (ms)
----@field max_delay integer Maximum debounce delay (ms)
+---@type DebounceConfig
 local config = {
   small_file_threshold = 500,
   medium_file_threshold = 2000,

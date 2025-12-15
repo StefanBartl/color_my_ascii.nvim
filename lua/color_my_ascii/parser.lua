@@ -199,12 +199,6 @@ function M.get_byte_offset(line, col)
   return byte_offset, nil
 end
 
----@class ColorMyAscii.InlineCode
----@field line integer Line number (0-indexed)
----@field start_col integer Start column (0-indexed, byte offset)
----@field end_col integer End column (0-indexed, byte offset, exclusive)
----@field content string Content inside backticks
-
 --- Find all inline code segments in a buffer.
 --- Uses safe API calls and error handling.
 ---@param bufnr integer Buffer number

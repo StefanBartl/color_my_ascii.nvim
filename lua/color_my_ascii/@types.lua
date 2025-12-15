@@ -39,6 +39,8 @@
 ---@field enable_inline_code? boolean Enable highlighting in inline code ...`)
 ---@field enable_function_names? boolean Enable heuristic function name detection
 ---@field enable_bracket_highlighting? boolean Enable highlighting of brackets/parentheses
+---@field scheme? string Color scheme name to load (e.g., "nord", "gruvbox")
+
 ---@class ColorMyAscii.State
 ---@field enabled boolean Whether the plugin is currently enabled
 ---@field buffers table<integer, boolean> Set of buffers with active highlighting
@@ -49,9 +51,45 @@
 ---@field lines string[] Content lines of the block (without fence markers)
 ---@field fence_line string Opening fence line (for language detection)
 
+---@class ColorMyAscii.InlineCode
+---@field line integer Line number (0-indexed)
+---@field start_col integer Start column (0-indexed, byte offset)
+---@field end_col integer End column (0-indexed, byte offset, exclusive)
+---@field content string Content inside backticks
+
+---@class CacheEntry
+---@field blocks ColorMyAscii.Block[] Parsed ASCII blocks
+---@field inline_codes ColorMyAscii.InlineCode[] Parsed inline code segments
+---@field timestamp number Cache creation timestamp (ms)
+---@field changedtick number Buffer changedtick at cache time
+---@field line_count integer Number of lines in buffer at cache time
+
+---@class CacheConfig
+---@field timeout integer Cache validity timeout in milliseconds
+---@field max_size integer Maximum number of cached buffers
+---@field enable_stats boolean Whether to collect statistics
+
+---@class CacheStats
+---@field hits integer Number of cache hits
+---@field misses integer Number of cache misses
+---@field invalidations integer Number of cache invalidations
+---@field evictions integer Number of cache evictions
+
+---@class DebounceConfig
+---@field small_file_threshold integer? Line count threshold for small files
+---@field medium_file_threshold integer? Line count threshold for medium files
+---@field small_delay integer? Delay for small files (ms)
+---@field medium_delay integer? Delay for medium files (ms)
+---@field large_delay integer? Delay for large files (ms)
+---@field min_delay integer? Minimum debounce delay (ms)
+---@field max_delay integer? Maximum debounce delay (ms)
+
 ---@class SafeApiResult
 ---@field success boolean Whether the operation succeeded
 ---@field result any|nil The result of the operation if successful
 ---@field error string|nil Error message if operation failed
 
-
+---@alias HighlightSpec string|ColorMyAscii.CustomHighlight
+---@alias KeywordLookup table<string, {language: string, hl: string}[]>
+---@alias CharLookup table<string, string>
+---@alias UniqueKeywordLookup table<string, string>

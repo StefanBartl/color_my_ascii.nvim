@@ -106,7 +106,6 @@ end
 ---@param custom_delay integer|nil Optional custom delay (overrides adaptive)
 ---@return nil
 function M.debounce(bufnr, fn, custom_delay)
-  -- Validate input
   if type(bufnr) ~= 'number' or bufnr < 0 then
     return
   end
@@ -115,23 +114,16 @@ function M.debounce(bufnr, fn, custom_delay)
     return
   end
 
-  -- Clear existing timer
   if timers[bufnr] then
-    timers[bufnr]:stop()
-    timers[bufnr]:close()
-    timers[bufnr] = nil
+    M.cancel(bufnr)
   end
 
-  -- Calculate delay
   local delay = custom_delay or calculate_delay(bufnr)
 
-  -- Create new timer
   timers[bufnr] = vim.defer_fn(function()
-    -- Validate buffer before executing
     local safe_api = require('color_my_ascii.utils.safe_api')
 
     if safe_api.is_valid_buffer(bufnr) then
-      -- Safe function execution
       local ok, err = pcall(fn)
 
       if not ok then

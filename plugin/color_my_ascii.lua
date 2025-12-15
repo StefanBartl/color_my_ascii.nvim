@@ -56,6 +56,13 @@ end, {
   desc = 'Show debug information about color_my_ascii configuration',
 })
 
+-- Check fenced blocks
+api.nvim_create_user_command("ColorMyAsciiCheckFences", function()
+  require("color_my_ascii.commands.fence_check").check_current_buffer()
+end, {
+  desc = "Check current buffer for unmatched fenced code blocks",
+})
+
 -- Create autogroup for plugin autocommands
 local group = api.nvim_create_augroup('ColorMyAscii', { clear = true })
 

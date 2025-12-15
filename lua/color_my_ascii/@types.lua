@@ -49,3 +49,9 @@
 ---@field lines string[] Content lines of the block (without fence markers)
 ---@field fence_line string Opening fence line (for language detection)
 
+---@class SafeApiResult
+---@field success boolean Whether the operation succeeded
+---@field result any|nil The result of the operation if successful
+---@field error string|nil Error message if operation failed
+
+

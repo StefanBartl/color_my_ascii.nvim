@@ -47,6 +47,7 @@ function M.find_ascii_blocks(bufnr)
 
         -- Determine if this is an ASCII block we want to track
         local track_as_ascii = is_ascii or (is_empty and cfg.treat_empty_fence_as_ascii)
+        ---@cast track_as_ascii boolean
 
         -- Start tracking this block (ASCII or not)
         in_block = true

@@ -1,5 +1,17 @@
 ---@module 'color_my_ascii.@types'
 
+---@alias ColorMyAscii.SchemeName
+---| "default"    # Uses built-in Neovim highlights
+---| "matrix"     # Dark with bright green (hacker style)
+---| "nord"       # Cool blue/cyan colors
+---| "gruvbox"    # Warm, retro colors
+---| "dracula"    # Vibrant purple and pink
+---| "catppuccin" # Soft pastel colors
+---| "onedark"    # Dark theme with subtle highlights
+---| "solarized"  # Solarized color palette
+---| "tokyonight" # Dark theme with blue accents
+---| "monokai"    # Classic Monokai color scheme
+
 ---@class ColorMyAscii.CharGroup
 ---@field chars string String containing all characters in this group
 ---@field hl string|ColorMyAscii.CustomHighlight Highlight group name or custom highlight definition
@@ -23,6 +35,7 @@
 ---@field hl string|ColorMyAscii.CustomHighlight Highlight specification
 
 ---@class ColorMyAscii.Config
+---@field scheme? ColorMyAscii.SchemeName Color scheme name to load (e.g., "nord", "gruvbox")
 ---@field debug_enabled? boolean Toggle debug mode (usercommands)
 ---@field debug_verbose? boolean Toggle write debug logs to file
 ---@field groups? table<string, ColorMyAscii.CharGroup> Named character groups with their highlight settings
@@ -39,7 +52,6 @@
 ---@field enable_inline_code? boolean Enable highlighting in inline code ...`)
 ---@field enable_function_names? boolean Enable heuristic function name detection
 ---@field enable_bracket_highlighting? boolean Enable highlighting of brackets/parentheses
----@field scheme? string Color scheme name to load (e.g., "nord", "gruvbox")
 
 ---@class ColorMyAscii.State
 ---@field enabled boolean Whether the plugin is currently enabled
@@ -61,7 +73,7 @@
 ---@field start_line integer Line number where block starts (1-indexed)
 ---@field fence_line string The opening fence line content
 ---@field fence_length integer Length of the fence sequence
----@field is_ascii boolean? Whether this is an ASCII block we want to highlight
+---@field is_ascii boolean Whether this is an ASCII block we want to highlight
 ---@field block_lines string[] Accumulated block content lines (only for ASCII blocks)
 
 ---@class CacheEntry

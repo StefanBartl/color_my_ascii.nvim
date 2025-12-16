@@ -333,6 +333,8 @@ function M.setup_auto_cleanup(interval)
     return nil
   end
 
+  ---@cast timer uv.uv_timer_t
+
   timer:start(interval, interval, vim.schedule_wrap(function()
     M.cleanup()
   end))

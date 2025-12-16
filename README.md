@@ -274,25 +274,20 @@ Additional languages can be easily added (see [Contributing](#contributing)).
 | `:ColorMyAsciiSwitchScheme <name>` | Switch to a different scheme |
 | `:ColorMyAsciiSchemes` | Pick scheme with Telescope (live preview) |
 
-**Available Schemes:**
-- `default` - Built-in Neovim highlights
-- `matrix` - Green hacker style
-- `nord` - Cool blue/cyan
-- `gruvbox` - Warm retro colors
-- `dracula` - Vibrant purple/pink
-
-**Example:**
-```vim
-:ColorMyAsciiSwitchScheme matrix
-```
-
-**Telescope Picker:**
-```vim
-:ColorMyAsciiSchemes
-```
-Navigate with `j/k`, scheme applies on cursor move (live preview). Press `Enter` to confirm.
-
 ---
+
+#### Available Schemes
+
+- `default`    - Built-in Neovim highlights
+- `matrix`     - Green hacker style
+- `nord`       - Cool blue/cyan
+- `gruvbox`    - Warm retro colors
+- `dracula`    - Vibrant purple/pink
+- `catppuccin` - Soft pastel colors
+- `onedark`    - Dark theme with subtle highlights
+- `solarized`  - Solarized color palette
+- `tokyonight` - Dark theme with blue accents
+- `monokai`    - # Classic Monokai color scheme
 
 ### Keybinding Examples
 
@@ -343,47 +338,17 @@ vim.keymap.set('n', '<leader>ac', '<cmd>ColorMyAsciiShowConfig<cr>', {
 
 ## Color Schemes
 
-### Matrix (Hacker Style)
+Pick one scheme from the list of [available schemes](#available-schemes) and set it in the initialization like:
+
+Example with Matrix Scheme:
+
 ````lua
 require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.matrix')
+  scheme = "matrix",
 )
 ````
 
 Dark background with bright green elements. All features enabled.
-
----
-
-### Nord
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.nord')
-)
-````
-
-Cool blue/cyan tones. Corners specially highlighted.
-
----
-
-### Gruvbox
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.gruvbox')
-)
-````
-
-Warm retro colors. Bracket highlighting enabled.
-
----
-
-### Dracula
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.dracula')
-)
-````
-
-Vibrant purple/pink accents. All features enabled.
 
 ---
 

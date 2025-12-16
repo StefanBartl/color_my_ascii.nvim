@@ -80,7 +80,7 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
 ### Mit lazy.nvim
 ````lua
 {
-  'username/color_my_ascii.nvim',
+  'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
   opts = {
     -- Optional: Konfiguration hier
@@ -93,7 +93,7 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
 ### Mit packer.nvim
 ````lua
 use {
-  'username/color_my_ascii.nvim',
+  'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
   config = function()
     require('color_my_ascii').setup({

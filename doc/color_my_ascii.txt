@@ -50,7 +50,7 @@ Features:~
 Using lazy.nvim:~
 >lua
     {
-      'username/color_my_ascii.nvim',
+      'StefanBartl/color_my_ascii.nvim',
       ft = 'markdown',
       opts = {}
     }
@@ -59,7 +59,7 @@ Using lazy.nvim:~
 Using packer.nvim:~
 >lua
     use {
-      'username/color_my_ascii.nvim',
+      'StefanBartl/color_my_ascii.nvim',
       ft = 'markdown',
       config = function()
         require('color_my_ascii').setup()

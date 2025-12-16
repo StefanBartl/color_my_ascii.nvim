@@ -8,7 +8,7 @@ Schnelleinstieg in color_my_ascii.nvim mit allen wichtigen Features.
 
 ```lua
 {
-  'username/color_my_ascii.nvim',
+  'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
   config = function()
     require('color_my_ascii').setup()
@@ -20,7 +20,7 @@ Schnelleinstieg in color_my_ascii.nvim mit allen wichtigen Features.
 
 ```lua
 use {
-  'username/color_my_ascii.nvim',
+  'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
   config = function()
     require('color_my_ascii').setup()

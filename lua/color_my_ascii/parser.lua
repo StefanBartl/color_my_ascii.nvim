@@ -90,8 +90,8 @@ function M.find_ascii_blocks(bufnr)
     end
   end
 
-  -- If block is still open at EOF, log warning only for ASCII blocks
-  if in_block and open_fence_info and open_fence_info.is_ascii then
+  -- If block is still open at EOF, log warning only for ASCII blocks and only in debug mode
+  if in_block and open_fence_info and open_fence_info.is_ascii and cfg.debug_enabled then
     vim.notify(
       string.format("Unclosed ASCII block at line %d", open_fence_info.start_line),
       vim.log.levels.WARN

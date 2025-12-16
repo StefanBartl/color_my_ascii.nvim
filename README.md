@@ -1,6 +1,49 @@
 # color_my_ascii.nvim
 
-A Neovim plugin for syntax highlighting ASCII art in Markdown code blocks with automatic language detection, custom highlights, and predefined color schemes.
+A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks with automatic language detection, custom highlights, and predefined color schemes.
+
+## Table of content
+
+  - [Features](#features)
+    - [Core Features](#core-features)
+    - [Extended Features](#extended-features)
+  - [Installation](#installation)
+    - [With lazy.nvim](#with-lazynvim)
+    - [With packer.nvim](#with-packernvim)
+  - [Quick Start](#quick-start)
+    - [Minimal Setup](#minimal-setup)
+    - [Example](#example)
+  - [Configuration](#configuration)
+    - [Default Configuration](#default-configuration)
+    - [With Color Scheme](#with-color-scheme)
+    - [Custom Highlights](#custom-highlights)
+    - [All Features Enabled](#all-features-enabled)
+  - [Supported Languages](#supported-languages)
+  - [Commands](#commands)
+  - [Documentation](#documentation)
+    - [Features](#features-1)
+    - [Guides](#guides)
+    - [Reference](#reference)
+  - [Color Schemes](#color-schemes)
+    - [Matrix (Hacker Style)](#matrix-hacker-style)
+    - [Nord](#nord)
+    - [Gruvbox](#gruvbox)
+    - [Dracula](#dracula)
+    - [Create Your Own Scheme](#create-your-own-scheme)
+  - [Architecture](#architecture)
+  - [Performance](#performance)
+  - [Troubleshooting](#troubleshooting)
+    - [No Highlights Visible](#no-highlights-visible)
+    - [Wrong Language Detected](#wrong-language-detected)
+    - [Performance Issues](#performance-issues)
+  - [Contributing](#contributing)
+    - [Add a New Language](#add-a-new-language)
+    - [Add a New Character Group](#add-a-new-character-group)
+  - [License](#license)
+  - [Credits](#credits)
+  - [See Also](#see-also)
+
+---
 
 ## Features
 
@@ -10,23 +53,24 @@ A Neovim plugin for syntax highlighting ASCII art in Markdown code blocks with a
 - ✅ **Modular Language Definitions**: 10 predefined languages (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR)
 - ✅ **Intelligent Language Detection**:
   - Explicit via ````ascii-c`, ````ascii lua`, ````ascii:python`
-  - Heuristic detection based on keyword frequency
+  - Heuristic based on keyword frequency
   - Fallback to buffer filetype
 - ✅ **Modular Character Groups**: Customizable groups for lines, blocks, arrows, symbols, operators
 - ✅ **Custom Highlights with RGB/Hex**: Full color and style control
-- ✅ **10 Predefined Color Schemes**: Default, Matrix, Nord, Gruvbox, Dracula, Catppuccin, Tokyo Night, Solarized, One Dark, Monokai
+- ✅ **5 Predefined Color Schemes**: Default, Matrix, Nord, Gruvbox, Dracula
 - ✅ **Non-intrusive**: Uses extmarks, no buffer modification
 
 ---
 
-### Advanced Features
+### Extended Features
 
-- ✅ **Function Name Detection**: Heuristic for `word()` patterns
+- ✅ **Function Name Detection**: Heuristic for `word()` pattern
 - ✅ **Bracket Highlighting**: Automatic highlighting of `()[]{}`
 - ✅ **Inline Code Highlighting**: Keywords and symbols in `` `...` ``
-- ✅ **Empty Fenced Blocks**: Optional ``` without language as ASCII
-- ✅ **Default Text Color**: Dimmed display for normal text
+- ✅ **Empty Fenced Blocks**: Optionally treat ``` without language as ASCII
+- ✅ **Default Text Color**: Dimmed representation for normal text
 - ✅ **Health Check**: `:checkhealth color_my_ascii`
+- ✅ **Fence Validation**: `:ColorMyAsciiCheckFences` to detect unmatched blocks
 - ✅ **Vim Help**: `:h color_my_ascii`
 
 ---
@@ -34,24 +78,22 @@ A Neovim plugin for syntax highlighting ASCII art in Markdown code blocks with a
 ## Installation
 
 ### With lazy.nvim
-
-```lua
+````lua
 {
-  'StefanBartl/color_my_ascii.nvim',
+  'username/color_my_ascii.nvim',
   ft = 'markdown',
   opts = {
     -- Optional: Configuration here
   }
 }
-```
+````
 
 ---
 
 ### With packer.nvim
-
-```lua
+````lua
 use {
-  'StefanBartl/color_my_ascii.nvim',
+  'username/color_my_ascii.nvim',
   ft = 'markdown',
   config = function()
     require('color_my_ascii').setup({
@@ -59,48 +101,47 @@ use {
     })
   end
 }
-```
+````
 
 ---
 
 ## Quick Start
 
 ### Minimal Setup
-
-```lua
+````lua
 require('color_my_ascii').setup()
-```
+````
 
 The plugin activates automatically for Markdown files.
 
 ---
 
 ### Example
-
+````markdown
 ```ascii
 ┌─────────────────────┐
 │  Hello World!       │
 └─────────────────────┘
 ```
+````
 
-→ Box characters are automatically highlighted
+→ Box-drawing characters are automatically highlighted in color
 
 ---
 
 ## Configuration
 
 ### Default Configuration
-
-```lua
+````lua
 require('color_my_ascii').setup({
   -- Character-specific overrides (highest priority)
   overrides = {},
 
-  -- Default highlighting for unmapped characters
+  -- Default highlighting for unmatched characters
   default_hl = 'Normal',
 
   -- Optional: Default highlighting for normal text in blocks
-  default_text_hl = nil,  -- e.g. 'Comment' for dimmed display
+  default_text_hl = nil,  -- e.g., 'Comment' for dimmed display
 
   -- Feature toggles
   enable_keywords = true,
@@ -111,35 +152,43 @@ require('color_my_ascii').setup({
   treat_empty_fence_as_ascii = false,
   enable_inline_code = false,
 })
-```
+````
 
 ---
 
 ### With Color Scheme
+````lua
+-- Matrix style (green hacker look)
+require('color_my_ascii').setup(
+  require('color_my_ascii.schemes.matrix')
+)
 
-```lua
--- Simplified scheme loading
-require('color_my_ascii').setup({ scheme = 'matrix' })
-require('color_my_ascii').setup({ scheme = 'nord' })
-require('color_my_ascii').setup({ scheme = 'catppuccin' })
+-- Nord theme (cool blue/cyan)
+require('color_my_ascii').setup(
+  require('color_my_ascii.schemes.nord')
+)
 
--- Or load scheme module directly
+-- Gruvbox (warm retro colors)
 require('color_my_ascii').setup(
   require('color_my_ascii.schemes.gruvbox')
 )
-```
+
+-- Dracula (vibrant purple/pink)
+require('color_my_ascii').setup(
+  require('color_my_ascii.schemes.dracula')
+)
+````
 
 ---
 
 ### Custom Highlights
-
-```lua
+````lua
 require('color_my_ascii').setup({
   overrides = {
     -- String: Built-in highlight group
     ['┌'] = 'Special',
 
-    -- Table: Custom definition with RGB/hex
+    -- Table: Custom definition with RGB/Hex
     ['└'] = { fg = '#ff0000', bold = true },
     ['→'] = { fg = '#00ff00', italic = true },
   },
@@ -147,15 +196,13 @@ require('color_my_ascii').setup({
   -- Dimmed text in blocks
   default_text_hl = { fg = '#808080' },
 })
-```
+````
 
 ---
 
 ### All Features Enabled
-
-```lua
+````lua
 require('color_my_ascii').setup({
-  scheme = 'tokyonight',
   enable_keywords = true,
   enable_language_detection = true,
   enable_function_names = true,
@@ -164,7 +211,7 @@ require('color_my_ascii').setup({
   enable_inline_code = true,
   default_text_hl = 'Comment',
 })
-```
+````
 
 ---
 
@@ -172,8 +219,8 @@ require('color_my_ascii').setup({
 
 The plugin includes predefined keyword definitions for:
 
-| Language | Unique Keywords | Examples |
-|---------|----------------|----------|
+| Language | Unique Keywords | Example |
+|----------|----------------|---------|
 | C | `restrict`, `_Bool`, `_Complex` | `int`, `void`, `char` |
 | C++ | `class`, `namespace`, `template` | `virtual`, `override`, `nullptr` |
 | Lua | `then`, `elseif`, `end` | `function`, `local`, `nil` |
@@ -185,17 +232,18 @@ The plugin includes predefined keyword definitions for:
 | Zig | `comptime`, `errdefer` | `anytype`, `unreachable` |
 | LLVM IR | `getelementptr`, `phi` | `alloca`, `icmp`, `zext` |
 
-Additional languages can be easily added (see [Documentation](docs/features/)).
+Additional languages can be easily added (see [Contributing](#contributing)).
 
 ---
 
 ## Commands
 
 | Command | Description |
-|--------|--------------|
+|---------|-------------|
 | `:ColorMyAscii` | Manually update highlighting |
 | `:ColorMyAsciiToggle` | Enable/disable plugin |
 | `:ColorMyAsciiDebug` | Show debug information |
+| `:ColorMyAsciiCheckFences` | Check for unmatched fences |
 | `:checkhealth color_my_ascii` | Run health check |
 | `:h color_my_ascii` | Open Vim help |
 
@@ -205,12 +253,9 @@ Additional languages can be easily added (see [Documentation](docs/features/)).
 
 ### Features
 
-- [Custom Colors](docs/features/custom-colors.md) - RGB/hex colors and styles
-- [Keyword Configuration](docs/features/keyword-configuration.md) - Language keyword setup
-- [Group Configuration](docs/features/group-configuration.md) - Character group customization
-- [Custom Highlights](docs/features/custom-highlights.md) - Advanced highlighting
+- [Custom Highlights](docs/features/custom-highlights.md) - RGB/Hex colors and styles
 - [Function Detection](docs/features/function-detection.md) - Automatic function name detection
-- [Bracket Highlighting](docs/features/bracket-highlighting.md) - Bracket highlighting
+- [Bracket Highlighting](docs/features/bracket-highlighting.md) - Highlight brackets
 - [Inline Code](docs/features/inline-code.md) - Highlighting in `` `...` ``
 
 ---
@@ -219,66 +264,65 @@ Additional languages can be easily added (see [Documentation](docs/features/)).
 
 - [Quickstart](docs/QUICKSTART.md) - Getting started
 - [Test File](docs/TEST.md) - Test all features
+- [Color Schemes](docs/schemes.md) - Create custom schemes
 
 ---
 
 ### Reference
 
 - [Vim Help](doc/color_my_ascii.txt) - Complete reference
+- [Changelog](docs/CHANGELOG.md) - Version history
 
 ---
 
 ## Color Schemes
 
-### Available Schemes
-
-| Scheme | Style | Features |
-|--------|------|----------|
-| `default` | Built-in highlights | Minimal, compatible |
-| `matrix` | Green on black | All features |
-| `nord` | Blue/cyan | Function names |
-| `gruvbox` | Warm/retro | Brackets, inline |
-| `dracula` | Purple/pink | All features |
-| `catppuccin` | Soft pastels | Function names, inline |
-| `tokyonight` | Deep blue night | All features |
-| `solarized` | Precision colors | Minimal |
-| `onedark` | Atom-inspired | All features |
-| `monokai` | High contrast | All features |
-
----
-
-### Loading Schemes
-
-```lua
--- Simple string identifier
-require('color_my_ascii').setup({ scheme = 'catppuccin' })
-
--- Or load module directly
+### Matrix (Hacker Style)
+````lua
 require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.tokyonight')
+  require('color_my_ascii.schemes.matrix')
 )
-```
+````
+
+Dark background with bright green elements. All features enabled.
 
 ---
 
-### Customizing Schemes
+### Nord
+````lua
+require('color_my_ascii').setup(
+  require('color_my_ascii.schemes.nord')
+)
+````
 
-```lua
-require('color_my_ascii').setup({
-  scheme = 'nord',
-  enable_inline_code = true,  -- Enable feature
-  default_text_hl = 'Comment',  -- Dim text
-  overrides = {
-    ['★'] = { fg = '#ffff00', bold = true },  -- Custom override
-  }
-})
-```
+Cool blue/cyan tones. Corners specially highlighted.
 
 ---
 
-### Creating Custom Schemes
+### Gruvbox
+````lua
+require('color_my_ascii').setup(
+  require('color_my_ascii.schemes.gruvbox')
+)
+````
 
-```lua
+Warm retro colors. Bracket highlighting enabled.
+
+---
+
+### Dracula
+````lua
+require('color_my_ascii').setup(
+  require('color_my_ascii.schemes.dracula')
+)
+````
+
+Vibrant purple/pink accents. All features enabled.
+
+---
+
+### Create Your Own Scheme
+````lua
 require('color_my_ascii').setup({
   groups = {
     box_drawing = {
@@ -291,7 +335,25 @@ require('color_my_ascii').setup({
   },
   enable_keywords = true,
 })
-```
+````
+
+See [Color Schemes Guide](docs/schemes.md) for details.
+
+---
+
+## Architecture
+
+The plugin consists of several modules:
+
+- `init.lua` - Main entry point, API, state management
+- `config.lua` - Configuration management, dynamic loading
+- `parser.lua` - Detection of ASCII code blocks and inline code
+- `highlighter.lua` - Application of highlights via extmarks
+- `language_detector.lua` - Intelligent language detection
+- `health.lua` - Health check for `:checkhealth`
+- `languages/*.lua` - Modular language definitions
+- `groups/*.lua` - Modular character group definitions
+- `schemes/*.lua` - Predefined color schemes
 
 ---
 
@@ -305,7 +367,7 @@ The plugin uses:
 
 Even large documents (>1000 lines) should not cause performance issues.
 
-**Note**: `enable_inline_code` can slow down very large files (>5000 lines).
+**Note**: `enable_inline_code` may cause slowdowns in very large files (>5000 lines).
 
 ---
 
@@ -314,51 +376,51 @@ Even large documents (>1000 lines) should not cause performance issues.
 ### No Highlights Visible
 
 1. Plugin loaded?
-```vim
+````vim
 :ColorMyAsciiDebug
-```
+````
 
 2. Buffer is Markdown?
-```vim
+````vim
 :set filetype?
-```
+````
 
 3. Run health check
-```vim
+````vim
 :checkhealth color_my_ascii
-```
+````
 
 ---
 
 ### Wrong Language Detected
 
 Use explicit language specification:
-
+````markdown
 ```ascii-c
 int x = 42;
 ```
+````
 
 Or adjust detection threshold:
-
-
-```lua
+````lua
 require('color_my_ascii').setup({
-  language_detection_threshold = 3,  -- More strict
+  language_detection_threshold = 3,  -- Stricter
 })
-```
+````
 
 ---
 
 ### Performance Issues
 
 Disable features:
-
-```lua
+````lua
 require('color_my_ascii').setup({
   enable_function_names = false,
   enable_inline_code = false,
 })
-```
+````
+
+See [Troubleshooting Guide](docs/troubleshooting.md) for more.
 
 ---
 
@@ -368,12 +430,11 @@ Issues and pull requests are welcome. For major changes, please open an issue fi
 
 ---
 
-### Adding a New Language
+### Add a New Language
 
 1. Create file: `lua/color_my_ascii/languages/NAME.lua`
 2. Define keywords:
-
-```lua
+````lua
 ---@module 'color_my_ascii.languages.NAME'
 ---@type ColorMyAscii.KeywordGroup
 return {
@@ -381,18 +442,17 @@ return {
   unique_words = { 'unique1', 'unique2', ... },
   hl = 'Function',
 }
-```
+````
 
 3. Reload plugin
 
 ---
 
-### Adding a New Character Group
+### Add a New Character Group
 
 1. Create file: `lua/color_my_ascii/groups/NAME.lua`
 2. Define characters:
-
-```lua
+````lua
 ---@module 'color_my_ascii.groups.NAME'
 ---@type ColorMyAscii.CharGroup
 local group = {
@@ -404,7 +464,7 @@ local chars = { '⚡', '★', '☆' }
 group.chars = table.concat(chars, '')
 
 return group
-```
+````
 
 3. Reload plugin
 
@@ -430,3 +490,4 @@ return group
 - [Extmarks API](https://neovim.io/doc/user/api.html#api-extmarks)
 - [Markdown Syntax](https://www.markdownguide.org/basic-syntax/)
 
+---

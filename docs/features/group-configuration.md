@@ -2,6 +2,38 @@
 
 This guide explains how to configure and customize character groups for ASCII art highlighting.
 
+## Table of content
+
+  - [What are Groups?](#what-are-groups)
+  - [Quick Start](#quick-start)
+  - [Customizing Existing Groups](#customizing-existing-groups)
+  - [Creating New Groups](#creating-new-groups)
+  - [Group Definition Structure](#group-definition-structure)
+    - [Characters String](#characters-string)
+    - [Highlight Specification](#highlight-specification)
+  - [Practical Examples](#practical-examples)
+    - [Minimal Box Drawing](#minimal-box-drawing)
+    - [Extended Unicode Blocks](#extended-unicode-blocks)
+    - [Mathematical Symbols](#mathematical-symbols)
+    - [Currency Symbols](#currency-symbols)
+    - [Emoji Support](#emoji-support)
+  - [Combining Groups](#combining-groups)
+  - [Group Priority](#group-priority)
+  - [Overrides vs Groups](#overrides-vs-groups)
+  - [Disabling Built-in Groups](#disabling-built-in-groups)
+  - [Extending Built-in Groups](#extending-built-in-groups)
+  - [Building Character Strings](#building-character-strings)
+  - [Theme Compatibility](#theme-compatibility)
+  - [Performance](#performance)
+  - [Tips](#tips)
+  - [Common Use Cases](#common-use-cases)
+    - [Programming Diagrams](#programming-diagrams)
+    - [Flow Charts](#flow-charts)
+    - [Network Diagrams](#network-diagrams)
+  - [See Also](#see-also)
+
+---
+
 ## What are Groups?
 
 Groups are collections of related characters that share the same highlight style:
@@ -11,6 +43,8 @@ Groups are collections of related characters that share the same highlight style
 - **arrows**: `←→↑↓⇐⇒⇑⇓`
 - **symbols**: `•★☆✓✔✗✘`
 - **operators**: `+-*/%=<>!&|`
+
+---
 
 ## Quick Start
 
@@ -24,6 +58,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ## Customizing Existing Groups
 
@@ -44,6 +80,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ## Creating New Groups
 
 Add custom groups for specific use cases:
@@ -63,6 +101,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ## Group Definition Structure
 
 Each group requires two properties:
@@ -73,6 +113,8 @@ Each group requires two properties:
   hl = "HighlightGroup" or { }     -- Highlight specification
 }
 ```
+
+---
 
 ### Characters String
 
@@ -88,11 +130,14 @@ Characters can be:
 - Emojis: `😀😃😄`
 - Any UTF-8 character
 
+---
+
 ### Highlight Specification
 
 Two options for `hl`:
 
 **Built-in highlight group:**
+
 ```lua
 hl = 'Keyword'
 hl = 'Function'
@@ -100,6 +145,7 @@ hl = 'Special'
 ```
 
 **Custom colors:**
+
 ```lua
 hl = {
   fg = '#ff0000',
@@ -109,6 +155,8 @@ hl = {
   underline = true,
 }
 ```
+
+---
 
 ## Practical Examples
 
@@ -127,6 +175,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Extended Unicode Blocks
 
 ```lua
@@ -139,6 +189,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ### Mathematical Symbols
 
@@ -153,6 +205,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Currency Symbols
 
 ```lua
@@ -166,6 +220,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Emoji Support
 
 ```lua
@@ -178,6 +234,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ## Combining Groups
 
@@ -202,6 +260,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ## Group Priority
 
 When characters overlap between groups, the **last defined group wins**:
@@ -223,6 +283,8 @@ require('color_my_ascii').setup({
 
 Result: `★` uses 'Special', `☆` uses 'Keyword'.
 
+---
+
 ## Overrides vs Groups
 
 Use **overrides** for individual characters:
@@ -243,6 +305,8 @@ require('color_my_ascii').setup({
 
 Overrides have **higher priority** than groups.
 
+---
+
 ## Disabling Built-in Groups
 
 Replace all built-in groups:
@@ -260,6 +324,8 @@ require('color_my_ascii').setup({
 
 This disables all default groups and uses only your custom groups.
 
+---
+
 ## Extending Built-in Groups
 
 Load defaults, then add custom groups:
@@ -274,6 +340,8 @@ config.groups.my_custom = {
 
 require('color_my_ascii').setup(config)
 ```
+
+---
 
 ## Building Character Strings
 
@@ -297,6 +365,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ## Theme Compatibility
 
 Use built-in highlights for automatic theme adaptation:
@@ -311,6 +381,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ## Performance
 
@@ -330,6 +402,8 @@ groups = {
 }
 ```
 
+---
+
 ## Tips
 
 1. **Group related characters** - easier to maintain
@@ -337,6 +411,8 @@ groups = {
 3. **Test with real content** - verify coverage
 4. **Consider overlaps** - last definition wins
 5. **Start with defaults** - extend rather than replace
+
+---
 
 ## Common Use Cases
 
@@ -350,6 +426,8 @@ groups = {
 }
 ```
 
+---
+
 ### Flow Charts
 
 ```lua
@@ -359,6 +437,8 @@ groups = {
   arrows = { chars = "→↓←↑", hl = 'Special' },
 }
 ```
+
+---
 
 ### Network Diagrams
 
@@ -370,8 +450,11 @@ groups = {
 }
 ```
 
+---
+
 ## See Also
 
 - [Custom Colors](custom-colors.md) - Individual character colors
-- [Character Groups Reference](../groups.md) - Built-in groups
 - [Custom Highlights](custom-highlights.md) - Advanced styling
+
+---

@@ -1,8 +1,41 @@
 # Bracket Highlighting
 
-Das Plugin kann Klammern und Brackets automatisch hervorheben, falls sie nicht bereits in Character Groups definiert sind.
+The plugin can automatically highlight brackets and braces if they aren't already defined in character groups.
 
-## Aktivierung
+## Table of content
+
+  - [Activation](#activation)
+  - [Supported Brackets](#supported-brackets)
+  - [Highlight Group](#highlight-group)
+  - [How It Works](#how-it-works)
+    - [Automatic Detection](#automatic-detection)
+    - [Priority](#priority)
+  - [Examples](#examples)
+    - [C Syntax](#c-syntax)
+    - [Array Access](#array-access)
+    - [Nested Structures](#nested-structures)
+  - [Combination with Other Features](#combination-with-other-features)
+    - [With Operators Group](#with-operators-group)
+    - [With Custom Highlights](#with-custom-highlights)
+  - [Use Cases](#use-cases)
+    - [Code Diagrams](#code-diagrams)
+    - [Minimal Configuration](#minimal-configuration)
+    - [Bracket Pairing Visualization](#bracket-pairing-visualization)
+  - [Performance](#performance)
+  - [Limitations](#limitations)
+    - [No Matching Logic](#no-matching-logic)
+    - [No Context Awareness](#no-context-awareness)
+  - [Best Practices](#best-practices)
+    - [When to Enable?](#when-to-enable)
+    - [Combination with Color Schemes](#combination-with-color-schemes)
+  - [Troubleshooting](#troubleshooting)
+    - [Brackets Not Highlighted](#brackets-not-highlighted)
+    - [Wrong Highlight Color](#wrong-highlight-color)
+  - [See Also](#see-also)
+
+---
+
+## Activation
 
 ```lua
 require('color_my_ascii').setup({
@@ -10,59 +43,70 @@ require('color_my_ascii').setup({
 })
 ```
 
-**Standard**: `false` (deaktiviert)
+**Default**: `false` (disabled)
 
-## Unterstützte Brackets
+---
 
-Das Feature hebt folgende Zeichen hervor:
+## Supported Brackets
 
-- `(` `)` — Runde Klammern (Parentheses)
-- `[` `]` — Eckige Klammern (Square Brackets)
-- `{` `}` — Geschweifte Klammern (Curly Braces)
+The feature highlights the following characters:
 
-## Highlight-Gruppe
+- `(` `)` — Parentheses
+- `[` `]` — Square Brackets
+- `{` `}` — Curly Braces
 
-Brackets werden mit der `Operator` Highlight-Gruppe hervorgehoben.
+---
 
-## Funktionsweise
+## Highlight Group
 
-### Automatische Erkennung
+Brackets are highlighted with the `Operator` highlight group.
 
-Das Plugin prüft, ob Brackets bereits in anderen Groups definiert sind:
+---
 
-**Beispiel 1**: Operators-Group enthält bereits Brackets
+## How It Works
+
+### Automatic Detection
+
+The plugin checks if brackets are already defined in other groups:
+
+**Example 1**: Operators group already contains brackets
+
 ```lua
 groups = {
   operators = {
-    chars = "+-*/()[]{}",  -- Enthält Brackets
+    chars = "+-*/()[]{}",  -- Contains brackets
     hl = 'Operator',
   }
 }
 ```
-→ `enable_bracket_highlighting` wird **ignoriert** (bereits definiert)
+→ `enable_bracket_highlighting` is **ignored** (already defined)
 
-**Beispiel 2**: Keine Bracket-Definition
+**Example 2**: No bracket definition
+
 ```lua
 groups = {
   arrows = {
-    chars = "←→↑↓",  -- Keine Brackets
+    chars = "←→↑↓",  -- No brackets
     hl = 'Special',
   }
 }
 ```
-→ `enable_bracket_highlighting = true` **fügt Brackets hinzu**
+→ `enable_bracket_highlighting = true` **adds brackets**
 
-### Priorität
+---
 
-Falls Brackets sowohl in Groups als auch via `enable_bracket_highlighting` definiert sind:
+### Priority
 
-**Groups haben Vorrang** (Overrides > Groups > enable_bracket_highlighting)
+If brackets are defined in both groups and via `enable_bracket_highlighting`:
 
-## Beispiele
+**Groups have precedence** (Overrides > Groups > enable_bracket_highlighting)
 
-### C-Syntax
+---
 
-````markdown
+## Examples
+
+### C Syntax
+
 ```ascii-c
 ┌──────────────────────┐
 │ if (x > 0) {         │
@@ -70,29 +114,29 @@ Falls Brackets sowohl in Groups als auch via `enable_bracket_highlighting` defin
 │ }                    │
 └──────────────────────┘
 ```
-````
 
-**Mit `enable_bracket_highlighting = true`**:
-- `()`, `{}` werden hervorgehoben
-- `if`, `result` als Keywords
-- `func` als Funktion (wenn `enable_function_names = true`)
+**With `enable_bracket_highlighting = true`**:
+- `()`, `{}` are highlighted
+- `if`, `result` as keywords
+- `func` as function (if `enable_function_names = true`)
 
-### Array-Zugriff
+---
 
-````markdown
+### Array Access
+
 ```ascii
 ┌─────────────────┐
 │ array[0] = x    │
 │ matrix[i][j]    │
 └─────────────────┘
 ```
-````
 
-**Ergebnis**: `[]` werden hervorgehoben
+**Result**: `[]` are highlighted
+
+---
 
 ### Nested Structures
 
-````markdown
 ```ascii-go
 ┌──────────────────────────┐
 │ map[string][]int{        │
@@ -100,17 +144,19 @@ Falls Brackets sowohl in Groups als auch via `enable_bracket_highlighting` defin
 │ }                        │
 └──────────────────────────┘
 ```
-````
 
-**Ergebnis**: Alle `[]`, `{}` werden hervorgehoben
+Result**: All `[]`, `{}` are highlighted
 
-## Kombination mit anderen Features
+---
 
-### Mit Operators Group
+## Combination with Other Features
 
-Falls man bereits eine Operators-Group hat:
+### With Operators Group
 
-**Option 1**: Brackets in Group definieren
+If you already have an operators group:
+
+**Option 1**: Define brackets in group
+
 ```lua
 require('color_my_ascii').setup({
   groups = {
@@ -119,48 +165,53 @@ require('color_my_ascii').setup({
       hl = 'Operator',
     }
   },
-  enable_bracket_highlighting = false,  -- Nicht nötig
+  enable_bracket_highlighting = false,  -- Not needed
 })
 ```
 
-**Option 2**: Nur Feature nutzen
+**Option 2**: Use feature only
+
 ```lua
 require('color_my_ascii').setup({
   groups = {
     operators = {
-      chars = "+-*/",  -- Ohne Brackets
+      chars = "+-*/",  -- Without brackets
       hl = 'Operator',
     }
   },
-  enable_bracket_highlighting = true,  -- Fügt Brackets hinzu
+  enable_bracket_highlighting = true,  -- Adds brackets
 })
 ```
 
-### Mit Custom Highlights
+---
 
-Brackets individuell stylen:
+### With Custom Highlights
+
+Style brackets individually:
 
 ```lua
 require('color_my_ascii').setup({
   enable_bracket_highlighting = true,
   overrides = {
-    ['('] = { fg = '#ff0000' },  -- Rot
+    ['('] = { fg = '#ff0000' },  -- Red
     [')'] = { fg = '#ff0000' },
-    ['['] = { fg = '#00ff00' },  -- Grün
+    ['['] = { fg = '#00ff00' },  -- Green
     [']'] = { fg = '#00ff00' },
-    ['{'] = { fg = '#0000ff' },  -- Blau
+    ['{'] = { fg = '#0000ff' },  -- Blue
     ['}'] = { fg = '#0000ff' },
   }
 })
 ```
 
-**Resultat**: Overrides haben Vorrang → Regenbogen-Brackets
+**Result**: Overrides take precedence → Rainbow brackets
+
+---
 
 ## Use Cases
 
-### Code-Diagramme
+### Code Diagrams
 
-Bei Code-Visualisierungen sind Brackets oft wichtig:
+Brackets are often important in code visualizations:
 
 ```lua
 require('color_my_ascii').setup({
@@ -170,143 +221,168 @@ require('color_my_ascii').setup({
 })
 ```
 
-### Minimale Konfiguration
+---
 
-Nur Brackets, keine anderen Operatoren:
+### Minimal Configuration
+
+Only brackets, no other operators:
 
 ```lua
 require('color_my_ascii').setup({
-  groups = {},  -- Keine vordefinierten Groups
+  groups = {},  -- No predefined groups
   enable_bracket_highlighting = true,
 })
 ```
 
+---
+
 ### Bracket Pairing Visualization
 
-Verschiedene Farben für verschiedene Bracket-Typen:
+Different colors for different bracket types:
 
 ```lua
 require('color_my_ascii').setup({
-  enable_bracket_highlighting = false,  -- Basis-Feature aus
+  enable_bracket_highlighting = false,  -- Base feature off
   overrides = {
-    -- Runde Klammern: Gelb
+    -- Parentheses: Yellow
     ['('] = { fg = '#ffff00', bold = true },
     [')'] = { fg = '#ffff00', bold = true },
-    -- Eckige Klammern: Cyan
+    -- Square brackets: Cyan
     ['['] = { fg = '#00ffff', bold = true },
     [']'] = { fg = '#00ffff', bold = true },
-    -- Geschweifte Klammern: Magenta
+    -- Curly braces: Magenta
     ['{'] = { fg = '#ff00ff', bold = true },
     ['}'] = { fg = '#ff00ff', bold = true },
   }
 })
 ```
 
+---
+
 ## Performance
 
-Das Feature hat **minimalen Overhead**:
-- Brackets werden beim Setup in die Lookup-Tabelle eingefügt
-- Lookup ist O(1) wie für alle anderen Characters
-- Keine Runtime-Overhead
+The feature has **minimal overhead**:
+- Brackets are inserted into lookup table at setup
+- Lookup is O(1) like for all other characters
+- No runtime overhead
 
-## Einschränkungen
+---
 
-### Keine Matching-Logik
+## Limitations
 
-Das Feature hebt **alle** Brackets hervor, ohne zu prüfen, ob sie zusammenpassen:
+### No Matching Logic
+
+The feature highlights **all** brackets without checking if they match:
 
 ```
-( ] { )  → Alle werden hervorgehoben, auch wenn falsch gepaart
+( ] { )  → All are highlighted, even if incorrectly paired
 ```
 
-Für Matching-Logic nutze man ein separates Plugin wie:
+For matching logic, use a separate plugin like:
 - `rainbow-delimiters.nvim`
 - `nvim-ts-rainbow`
 
-### Keine Context-Awareness
+---
 
-Brackets werden überall hervorgehoben:
+### No Context Awareness
+
+Brackets are highlighted everywhere:
 
 ```
-"text (in quotes)"  → () werden hervorgehoben (auch in Strings)
-# comment [test]    → [] werden hervorgehoben (auch in Kommentaren)
+"text (in quotes)"  → () are highlighted (even in strings)
+# comment [test]    → [] are highlighted (even in comments)
 ```
 
-Dies ist beabsichtigt, da ASCII-Art oft außerhalb normaler Syntax-Regeln liegt.
+This is intentional, as ASCII art often exists outside normal syntax rules.
+
+---
 
 ## Best Practices
 
-### Wann aktivieren?
+### When to Enable?
 
-**Aktivieren**, wenn:
-- Code-Strukturen mit Brackets visualisiert werden
-- Arrays, Maps, oder verschachtelte Strukturen dargestellt werden
-- Funktionsaufrufe in Diagrammen vorkommen
+**Enable** when:
+- Code structures with brackets are visualized
+- Arrays, maps, or nested structures are shown
+- Function calls appear in diagrams
 
-**Deaktivieren**, wenn:
-- Keine Brackets in ASCII-Art vorkommen
-- Operators-Group bereits Brackets definiert
-- Individuelle Bracket-Styles via Overrides gewünscht sind
+**Disable** when:
+- No brackets appear in ASCII art
+- Operators group already defines brackets
+- Individual bracket styles via overrides are desired
 
-### Kombination mit Color Schemes
+---
 
-Manche vordefinierten Schemes haben bereits Bracket-Highlighting:
+### Combination with Color Schemes
+
+Some predefined schemes already have bracket highlighting:
 
 ```lua
--- Matrix-Scheme hat enable_bracket_highlighting = true
+-- Matrix scheme has enable_bracket_highlighting = true
 require('color_my_ascii').setup(
   require('color_my_ascii.schemes.matrix')
 )
 
--- Überschreiben falls gewünscht
+-- Override if desired
 local matrix = require('color_my_ascii.schemes.matrix')
 matrix.enable_bracket_highlighting = false
 require('color_my_ascii').setup(matrix)
 ```
 
+---
+
 ## Troubleshooting
 
-### Brackets werden nicht hervorgehoben
+### Brackets Not Highlighted
 
-1. Feature aktiviert?
+1. Feature enabled?
+
 ```lua
 local config = require('color_my_ascii.config').get()
 print(config.enable_bracket_highlighting)
 ```
 
-2. Bereits in Groups definiert?
+2. Already defined in groups?
+
 ```lua
 local lookup = require('color_my_ascii.config').char_lookup
-print(lookup['('])  -- Sollte Highlight-Gruppe zeigen
+print(lookup['('])  -- Should show highlight group
 ```
 
-3. Overrides vorhanden?
+3. Overrides present?
+
 ```lua
 local config = require('color_my_ascii.config').get()
 print(vim.inspect(config.overrides))
 ```
 
-### Falsche Highlight-Farbe
+---
 
-Prüfe Priorität:
-1. Overrides (höchste)
+### Wrong Highlight Color
+
+Check priority:
+1. Overrides (highest)
 2. Groups
-3. enable_bracket_highlighting (niedrigste)
+3. enable_bracket_highlighting (lowest)
 
-Passe entsprechend an:
+Adjust accordingly:
+
 ```lua
--- Entferne Brackets aus Groups
+-- Remove brackets from groups
 groups = {
   operators = {
-    chars = "+-*/",  -- Ohne ()[]{}
+    chars = "+-*/",  -- Without ()[]{}
   }
 },
--- Dann funktioniert enable_bracket_highlighting
+-- Then enable_bracket_highlighting works
 enable_bracket_highlighting = true,
 ```
 
-## Siehe auch
+---
 
-- [Custom Highlights](custom-highlights.md)
-- [Character Groups](character-groups.md)
+## See Also
+
+- [Custom Highlights](./custom-highlights.md)
 - [Operators Group](../groups/operators.md)
+
+---

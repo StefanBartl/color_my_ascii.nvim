@@ -1,67 +1,104 @@
 # Custom Highlights
 
-Das Plugin unterstützt vollständig anpassbare Highlight-Definitionen mit RGB/Hex-Farben und Text-Styles.
+The plugin supports fully customizable highlight definitions with RGB/Hex colors and text styles.
 
-## Übersicht
+## Table of content
 
-Man kann Highlights auf zwei Arten spezifizieren:
+  - [Overview](#overview)
+  - [String Highlights](#string-highlights)
+  - [Custom Highlight Tables](#custom-highlight-tables)
+  - [Supported Color Formats](#supported-color-formats)
+    - [Hex Colors](#hex-colors)
+    - [Color Names](#color-names)
+  - [Text Styles](#text-styles)
+    - [Available Styles](#available-styles)
+  - [Use Cases](#use-cases)
+    - [Character-Specific Overrides](#character-specific-overrides)
+    - [Default Text Highlighting](#default-text-highlighting)
+    - [Combined Usage](#combined-usage)
+  - [Character Groups with Custom Highlights](#character-groups-with-custom-highlights)
+  - [Keyword Highlights](#keyword-highlights)
+  - [Practical Examples](#practical-examples)
+    - [Matrix Style (Green Hacker Look)](#matrix-style-green-hacker-look)
+    - [Rainbow Corners](#rainbow-corners)
+    - [Subtle Dimming Effects](#subtle-dimming-effects)
+  - [Troubleshooting](#troubleshooting)
+    - [Colors Not Displaying](#colors-not-displaying)
+    - [Styles Not Working](#styles-not-working)
+    - [Performance Issues](#performance-issues)
+  - [Best Practices](#best-practices)
+  - [See Also](#see-also)
 
-1. **String**: Name einer existierenden Neovim-Highlight-Gruppe
-2. **Table**: Custom-Definition mit Farben und Styles
+---
 
-## String-Highlights
+## Overview
 
-Verwendet existierende Neovim-Highlight-Gruppen:
+Highlights can be specified in two ways:
+
+1. **String**: Name of an existing Neovim highlight group
+2. **Table**: Custom definition with colors and styles
+
+---
+
+## String Highlights
+
+Use existing Neovim highlight groups:
 
 ```lua
 require('color_my_ascii').setup({
   overrides = {
-    ['┌'] = 'Special',      -- Built-in Highlight-Gruppe
-    ['→'] = 'Function',     -- Andere Highlight-Gruppe
+    ['┌'] = 'Special',      -- Built-in highlight group
+    ['→'] = 'Function',     -- Other highlight group
   }
 })
 ```
 
-Vorteile:
-- Kompatibel mit Colorschemes
-- Automatisch an Theme angepasst
-- Keine zusätzliche Konfiguration
+Advantages:
+- Compatible with colorschemes
+- Automatically adapts to theme
+- No additional configuration
 
-## Custom-Highlight-Tables
+---
 
-Definiert eigene Farben und Styles:
+## Custom Highlight Tables
+
+Define custom colors and styles:
 
 ```lua
 require('color_my_ascii').setup({
   overrides = {
     ['┌'] = {
-      fg = '#ff0000',           -- Vordergrundfarbe (Hex)
-      bg = '#000000',           -- Hintergrundfarbe (optional)
-      bold = true,              -- Fett (optional)
-      italic = false,           -- Kursiv (optional)
-      underline = false,        -- Unterstrichen (optional)
-      undercurl = false,        -- Gewellte Unterstreichung (optional)
-      strikethrough = false,    -- Durchgestrichen (optional)
+      fg = '#ff0000',           -- Foreground color (Hex)
+      bg = '#000000',           -- Background color (optional)
+      bold = true,              -- Bold (optional)
+      italic = false,           -- Italic (optional)
+      underline = false,        -- Underline (optional)
+      undercurl = false,        -- Undercurl (optional)
+      strikethrough = false,    -- Strikethrough (optional)
     },
   }
 })
 ```
 
-## Unterstützte Farb-Formate
+---
 
-### Hex-Farben
+## Supported Color Formats
+
+### Hex Colors
 
 ```lua
-fg = '#ff0000'    -- Rot
-fg = '#00ff00'    -- Grün
-fg = '#0000ff'    -- Blau
-fg = '#ffffff'    -- Weiß
-fg = '#000000'    -- Schwarz
+fg = '#ff0000'    -- Red
+fg = '#00ff00'    -- Green
+fg = '#0000ff'    -- Blue
+fg = '#ffffff'    -- White
+fg = '#000000'    -- Black
 ```
 
-### Farbnamen
+---
 
-Das Plugin verwendet Neovim's interne Farbverarbeitung, daher funktionieren auch Farbnamen:
+### Color Names
+
+The plugin uses Neovim's internal color processing, so color names work:
 
 ```lua
 fg = 'red'
@@ -69,11 +106,13 @@ fg = 'blue'
 fg = 'green'
 ```
 
-**Hinweis**: Hex-Werte sind präziser und portabler.
+**Note**: Hex values are more precise and portable.
 
-## Text-Styles
+---
 
-Alle Styles können kombiniert werden:
+## Text Styles
+
+All styles can be combined:
 
 ```lua
 {
@@ -84,74 +123,84 @@ Alle Styles können kombiniert werden:
 }
 ```
 
-### Verfügbare Styles
+---
 
-| Style | Beschreibung | Beispiel |
-|-------|--------------|----------|
-| `bold` | Fettdruck | `bold = true` |
-| `italic` | Kursiv | `italic = true` |
-| `underline` | Unterstrichen | `underline = true` |
-| `undercurl` | Gewellte Unterstreichung | `undercurl = true` |
-| `strikethrough` | Durchgestrichen | `strikethrough = true` |
+### Available Styles
 
-## Anwendungsfälle
+| Style | Description | Example |
+|-------|-------------|---------|
+| `bold` | Bold text | `bold = true` |
+| `italic` | Italic text | `italic = true` |
+| `underline` | Underlined text | `underline = true` |
+| `undercurl` | Wavy underline | `undercurl = true` |
+| `strikethrough` | Strikethrough text | `strikethrough = true` |
+
+---
+
+## Use Cases
 
 ### Character-Specific Overrides
 
-Bestimmte Zeichen hervorheben:
+Highlight specific characters:
 
 ```lua
 require('color_my_ascii').setup({
   overrides = {
-    -- Ecken in rot und fett
+    -- Corners in red and bold
     ['┌'] = { fg = '#ff0000', bold = true },
     ['┐'] = { fg = '#ff0000', bold = true },
     ['└'] = { fg = '#ff0000', bold = true },
     ['┘'] = { fg = '#ff0000', bold = true },
 
-    -- Pfeile in grün
+    -- Arrows in green
     ['→'] = { fg = '#00ff00' },
     ['←'] = { fg = '#00ff00' },
 
-    -- Symbole in blau mit Unterstreichung
+    -- Symbols in blue with underline
     ['★'] = { fg = '#0000ff', underline = true },
   }
 })
 ```
 
+---
+
 ### Default Text Highlighting
 
-Normalen Text in Blöcken gedämpft darstellen:
+Dim normal text in blocks:
 
 ```lua
 require('color_my_ascii').setup({
-  default_text_hl = { fg = '#808080' },  -- Grauer Text
+  default_text_hl = { fg = '#808080' },  -- Gray text
 })
 ```
 
-Dies bewirkt:
-- Normaler Text wird grau
-- Keywords bleiben farbig hervorgehoben
-- Symbole bleiben farbig hervorgehoben
-- Guter Kontrast zwischen wichtigen und unwichtigen Elementen
+This achieves:
+- Normal text becomes gray
+- Keywords remain colorfully highlighted
+- Symbols remain colorfully highlighted
+- Good contrast between important and unimportant elements
 
-### Kombinierte Nutzung
+---
 
-String-Highlights und Custom-Highlights kombinieren:
+### Combined Usage
+
+Combine string highlights and custom highlights:
 
 ```lua
 require('color_my_ascii').setup({
   overrides = {
-    ['┌'] = 'Special',                    -- Built-in Highlight
+    ['┌'] = 'Special',                    -- Built-in highlight
     ['→'] = { fg = '#00ff00', bold = true }, -- Custom
   },
-  default_text_hl = 'Comment',            -- Built-in Highlight
+  default_text_hl = 'Comment',            -- Built-in highlight
 })
 ```
 
-## Character Groups mit Custom Highlights
+---
 
-Auch Gruppen können Custom-Highlights verwenden:
+## Character Groups with Custom Highlights
+
+Groups can also use custom highlights:
 
 ```lua
 require('color_my_ascii').setup({
@@ -162,15 +211,17 @@ require('color_my_ascii').setup({
     },
     arrows = {
       chars = "←→↑↓",
-      hl = 'Special',  -- Oder String
+      hl = 'Special',  -- Or string
     },
   }
 })
 ```
 
+---
+
 ## Keyword Highlights
 
-Keywords können ebenfalls Custom-Highlights verwenden:
+Keywords can also use custom highlights:
 
 ```lua
 require('color_my_ascii').setup({
@@ -183,9 +234,11 @@ require('color_my_ascii').setup({
 })
 ```
 
-## Praktische Beispiele
+---
 
-### Matrix-Style (Grüner Hacker-Look)
+## Practical Examples
+
+### Matrix Style (Green Hacker Look)
 
 ```lua
 require('color_my_ascii').setup({
@@ -195,71 +248,86 @@ require('color_my_ascii').setup({
       hl = { fg = '#00ff00', bold = true },
     },
   },
-  default_text_hl = { fg = '#004400' },  -- Dunkles Grün
+  default_text_hl = { fg = '#004400' },  -- Dark green
 })
 ```
 
-### Regenbogen-Ecken
+---
+
+### Rainbow Corners
 
 ```lua
 require('color_my_ascii').setup({
   overrides = {
-    ['┌'] = { fg = '#ff0000' },  -- Rot
+    ['┌'] = { fg = '#ff0000' },  -- Red
     ['┐'] = { fg = '#ff7f00' },  -- Orange
-    ['└'] = { fg = '#00ff00' },  -- Grün
-    ['┘'] = { fg = '#0000ff' },  -- Blau
+    ['└'] = { fg = '#00ff00' },  -- Green
+    ['┘'] = { fg = '#0000ff' },  -- Blue
   }
 })
 ```
 
-### Subtile Dimm-Effekte
+---
+
+### Subtle Dimming Effects
 
 ```lua
 require('color_my_ascii').setup({
-  default_text_hl = { fg = '#666666' },  -- Gedämpfter Text
+  default_text_hl = { fg = '#666666' },  -- Dimmed text
   overrides = {
-    -- Wichtige Symbole hell
+    -- Important symbols bright
     ['→'] = { fg = '#ffffff', bold = true },
     ['★'] = { fg = '#ffff00', bold = true },
   }
 })
 ```
 
+---
+
 ## Troubleshooting
 
-### Farben werden nicht angezeigt
+### Colors Not Displaying
 
-1. Terminal unterstützt True Color:
+1. Terminal supports true color:
 ```lua
 vim.opt.termguicolors = true
 ```
 
-2. Theme überschreibt Custom-Highlights:
-   - Lade Plugin nach dem Theme
-   - Verwende höhere Priorität
+2. Theme overrides custom highlights:
+   - Load plugin after theme
+   - Use higher priority
 
-### Styles funktionieren nicht
+---
 
-Manche Terminals unterstützen nicht alle Styles:
-- `bold` und `italic` funktionieren meist
-- `undercurl` benötigt spezielle Terminal-Unterstützung
-- `strikethrough` ist nicht überall verfügbar
+### Styles Not Working
 
-### Performance-Probleme
+Some terminals don't support all styles:
+- `bold` and `italic` usually work
+- `undercurl` requires special terminal support
+- `strikethrough` isn't available everywhere
 
-Custom-Highlights werden beim Setup einmalig erstellt und gecacht:
-- Keine Performance-Einbußen im Vergleich zu String-Highlights
-- Lookup ist O(1)
+---
+
+### Performance Issues
+
+Custom highlights are created once at setup and cached:
+- No performance penalty compared to string highlights
+- Lookup is O(1)
+
+---
 
 ## Best Practices
 
-1. **Konsistenz**: Verwende ähnliche Farben für ähnliche Element-Typen
-2. **Kontrast**: Stelle sicher, dass Text lesbar bleibt
-3. **Sparsamkeit**: Zu viele Farben können ablenkend wirken
-4. **Theme-Kompatibilität**: Überlege, String-Highlights zu nutzen, wenn möglich
+1. **Consistency**: Use similar colors for similar element types
+2. **Contrast**: Ensure text remains readable
+3. **Moderation**: Too many colors can be distracting
+4. **Theme Compatibility**: Consider using string highlights when possible
 
-## Siehe auch
+---
 
-- [Language Detection](language-detection.md)
-- [Character Groups](character-groups.md)
+## See Also
+
+- [Language Detection](./language-detection.md)
 - [Color Schemes](../color-schemes.md)
+
+---

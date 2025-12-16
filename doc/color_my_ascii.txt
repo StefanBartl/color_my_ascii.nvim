@@ -5,7 +5,7 @@
 
 Author:  lavalue
 License: MIT
-Version: 1.2.0
+Version: 1.1.0
 
 ==============================================================================
 CONTENTS                                        *color_my_ascii-contents*
@@ -36,6 +36,7 @@ Features:~
   • Function name detection
   • Bracket highlighting
   • Inline code highlighting
+  • Fence validation
 
 ==============================================================================
 2. REQUIREMENTS                                 *color_my_ascii-requirements*
@@ -53,7 +54,7 @@ Using lazy.nvim:~
       ft = 'markdown',
       opts = {}
     }
-<
+
 
 Using packer.nvim:~
 >lua
@@ -64,7 +65,7 @@ Using packer.nvim:~
         require('color_my_ascii').setup()
       end
     }
-<
+
 
 ==============================================================================
 4. QUICK START                                  *color_my_ascii-quickstart*
@@ -73,21 +74,21 @@ After installation, the plugin activates automatically for markdown files.
 
 Basic usage:~
 >markdown
-    ```ascii
+````ascii
     ┌─────────────┐
     │ Hello World │
     └─────────────┘
-    ```
-<
+````
+
 
 With explicit language:~
 >markdown
-    ```ascii-c
+````ascii-c
     ┌──────────────┐
     │ int x = 42;  │
     └──────────────┘
-    ```
-<
+````
+
 
 See |color_my_ascii-config| for configuration options.
 
@@ -97,7 +98,7 @@ See |color_my_ascii-config| for configuration options.
 Setup with defaults:~
 >lua
     require('color_my_ascii').setup()
-<
+
 
 Custom configuration:~
 >lua
@@ -123,7 +124,7 @@ Custom configuration:~
       treat_empty_fence_as_ascii = false,
       enable_inline_code = false,
     })
-<
+
 
 Configuration options:~
 
@@ -194,7 +195,7 @@ with custom colors:
       undercurl = true,         -- Undercurl
       strikethrough = true,     -- Strikethrough
     }
-<
+
 
 ==============================================================================
 6. FEATURES                                     *color_my_ascii-features*
@@ -209,7 +210,7 @@ The plugin highlights different types of characters:
   • Symbols: •★☆✓✔✗✘♠♣♥♦
   • Operators: +-*/%=<>!&|^~()[]{}
 
-Language Detection~
+Language Detection~                             *color_my_ascii-language-detection*
 
 The plugin can detect programming languages using three strategies:
 
@@ -222,198 +223,34 @@ Supported languages:~
 
 See |color_my_ascii-config-enable_language_detection| to enable/disable.
 
-Function Name Detection~
+Function Name Detection~                        *color_my_ascii-function-detection*
 
 When enabled, highlights function names using heuristics:
 >c
     result = calculate(x);  // "calculate" highlighted
-<
+
 
 See |color_my_ascii-config-enable_function_names|.
 
-Inline Code Highlighting~
+Bracket Highlighting~                           *color_my_ascii-bracket-highlighting*
+
+When enabled, highlights parentheses, square brackets, and curly braces:
+>c
+    if (x > 0) { }  // (), {} highlighted
+
+
+See |color_my_ascii-config-enable_bracket_highlighting|.
+
+Inline Code Highlighting~                       *color_my_ascii-inline-code*
 
 When enabled, highlights keywords and symbols in inline code:
 >markdown
     Use `func` for functions and `→` for arrows.
-<
+
 
 See |color_my_ascii-config-enable_inline_code|.
 
-==============================================================================
-7. COMMANDS                                     *color_my_ascii-commands*
+Empty Fence Support~                            *color_my_ascii-empty-fence*
 
-*:ColorMyAscii*
-    Manually trigger highlighting for the current buffer.
-
-*:ColorMyAsciiToggle*
-    Toggle the plugin on/off.
-
-*:ColorMyAsciiDebug*
-    Show debug information about the current configuration.
-    Displays:
-      • Loaded languages and groups
-      • Lookup table sizes
-      • Feature flags status
-
-==============================================================================
-8. COLOR SCHEMES                                *color_my_ascii-schemes*
-
-The plugin includes pre-configured color schemes:
-
-Loading a color scheme:~
->lua
-    require('color_my_ascii').setup(
-      require('color_my_ascii.schemes.matrix')
-    )
-<
-
-Available schemes:~
-
-*color_my_ascii-scheme-default*
-    default                 Uses built-in Neovim highlights
-                            Maximum compatibility
-
-*color_my_ascii-scheme-matrix*
-    matrix                  Dark with bright green (hacker style)
-                            All features enabled
-
-*color_my_ascii-scheme-nord*
-    nord                    Cool blue/cyan colors
-                            Based on Nord theme
-
-*color_my_ascii-scheme-gruvbox*
-    gruvbox                 Warm, retro colors
-                            Based on Gruvbox theme
-
-*color_my_ascii-scheme-dracula*
-    dracula                 Vibrant purple and pink
-                            Based on Dracula theme
-
-Creating custom schemes:~
->lua
-    require('color_my_ascii').setup({
-      groups = {
-        box_drawing = {
-          chars = "─│┌┐└┘",
-          hl = { fg = '#00ff00', bold = true },
-        },
-      },
-      overrides = {
-        ['┌'] = { fg = '#ff0000' },
-      },
-    })
-<
-
-==============================================================================
-9. API                                          *color_my_ascii-api*
-
-*color_my_ascii.setup()*
-    Setup the plugin with configuration options.
-
-    Parameters:~
-        {opts}  (table|nil)  Configuration options
-
-    Usage:~
->lua
-        require('color_my_ascii').setup({
-          enable_keywords = true,
-        })
-<
-
-*color_my_ascii.highlight_buffer()*
-    Manually trigger highlighting for a buffer.
-
-    Parameters:~
-        {bufnr}  (integer|nil)  Buffer number (default: current buffer)
-
-    Usage:~
->lua
-        require('color_my_ascii').highlight_buffer()
-<
-
-*color_my_ascii.toggle()*
-    Toggle the plugin on/off.
-
-    Returns:~
-        boolean  New state (true = enabled, false = disabled)
-
-    Usage:~
->lua
-        local enabled = require('color_my_ascii').toggle()
-        print('Plugin enabled:', enabled)
-<
-
-*color_my_ascii.get_state()*
-    Get the current plugin state.
-
-    Returns:~
-        table  State containing enabled status and active buffers
-
-==============================================================================
-10. TROUBLESHOOTING                             *color_my_ascii-troubleshooting*
-
-No highlighting visible~
-
-1. Check if plugin is loaded:
-   >vim
-       :ColorMyAsciiDebug
-<
-
-2. Verify buffer is markdown:
-   >vim
-       :set filetype?
-<
-
-3. Check for errors:
-   >vim
-       :messages
-<
-
-4. Run health check:
-   >vim
-       :checkhealth color_my_ascii
-<
-
-Incorrect language detection~
-
-Use explicit language marker:
+When enabled, treats empty fences (``` without language) as ASCII blocks:
 >markdown
-    ```ascii-c
-    int x = 42;
-    ```
-<
-
-Or adjust detection threshold:
->lua
-    require('color_my_ascii').setup({
-      language_detection_threshold = 3,  -- More strict
-    })
-<
-
-Performance issues~
-
-Disable features you don't need:
->lua
-    require('color_my_ascii').setup({
-      enable_function_names = false,
-      enable_inline_code = false,
-    })
-<
-
-Keywords not highlighting~
-
-Check if language is loaded:
->vim
-    :ColorMyAsciiDebug
-<
-
-Verify keywords are enabled:
->lua
-    require('color_my_ascii').setup({
-      enable_keywords = true,
-    })
-<
-
-==============================================================================
-vim:tw=78:ts=8:ft=help:norl:

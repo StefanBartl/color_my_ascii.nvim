@@ -168,10 +168,10 @@ local defaults = {
   enable_language_detection = true,
   language_detection_threshold = 2,
   enable_treesitter = false,
-  treat_empty_fence_as_ascii = false,
-  enable_inline_code = false,
-  enable_function_names = false,
-  enable_bracket_highlighting = false,
+  treat_empty_fence_as_ascii = true,
+  enable_inline_code = true,
+  enable_function_names = true,
+  enable_bracket_highlighting = true,
 }
 
 --- Current configuration

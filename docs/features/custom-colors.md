@@ -2,6 +2,26 @@
 
 This guide shows how to customize colors for individual characters, groups, or keywords.
 
+## Table of content
+
+  - [Quick Start](#quick-start)
+  - [Individual Character Colors](#individual-character-colors)
+  - [Available Style Options](#available-style-options)
+  - [Group Colors](#group-colors)
+  - [Keyword Colors](#keyword-colors)
+  - [Priority Order](#priority-order)
+  - [Default Text Color](#default-text-color)
+  - [Practical Examples](#practical-examples)
+    - [Matrix Style (Green Corners)](#matrix-style-green-corners)
+    - [Rainbow Arrows](#rainbow-arrows)
+    - [Language-Specific Keywords](#language-specific-keywords)
+  - [Combining with Schemes](#combining-with-schemes)
+  - [Tips](#tips)
+  - [Color Format](#color-format)
+  - [See Also](#see-also)
+
+---
+
 ## Quick Start
 
 ```lua
@@ -12,6 +32,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ## Individual Character Colors
 
@@ -32,6 +54,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ## Available Style Options
 
 Custom highlights support these properties:
@@ -47,6 +71,8 @@ Custom highlights support these properties:
   strikethrough = true,     -- Strikethrough text
 }
 ```
+
+---
 
 ## Group Colors
 
@@ -67,6 +93,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ## Keyword Colors
 
 Change colors for programming language keywords:
@@ -85,6 +113,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ## Priority Order
 
@@ -113,6 +143,8 @@ require('color_my_ascii').setup({
 
 Result: `┌` uses 'Special', all other box chars use 'Keyword'.
 
+---
+
 ## Default Text Color
 
 Dim normal text to highlight important elements:
@@ -127,6 +159,8 @@ This creates better contrast:
 - Normal text: dimmed (gray)
 - Keywords: highlighted (colorful)
 - Special chars: highlighted (colorful)
+
+---
 
 ## Practical Examples
 
@@ -144,6 +178,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Rainbow Arrows
 
 ```lua
@@ -157,6 +193,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Language-Specific Keywords
 
 ```lua
@@ -169,6 +207,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ## Combining with Schemes
 
@@ -185,6 +225,8 @@ require('color_my_ascii').setup({
 
 Scheme provides base colors, overrides customize specific elements.
 
+---
+
 ## Tips
 
 1. **Use hex colors** for precise control: `#ff0000` instead of `'red'`
@@ -192,6 +234,8 @@ Scheme provides base colors, overrides customize specific elements.
 3. **Keep it simple** - too many colors can be distracting
 4. **Use built-in highlights** when possible for theme compatibility
 5. **Dim default text** to make highlights stand out
+
+---
 
 ## Color Format
 
@@ -202,8 +246,11 @@ Hex colors must include the `#` prefix:
 { fg = 'ff0000' }   -- ✗ Wrong
 ```
 
+---
+
 ## See Also
 
 - [Schemes Documentation](../schemes.md) - Pre-configured color schemes
-- [Custom Highlights](custom-highlights.md) - Advanced highlight techniques
-- [Character Groups](character-groups.md) - Built-in group reference
+- [Custom Highlights](./custom-highlights.md) - Advanced highlight techniques
+
+-

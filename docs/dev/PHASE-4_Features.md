@@ -301,6 +301,10 @@ require('color_my_ascii.telescope_picker').blocks(opts)
 
 ## User Commands
 
+### features
+
+- [ ] Usercommand das bei ausführung wird sicherstellt, dass vor und nach jedem fenced block eine zeile abstand (leerzeile) vorhanden ist
+
 ### Language Management
 
 #### Register Language

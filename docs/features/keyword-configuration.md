@@ -2,6 +2,36 @@
 
 This guide explains how to customize keyword highlighting for programming languages in ASCII art blocks.
 
+## Table of content
+
+  - [Quick Start](#quick-start)
+  - [Adding New Languages](#adding-new-languages)
+    - [Word List](#word-list)
+    - [Unique Words](#unique-words)
+  - [Customizing Existing Languages](#customizing-existing-languages)
+  - [Highlight Options](#highlight-options)
+  - [Language Detection](#language-detection)
+    - [Detection Threshold](#detection-threshold)
+  - [Disabling Keywords](#disabling-keywords)
+  - [Practical Examples](#practical-examples)
+    - [Adding Swift Support](#adding-swift-support)
+    - [Custom Highlight per Language](#custom-highlight-per-language)
+    - [Minimal Keyword Set](#minimal-keyword-set)
+  - [Language Priority](#language-priority)
+  - [Common Patterns](#common-patterns)
+    - [Domain-Specific Language](#domain-specific-language)
+    - [Configuration Language](#configuration-language)
+  - [Combining with Schemes](#combining-with-schemes)
+  - [Performance Considerations](#performance-considerations)
+  - [Tips](#tips)
+  - [Troubleshooting](#troubleshooting)
+    - [Keywords not highlighting](#keywords-not-highlighting)
+    - [Wrong language detected](#wrong-language-detected)
+    - [Custom language not loaded](#custom-language-not-loaded)
+  - [See Also](#see-also)
+
+---
+
 ## Quick Start
 
 ```lua
@@ -15,6 +45,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ## Adding New Languages
 
@@ -32,6 +64,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Word List
 
 The `words` array contains all keywords to highlight:
@@ -44,6 +78,8 @@ words = {
 }
 ```
 
+---
+
 ### Unique Words
 
 `unique_words` helps with automatic language detection:
@@ -53,6 +89,8 @@ unique_words = { 'def', 'elsif', 'begin' }  -- Ruby-specific
 ```
 
 These should be keywords that **uniquely identify** the language.
+
+---
 
 ## Customizing Existing Languages
 
@@ -71,6 +109,8 @@ require('color_my_ascii').setup({
 
 This replaces the default Lua keyword configuration.
 
+---
+
 ## Highlight Options
 
 Keywords can use built-in or custom highlights:
@@ -88,11 +128,12 @@ hl = {
 }
 ```
 
+---
+
 ## Language Detection
 
 The plugin uses `unique_words` for automatic language detection:
 
-````markdown
 ```ascii
 ┌─────────────────┐
 │ def hello()     │  ← Detects Ruby (def is unique)
@@ -100,7 +141,8 @@ The plugin uses `unique_words` for automatic language detection:
 │ end             │
 └─────────────────┘
 ```
-````
+
+---
 
 ### Detection Threshold
 
@@ -115,6 +157,8 @@ require('color_my_ascii').setup({
 
 Lower = more lenient detection, Higher = more strict detection.
 
+---
+
 ## Disabling Keywords
 
 Disable keyword highlighting entirely:
@@ -127,11 +171,11 @@ require('color_my_ascii').setup({
 
 Or disable for specific blocks by using explicit language markers:
 
-````markdown
 ```ascii-none
 No keyword highlighting here
 ```
-````
+
+---
 
 ## Practical Examples
 
@@ -154,6 +198,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Custom Highlight per Language
 
 ```lua
@@ -171,6 +217,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Minimal Keyword Set
 
 Only highlight most common keywords:
@@ -186,6 +234,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ## Language Priority
 
 When multiple languages match, the plugin uses:
@@ -196,7 +246,6 @@ When multiple languages match, the plugin uses:
 
 Example:
 
-````markdown
 ```ascii-c
 int x = 42;  ← Uses C keywords (explicit)
 ```
@@ -205,7 +254,8 @@ int x = 42;  ← Uses C keywords (explicit)
 func main() {  ← Detects Go (unique keyword "func")
 }
 ```
-````
+
+---
 
 ## Common Patterns
 
@@ -226,6 +276,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ### Configuration Language
 
 ```lua
@@ -239,6 +291,8 @@ require('color_my_ascii').setup({
   }
 })
 ```
+
+---
 
 ## Combining with Schemes
 
@@ -256,6 +310,8 @@ require('color_my_ascii').setup({
 })
 ```
 
+---
+
 ## Performance Considerations
 
 Large keyword lists don't impact performance significantly:
@@ -268,6 +324,8 @@ However, for best performance:
 - Use unique_words for faster detection
 - Disable language detection if not needed
 
+---
+
 ## Tips
 
 1. **Start small** - add most common keywords first
@@ -275,6 +333,8 @@ However, for best performance:
 3. **Use built-in highlights** for theme compatibility
 4. **Consider case sensitivity** - keywords are case-sensitive
 5. **Group related keywords** - easier to maintain
+
+---
 
 ## Troubleshooting
 
@@ -286,24 +346,32 @@ local config = require('color_my_ascii.config').get()
 print(config.enable_keywords)
 ```
 
+---
+
 ### Wrong language detected
 
 Add more unique keywords or use explicit markers:
-````markdown
+
 ```ascii-rust
 fn main() {}  ← Forces Rust detection
 ```
-````
+
+---
 
 ### Custom language not loaded
 
 Verify syntax:
+
 ```lua
 :lua print(vim.inspect(require('color_my_ascii.config').get().keywords))
 ```
+
+---
 
 ## See Also
 
 - [Language Detection](language-detection.md) - How detection works
 - [Custom Colors](custom-colors.md) - Styling keywords
 - [Built-in Languages](../languages.md) - Default language support
+
+---

@@ -1,10 +1,47 @@
 # Quickstart Guide
 
-Schnelleinstieg in color_my_ascii.nvim mit allen wichtigen Features.
+Quick introduction to color_my_ascii.nvim with all important features.
+
+## Table of content
+
+  - [Installation](#installation)
+    - [With lazy.nvim](#with-lazynvim)
+    - [With packer.nvim](#with-packernvim)
+  - [First Steps](#first-steps)
+    - [1. Open Markdown File](#1-open-markdown-file)
+    - [2. Insert ASCII Code Block](#2-insert-ascii-code-block)
+  - [Basic Configuration](#basic-configuration)
+    - [Minimal](#minimal)
+    - [With Features](#with-features)
+    - [With Color Scheme](#with-color-scheme)
+  - [Feature Examples](#feature-examples)
+    - [1. Language Detection](#1-language-detection)
+    - [2. Custom Highlights](#2-custom-highlights)
+    - [3. Function Names](#3-function-names)
+    - [4. Inline Code](#4-inline-code)
+    - [5. Empty Fences](#5-empty-fences)
+  - [Available Color Schemes](#available-color-schemes)
+    - [Load Scheme](#load-scheme)
+    - [Customize Scheme](#customize-scheme)
+  - [Useful Commands](#useful-commands)
+  - [Typical Configurations](#typical-configurations)
+    - [For Developers](#for-developers)
+    - [For Documentation](#for-documentation)
+    - [Minimalist](#minimalist)
+    - [Maximum Features](#maximum-features)
+  - [Common Issues](#common-issues)
+    - [No Highlights](#no-highlights)
+    - [Wrong Colors](#wrong-colors)
+    - [Performance Issues](#performance-issues)
+  - [Next Steps](#next-steps)
+  - [Getting Help](#getting-help)
+  - [See Also](#see-also)
+
+---
 
 ## Installation
 
-### Mit lazy.nvim
+### With lazy.nvim
 
 ```lua
 {
@@ -16,7 +53,9 @@ Schnelleinstieg in color_my_ascii.nvim mit allen wichtigen Features.
 }
 ```
 
-### Mit packer.nvim
+---
+
+### With packer.nvim
 
 ```lua
 use {
@@ -28,27 +67,31 @@ use {
 }
 ```
 
-## Erste Schritte
+---
 
-### 1. Markdown-Datei öffnen
+## First Steps
+
+### 1. Open Markdown File
 
 ```vim
 :e test.md
 ```
 
-### 2. ASCII-Codeblock einfügen
+---
 
-````markdown
+### 2. Insert ASCII Code Block
+
 ```ascii
-┌─────────────┐
-│ Hello World │
-└─────────────┘
+┌─────────────────────┐
+│  Hello World!       │
+└─────────────────────┘
 ```
-````
 
-Die Box-Zeichen sollten automatisch farbig hervorgehoben werden.
+Box-drawing characters should be automatically highlighted in color.
 
-## Basis-Konfiguration
+---
+
+## Basic Configuration
 
 ### Minimal
 
@@ -56,52 +99,67 @@ Die Box-Zeichen sollten automatisch farbig hervorgehoben werden.
 require('color_my_ascii').setup()
 ```
 
-Nutzt alle Standard-Einstellungen und lädt automatisch:
-- 10 Sprachen (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM)
-- 5 Zeichengruppen (Box-Drawing, Blocks, Arrows, Symbols, Operators)
+Automatically loads:
+- 10 languages (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM)
+- 5 character groups (Box-Drawing, Blocks, Arrows, Symbols, Operators)
 
-### Mit Features
+---
+
+### With Features
 
 ```lua
 require('color_my_ascii').setup({
-  enable_keywords = true,              -- Keywords hervorheben
-  enable_language_detection = true,    -- Automatische Sprach-Erkennung
-  enable_function_names = false,       -- Funktionsnamen erkennen
-  enable_bracket_highlighting = false, -- Klammern hervorheben
-  enable_inline_code = false,          -- Inline-Code highlighten
-  treat_empty_fence_as_ascii = false,  -- ``` ohne Sprache = ASCII
+  enable_keywords = true,              -- Highlight keywords
+  enable_language_detection = true,    -- Automatic language detection
+  enable_function_names = false,       -- Detect function names
+  enable_bracket_highlighting = false, -- Highlight brackets
+  enable_inline_code = false,          -- Highlight inline code
+  treat_empty_fence_as_ascii = false,  -- ``` without language = ASCII
 })
 ```
 
-### Mit Color-Scheme
+---
+
+### With Color Scheme
 
 ```lua
--- Hacker-Style (grün auf schwarz)
+-- Matrix style (green on black)
 require('color_my_ascii').setup(
   require('color_my_ascii.schemes.matrix')
 )
 
--- Nord-Theme (blau/cyan)
+-- Nord theme (cool blue/cyan)
 require('color_my_ascii').setup(
   require('color_my_ascii.schemes.nord')
 )
+
+-- Gruvbox (warm retro colors)
+require('color_my_ascii').setup(
+  require('color_my_ascii.schemes.gruvbox')
+)
+
+-- Dracula (vibrant purple/pink)
+require('color_my_ascii').setup(
+  require('color_my_ascii.schemes.dracula')
+)
 ```
 
-## Feature-Beispiele
+---
 
-### 1. Sprach-Erkennung
+## Feature Examples
 
-**Explizit**:
-````markdown
+### 1. Language Detection
+
+**Explicit**:
+
 ```ascii-c
 ┌──────────────┐
 │ int x = 42;  │
 └──────────────┘
 ```
-````
 
-**Automatisch** (durch Keywords):
-````markdown
+**Automatic** (via keywords):
+
 ```ascii
 ┌─────────────────────┐
 │ function counter()  │
@@ -110,22 +168,32 @@ require('color_my_ascii').setup(
 │ end                 │
 └─────────────────────┘
 ```
-````
-→ Erkennt Lua durch `function`, `local`, `end`
 
-### 2. Custom-Highlights
+→ Detects Lua through `function`, `local`, `end`
+
+---
+
+### 2. Custom Highlights
 
 ```lua
 require('color_my_ascii').setup({
   overrides = {
-    ['┌'] = { fg = '#ff0000', bold = true },  -- Rote Ecke
-    ['→'] = { fg = '#00ff00' },               -- Grüner Pfeil
+    -- String: Built-in highlight group
+    ['┌'] = 'Special',
+
+    -- Table: Custom definition with RGB/Hex
+    ['└'] = { fg = '#ff0000', bold = true },
+    ['→'] = { fg = '#00ff00', italic = true },
   },
-  default_text_hl = { fg = '#808080' },       -- Grauer Text
+
+  -- Dimmed text in blocks
+  default_text_hl = { fg = '#808080' },
 })
 ```
 
-### 3. Funktionsnamen
+---
+
+### 3. Function Names
 
 ```lua
 require('color_my_ascii').setup({
@@ -133,7 +201,6 @@ require('color_my_ascii').setup({
 })
 ```
 
-````markdown
 ```ascii-c
 ┌────────────────┐
 │ init()         │
@@ -141,10 +208,12 @@ require('color_my_ascii').setup({
 │ cleanup()      │
 └────────────────┘
 ```
-````
-→ `init`, `process`, `cleanup` werden als Funktionen hervorgehoben
 
-### 4. Inline-Code
+→ `init`, `process`, `cleanup` are highlighted as functions
+
+---
+
+### 4. Inline Code
 
 ```lua
 require('color_my_ascii').setup({
@@ -153,11 +222,13 @@ require('color_my_ascii').setup({
 ```
 
 ```markdown
-Man verwendet `func` in Go und `→` für Pfeile.
+Use `func` in Go and `→` for arrows.
 ```
-→ `func` und `→` werden hervorgehoben
+→ `func` and `→` are highlighted
 
-### 5. Leere Fences
+---
+
+### 5. Empty Fences
 
 ```lua
 require('color_my_ascii').setup({
@@ -165,63 +236,75 @@ require('color_my_ascii').setup({
 })
 ```
 
-````markdown
 ```
 ┌────┐
 │ OK │
 └────┘
 ```
-````
-→ Wird wie ````ascii` behandelt
 
-## Verfügbare Color-Schemes
+→ Treated like ```ascii
 
-| Schema | Stil | Features |
-|--------|------|----------|
-| `default` | Built-in Highlights | Minimal, kompatibel |
-| `matrix` | Grün auf schwarz | Alle aktiviert |
-| `nord` | Blau/Cyan | Function names |
+---
+
+## Available Color Schemes
+
+| Scheme | Style | Features |
+|--------|-------|----------|
+| `default` | Built-in highlights | Minimal, compatible |
+| `matrix` | Green on black | All enabled |
+| `nord` | Blue/Cyan | Function names |
 | `gruvbox` | Warm/Retro | Brackets, Inline |
-| `dracula` | Lila/Pink | Alle aktiviert |
+| `dracula` | Purple/Pink | All enabled |
 
-### Schema laden
+---
+
+### Load Scheme
 
 ```lua
 local scheme = require('color_my_ascii.schemes.matrix')
 require('color_my_ascii').setup(scheme)
 ```
 
-### Schema anpassen
+---
+
+### Customize Scheme
 
 ```lua
 local scheme = require('color_my_ascii.schemes.nord')
-scheme.enable_inline_code = true  -- Feature hinzufügen
-scheme.default_text_hl = 'Comment'  -- Text dimmen
+scheme.enable_inline_code = true  -- Add feature
+scheme.default_text_hl = 'Comment'  -- Dim text
 require('color_my_ascii').setup(scheme)
 ```
 
-## Nützliche Befehle
+---
+
+## Useful Commands
 
 ```vim
-" Debug-Info anzeigen
+" Show debug info
 :ColorMyAsciiDebug
 
-" Manuell highlighten
+" Manually highlight
 :ColorMyAscii
 
-" Plugin an/aus
+" Toggle plugin on/off
 :ColorMyAsciiToggle
 
-" Health-Check
+" Health check
 :checkhealth color_my_ascii
 
-" Hilfe
+" Check fence matching
+:ColorMyAsciiCheckFences
+
+" Help
 :h color_my_ascii
 ```
 
-## Typische Konfigurationen
+---
 
-### Für Entwickler
+## Typical Configurations
+
+### For Developers
 
 ```lua
 require('color_my_ascii').setup({
@@ -232,7 +315,9 @@ require('color_my_ascii').setup({
 })
 ```
 
-### Für Dokumentation
+---
+
+### For Documentation
 
 ```lua
 require('color_my_ascii').setup({
@@ -242,15 +327,19 @@ require('color_my_ascii').setup({
 })
 ```
 
-### Minimalistisch
+---
+
+### Minimalist
 
 ```lua
 require('color_my_ascii').setup({
   enable_keywords = false,
   enable_language_detection = false,
-  -- Nur Zeichen-Highlighting
+  -- Only character highlighting
 })
 ```
+
+---
 
 ### Maximum Features
 
@@ -266,78 +355,96 @@ require('color_my_ascii').setup({
 })
 ```
 
-## Häufige Probleme
+---
 
-### Keine Highlights
+## Common Issues
 
-1. Plugin geladen?
+### No Highlights
+
+1. Plugin loaded?
+
 ```vim
 :ColorMyAsciiDebug
 ```
 
-2. Filetype richtig?
+2. Filetype correct?
+
 ```vim
-:set filetype?  " Sollte markdown sein
+:set filetype?  " Should be markdown
 ```
 
-3. Syntax richtig?
-````markdown
-```ascii  ✓ Richtig
-```asci   ✗ Tippfehler
-```
-````
+3. Syntax correct?
 
-### Falsche Farben
+\```ascii  ✓ Correct
+\```asci   ✗ Typo
 
-1. True Color aktiviert?
+---
+
+### Wrong Colors
+
+1. True color enabled?
+
 ```lua
 vim.opt.termguicolors = true
 ```
 
-2. Theme lädt nach Plugin?
+2. Theme loads after plugin?
+
 ```lua
--- In init.lua: Plugin VOR Theme laden
+-- In init.lua: Load plugin BEFORE theme
 ```
 
-### Performance-Probleme
+---
 
-Features deaktivieren:
+### Performance Issues
+
+Disable features:
+
 ```lua
 require('color_my_ascii').setup({
-  enable_function_names = false,  -- Kann langsam sein
-  enable_inline_code = false,     -- Bei großen Dateien
+  enable_function_names = false,  -- Can be slow
+  enable_inline_code = false,     -- For large files
 })
 ```
 
-## Nächste Schritte
+---
 
-1. **Feature-Dokumentation** lesen:
+## Next Steps
+
+1. **Read feature documentation**:
    - [Custom Highlights](features/custom-highlights.md)
    - [Function Detection](features/function-detection.md)
    - [Bracket Highlighting](features/bracket-highlighting.md)
    - [Inline Code](features/inline-code.md)
 
-2. **Test-Datei** ausprobieren:
-   - Öffne [TEST.md](TEST.md)
-   - Teste alle Features systematisch
+2. **Try test file**:
+   - Open [TEST.md](TEST.md)
+   - Test all features systematically
 
-3. **Eigenes Schema** erstellen:
-   - Basiere auf existierendem Schema
-   - Passe Farben an
-   - Speichere als eigene Datei
+3. **Create custom scheme**:
+   - Base on existing scheme
+   - Customize colors
+   - Save as own file
 
-4. **Neue Sprache** hinzufügen:
-   - Siehe [README.md](../README.md#contributing)
+4. **Add new language**:
+   - See [README.md](../README.md#contributing)
 
-## Hilfe bekommen
+---
 
-1. **Vim-Help**: `:h color_my_ascii`
-2. **Health-Check**: `:checkhealth color_my_ascii`
-3. **Debug-Info**: `:ColorMyAsciiDebug`
-4. **GitHub Issues**: Öffne ein Issue mit Details
+## Getting Help
 
-## Siehe auch
+1. **Vim Help**: `:h color_my_ascii`
+2. **Health Check**: `:checkhealth color_my_ascii`
+3. **Debug Info**: `:ColorMyAsciiDebug`
+4. **Fence Check**: `:ColorMyAsciiCheckFences`
+5. **GitHub Issues**: Open issue with details
 
-- [README.md](../README.md) - Vollständige Dokumentation
-- [TEST.md](TEST.md) - Alle Features testen
-- [doc/color_my_ascii.txt](../doc/color_my_ascii.txt) - Vim-Help
+---
+
+## See Also
+
+- [README.md](../README.md) - Complete documentation
+- [TEST.md](TEST.md) - Test all features
+- [doc/color_my_ascii.txt](../doc/color_my_ascii.txt) - Vim help
+
+---

@@ -1,330 +1,404 @@
-# Inline Code Highlighting
+# Function Detection
 
-Das Plugin kann Keywords und Symbole auch in Inline-Code (`` `...` ``) hervorheben.
+The plugin can automatically detect and highlight function names using pattern-based heuristics.
 
-## Aktivierung
+## Table of content
+
+  - [Activation](#activation)
+  - [How It Works](#how-it-works)
+    - [Detection Rules](#detection-rules)
+    - [Examples](#examples)
+  - [Highlight Group](#highlight-group)
+  - [Interaction with Keywords](#interaction-with-keywords)
+  - [Use Cases](#use-cases)
+    - [Code Flow Diagrams](#code-flow-diagrams)
+    - [API Documentation](#api-documentation)
+    - [Method Calls](#method-calls)
+  - [Limitations](#limitations)
+    - [Heuristic-Based](#heuristic-based)
+    - [No Type Information](#no-type-information)
+    - [Language Agnostic](#language-agnostic)
+  - [Configuration Examples](#configuration-examples)
+    - [With All Features](#with-all-features)
+    - [Only Functions](#only-functions)
+    - [Custom Function Highlight](#custom-function-highlight)
+  - [Performance](#performance)
+  - [Combination with Other Features](#combination-with-other-features)
+    - [With Keywords](#with-keywords)
+    - [With Language Detection](#with-language-detection)
+    - [With Custom Highlights](#with-custom-highlights)
+  - [Best Practices](#best-practices)
+    - [When to Enable?](#when-to-enable)
+    - [Reduce False Positives](#reduce-false-positives)
+  - [Troubleshooting](#troubleshooting)
+    - [Functions Not Highlighted](#functions-not-highlighted)
+    - [Too Many False Positives](#too-many-false-positives)
+  - [Examples](#examples-1)
+    - [Before/After](#beforeafter)
+  - [See Also](#see-also)
+
+---
+
+## Activation
 
 ```lua
 require('color_my_ascii').setup({
-  enable_inline_code = true,
+  enable_function_names = true,
 })
 ```
 
-**Standard**: `false` (deaktiviert)
+**Default**: `false` (disabled)
 
-## Funktionsweise
+---
 
-Das Plugin scannt Markdown-Zeilen nach Inline-Code-Segmenten zwischen Backticks und wendet dieselben Highlighting-Regeln an wie für ASCII-Blöcke.
+## How It Works
 
-## Was wird hervorgehoben?
+The plugin uses a simple heuristic to detect function names:
 
-In Inline-Code werden folgende Elemente erkannt:
+**Pattern**: `word followed by opening parenthesis`
 
-1. **Special Characters**: Aus Character Groups (Pfeile, Symbole, etc.)
-2. **Keywords**: Aus allen geladenen Sprachen
-3. **Function Names**: Falls `enable_function_names = true`
-4. **Operators**: Falls in Character Groups definiert
-
-## Beispiele
-
-### Keywords
-
-```markdown
-Man verwendet `func` für Funktionen in Go und `local` in Lua.
+```
+identifier(
 ```
 
-**Ergebnis**:
-- `func` → Go-Keyword, hervorgehoben
-- `local` → Lua-Keyword, hervorgehoben
+---
 
-### Symbole und Pfeile
+### Detection Rules
 
-```markdown
-Datenfluss: `A → B → C` mit Checkpoint `★`.
+1. **Word character sequence** (`[%w_]+`)
+2. **Optional whitespace**
+3. **Opening parenthesis** `(`
+
+---
+
+### Examples
+```c
+result = calculate(x);     // "calculate" detected
+process(data);             // "process" detected
+obj.method(arg);           // "method" detected
+func ();                   // "func" detected (with space)
 ```
 
-**Ergebnis**:
-- `→` → Pfeil, hervorgehoben (Special)
-- `★` → Symbol, hervorgehoben (Delimiter)
+---
 
-### Operatoren
+## Highlight Group
 
-```markdown
-Go verwendet `:=` für Deklarationen und `<-` für Channels.
+Function names are highlighted with the `Function` highlight group.
+
+---
+
+## Interaction with Keywords
+
+If a detected name is also a keyword, the **keyword takes precedence**:
+```lua
+function counter()         // "function" = keyword (not detected as function name)
+  return function() end    // second "function" also keyword
+end
 ```
 
-**Ergebnis**:
-- `:=` → Go-Operator
-- `<-` → Go-Operator
+This prevents false positives where language keywords appear before parentheses.
 
-### Funktionsnamen
+---
 
-```markdown
-Nutze `calculate(x)` für die Berechnung.
+## Use Cases
+
+### Code Flow Diagrams
+
+```ascii-c
+Function Call Chain:
+┌─────────────────────────┐
+│ result = calculate(x);  │
+│ process(result);        │
+│ display(result);        │
+└─────────────────────────┘
 ```
 
-**Mit `enable_function_names = true`**:
-- `calculate` → als Funktion hervorgehoben
+**Result**: `calculate`, `process`, `display` highlighted as functions
 
-## Priorität
+---
 
-Die Highlighting-Priorität in Inline-Code ist identisch zu ASCII-Blöcken:
+### API Documentation
 
-1. `default_text_hl` (niedrigste, falls gesetzt)
-2. Character highlights
-3. Function names
-4. Keywords (höchste)
-
-## Anwendungsfälle
-
-### Dokumentation
-
-Inline-Code in technischer Dokumentation:
-
-```markdown
-## API Reference
-
-Die Funktion `init()` initialisiert das System.
-Nutze `→` für Referenzen und `★` für wichtige Punkte.
+```ascii
+API Structure:
+┌──────────────────────┐
+│ init()               │
+│ configure(options)   │
+│ run()                │
+│ cleanup()            │
+└──────────────────────┘
 ```
 
-### Code-Erklärungen
+**Result**: All function names highlighted
 
-```markdown
-In Rust verwendet man `fn` statt `function` und `let` statt `var`.
-Der Operator `::` trennt Namespaces, `->` zeigt Return-Typen.
+---
+
+### Method Calls
+
+```ascii-java
+Object Lifecycle:
+┌────────────────────┐
+│ obj.create()       │
+│ obj.process()      │
+│ obj.destroy()      │
+└────────────────────┘
 ```
 
-### Inline-Diagramme
+**Result**: `create`, `process`, `destroy` highlighted
 
-```markdown
-Flow: `start → process → end`
+---
 
-States: `idle ● running ● done ✓`
+## Limitations
+
+### Heuristic-Based
+
+The detection is **not syntax-aware**:
+
+```
+// False positives possible:
+if (condition)        // "if" is keyword, not detected ✓
+array[index]          // "array" not detected (no parenthesis) ✓
+func (x)              // "func" detected (space before paren) ✓
+word(text)            // "word" detected even if not a function
 ```
 
-## Konfiguration
+---
 
-### Mit gedämpftem Text
+### No Type Information
+
+The plugin cannot distinguish:
+- Functions vs. macros
+- Methods vs. constructors
+- Actual functions vs. look-alike patterns
+
+---
+
+### Language Agnostic
+
+Works the same for all languages:
+- C/C++ functions
+- Python functions
+- Lua functions
+- etc.
+
+---
+
+## Configuration Examples
+
+### With All Features
 
 ```lua
 require('color_my_ascii').setup({
-  enable_inline_code = true,
-  default_text_hl = { fg = '#808080' },  -- Grauer Text
-})
-```
-
-**Ergebnis**: Normaler Text in Inline-Code wird grau, Keywords bleiben farbig.
-
-### Mit allen Features
-
-```lua
-require('color_my_ascii').setup({
-  enable_inline_code = true,
+  enable_keywords = true,
   enable_function_names = true,
   enable_bracket_highlighting = true,
-  enable_keywords = true,
 })
 ```
 
-### Nur Symbole, keine Keywords
+---
+
+### Only Functions
 
 ```lua
 require('color_my_ascii').setup({
-  enable_inline_code = true,
-  enable_keywords = false,  -- Keywords aus
+  enable_keywords = false,          -- No keyword highlighting
+  enable_function_names = true,     -- Only function names
+  enable_bracket_highlighting = false,
 })
 ```
 
-**Ergebnis**: Nur Symbole (→, ★, etc.) werden hervorgehoben, keine Wörter.
+---
+
+### Custom Function Highlight
+
+```lua
+require('color_my_ascii').setup({
+  enable_function_names = true,
+  -- Override Function highlight group
+  overrides = {
+    -- Note: This won't work directly
+    -- You need to set vim highlight instead:
+  }
+})
+
+-- Set custom Function highlight globally
+vim.api.nvim_set_hl(0, 'Function', {
+  fg = '#ff00ff',
+  bold = true,
+})
+```
+
+---
 
 ## Performance
 
-### Overhead
+Function detection has **minimal overhead**:
+- Simple regex pattern match per line
+- Only executed for lines in ASCII blocks
+- No complex parsing or AST analysis
 
-Inline-Code-Highlighting scannt **jede Zeile** im Buffer:
-- O(n) für Anzahl Zeilen
-- O(m) für Zeilen-Länge
-- Effizient durch Pattern-Matching
+For typical documents (<1000 lines), impact is negligible.
 
-**Empfehlung**: Bei sehr großen Dokumenten (>5000 Zeilen) kann man das Feature deaktivieren.
+---
 
-### Debouncing
+## Combination with Other Features
 
-Wie bei ASCII-Blöcken ist auch Inline-Code-Highlighting debounced:
-- 100ms Verzögerung nach Textänderung
-- Verhindert Flackern beim Tippen
+### With Keywords
 
-## Einschränkungen
+Keywords have **higher priority** than function names:
 
-### Escaped Backticks
-
-Escaped Backticks werden nicht korrekt behandelt:
-
-```markdown
-Use \`code\` for inline  → Wird nicht als Inline-Code erkannt
+```lua
+require('color_my_ascii').setup({
+  enable_keywords = true,           -- Priority 1
+  enable_function_names = true,     -- Priority 2
+})
 ```
 
-Dies ist eine Limitation des aktuellen Parsers.
-
-### Verschachtelte Backticks
-
-Nicht unterstützt:
-
-```markdown
-``nested `code` here``  → Funktioniert nicht korrekt
+```c
+if (check())      // "if" = keyword, "check" = function
+return init()     // "return" = keyword, "init" = function
 ```
 
-### Code-Spans über Zeilen
+---
 
-Inline-Code über mehrere Zeilen wird nicht erkannt:
+### With Language Detection
 
-```markdown
-`start
-end`  → Wird nicht als Inline-Code erkannt
+Function detection works with detected languages:
+
+```ascii-python
+def process():
+    calculate()
+    validate()
 ```
 
-Dies ist beabsichtigt, da Markdown-Inline-Code typischerweise einzeilig ist.
+- `def` highlighted as keyword
+- `process`, `calculate`, `validate` as functions
 
-## Kombination mit ASCII-Blöcken
+---
 
-Beide Features können gleichzeitig aktiv sein:
+### With Custom Highlights
 
-```markdown
-Flow-Diagramm:
+Combine with character highlights:
 
-```ascii
-┌──────┐
-│ Start│ → Process → End
-└──────┘
+```lua
+require('color_my_ascii').setup({
+  enable_function_names = true,
+  overrides = {
+    ['→'] = { fg = '#00ff00' },
+  }
+})
 ```
 
-Man verwendet `→` für Pfeile.
-```
-
-**Ergebnis**:
-- ASCII-Block: Alle Elemente hervorgehoben
-- Inline `→`: Auch hervorgehoben
-
-## Language Detection
-
-Im Gegensatz zu ASCII-Blöcken gibt es **keine Language Detection** für Inline-Code:
-
-**Grund**: Inline-Code ist zu kurz für zuverlässige Heuristik.
-
-**Konsequenz**: Alle Keywords aller Sprachen werden geprüft.
-
-Beispiel:
-```markdown
-`func` und `function` werden beide hervorgehoben (Go und Lua).
-```
+---
 
 ## Best Practices
 
-### Wann aktivieren?
+### When to Enable?
 
-**Aktivieren**, wenn:
-- Dokumentation viele Inline-Code-Beispiele enthält
-- Keywords und Symbole in Fließtext hervorgehoben werden sollen
-- Konsistentes Highlighting zwischen Blöcken und Inline-Code gewünscht ist
+**Enable** when:
+- Diagrams show function calls
+- API documentation with function lists
+- Call hierarchies or flow charts
 
-**Deaktivieren**, wenn:
-- Dokumentation ist sehr groß (>5000 Zeilen)
-- Inline-Code enthält hauptsächlich Variable/Platzhalter (keine Keywords)
-- Performance kritisch ist
+**Disable** when:
+- No function calls in ASCII art
+- False positives are distracting
+- Performance is critical (very large files)
 
-### Kombination mit Colorschemes
+---
 
-```lua
--- Matrix-Scheme hat enable_inline_code = true
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.matrix')
-)
+### Reduce False Positives
+
+1. Use explicit language markers:
+
+```ascii-c
+// C functions only
 ```
 
-Eigene Anpassung:
-```lua
-local config = require('color_my_ascii.schemes.nord')
-config.enable_inline_code = true  -- Falls im Schema deaktiviert
-require('color_my_ascii').setup(config)
-```
-
-### Mit default_text_hl
-
-Für bessere Lesbarkeit:
+2. Disable for non-code diagrams:
 
 ```lua
-require('color_my_ascii').setup({
-  enable_inline_code = true,
-  default_text_hl = 'Comment',  -- Gedämpfter Text
-})
+-- Only enable for code-heavy projects
+enable_function_names = false,
 ```
 
-**Effekt**: Keywords stechen deutlicher hervor.
+---
 
 ## Troubleshooting
 
-### Inline-Code wird nicht hervorgehoben
+### Functions Not Highlighted
 
-1. Feature aktiviert?
+1. Feature enabled?
+
 ```lua
 local config = require('color_my_ascii.config').get()
-print(config.enable_inline_code)
+print(config.enable_function_names)
 ```
 
-2. Buffer ist Markdown?
-```vim
-:set filetype?
+2. Is it a keyword?
+
+```lua
+-- Keywords take precedence
+-- "function" in Lua won't be detected as function name
 ```
 
-3. Backticks korrekt?
-```markdown
-`code`  ✓ Funktioniert
-'code'  ✗ Falsche Quotes
+3. Pattern matches?
+
+```lua
+-- Must be: word(
+-- Not: word [
+-- Not: word {
 ```
 
-### Zu viele False Positives
+---
 
-Inline-Code hebt alle möglichen Keywords hervor:
+### Too Many False Positives
 
-**Lösung 1**: Keywords deaktivieren
+Disable the feature:
+
 ```lua
 require('color_my_ascii').setup({
-  enable_inline_code = true,
-  enable_keywords = false,  -- Nur Symbole
+  enable_function_names = false,
 })
 ```
 
-**Lösung 2**: Feature deaktivieren
-```lua
-require('color_my_ascii').setup({
-  enable_inline_code = false,
-})
+Or use more explicit documentation:
+
+```ascii
+Functions:
+- calculate()   // Explicitly marked
+- process()
 ```
 
-### Performance-Probleme
+---
 
-Bei sehr großen Dateien:
+## Examples
 
-1. Feature deaktivieren
-2. Oder: Nur für spezifische Buffers aktivieren
+### Before/After
 
-```lua
-vim.api.nvim_create_autocmd('BufEnter', {
-  pattern = '*.md',
-  callback = function()
-    local lines = vim.api.nvim_buf_line_count(0)
-    if lines < 1000 then
-      -- Aktiviere nur für kleine Dateien
-      require('color_my_ascii.config').get().enable_inline_code = true
-    end
-  end
-})
+**Without function detection**:
+
 ```
+result = calculate(x);
+```
+- `result` = normal text
+- `calculate` = normal text
+- `x` = normal text
 
-## Siehe auch
+**With function detection**:
+```
+result = calculate(x);
+```
+- `result` = normal text
+- `calculate` = **highlighted**
+- `x` = normal text
 
-- [Language Detection](language-detection.md)
-- [Function Detection](function-detection.md)
-- [Character Groups](character-groups.md)
-- [Performance](../performance.md)
+---
+
+## See Also
+
+- [Language Detection](./language-detection.md)
+- [Keyword Highlighting](./keyword-highlighting.md)
+- [Custom Highlights](./custom-highlights.md)
+
+---

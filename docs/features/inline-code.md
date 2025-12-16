@@ -1,8 +1,49 @@
 # Inline Code Highlighting
 
-Das Plugin kann Keywords und Symbole auch in Inline-Code (`` `...` ``) hervorheben.
+The plugin can highlight keywords and symbols in inline code (`` `...` ``).
 
-## Aktivierung
+## Table of content
+
+  - [Activation](#activation)
+  - [How It Works](#how-it-works)
+  - [What Gets Highlighted?](#what-gets-highlighted)
+  - [Examples](#examples)
+    - [Keywords](#keywords)
+    - [Symbols and Arrows](#symbols-and-arrows)
+    - [Operators](#operators)
+    - [Function Names](#function-names)
+  - [Priority](#priority)
+  - [Use Cases](#use-cases)
+    - [Documentation](#documentation)
+  - [API Reference](#api-reference)
+    - [Code Explanations](#code-explanations)
+    - [Inline Diagrams](#inline-diagrams)
+  - [Configuration](#configuration)
+    - [With Dimmed Text](#with-dimmed-text)
+    - [With All Features](#with-all-features)
+    - [Only Symbols, No Keywords](#only-symbols-no-keywords)
+  - [Performance](#performance)
+    - [Overhead](#overhead)
+    - [Debouncing](#debouncing)
+  - [Limitations](#limitations)
+    - [Escaped Backticks](#escaped-backticks)
+    - [Nested Backticks](#nested-backticks)
+    - [Code Spans Across Lines](#code-spans-across-lines)
+  - [Combination with ASCII Blocks](#combination-with-ascii-blocks)
+  - [Language Detection](#language-detection)
+  - [Best Practices](#best-practices)
+    - [When to Enable?](#when-to-enable)
+    - [Combination with Colorschemes](#combination-with-colorschemes)
+    - [With default_text_hl](#with-default_text_hl)
+  - [Troubleshooting](#troubleshooting)
+    - [Inline Code Not Highlighted](#inline-code-not-highlighted)
+    - [Too Many False Positives](#too-many-false-positives)
+    - [Performance Issues](#performance-issues)
+  - [See Also](#see-also)
+
+---
+
+## Activation
 
 ```lua
 require('color_my_ascii').setup({
@@ -10,92 +51,112 @@ require('color_my_ascii').setup({
 })
 ```
 
-**Standard**: `false` (deaktiviert)
+**Default**: `false` (disabled)
 
-## Funktionsweise
+---
 
-Das Plugin scannt Markdown-Zeilen nach Inline-Code-Segmenten zwischen Backticks und wendet dieselben Highlighting-Regeln an wie für ASCII-Blöcke.
+## How It Works
 
-## Was wird hervorgehoben?
+The plugin scans Markdown lines for inline code segments between backticks and applies the same highlighting rules as for ASCII blocks.
 
-In Inline-Code werden folgende Elemente erkannt:
+---
 
-1. **Special Characters**: Aus Character Groups (Pfeile, Symbole, etc.)
-2. **Keywords**: Aus allen geladenen Sprachen
-3. **Function Names**: Falls `enable_function_names = true`
-4. **Operators**: Falls in Character Groups definiert
+## What Gets Highlighted?
 
-## Beispiele
+In inline code, the following elements are recognized:
+
+1. **Special Characters**: From character groups (arrows, symbols, etc.)
+2. **Keywords**: From all loaded languages
+3. **Function Names**: If `enable_function_names = true`
+4. **Operators**: If defined in character groups
+
+---
+
+## Examples
 
 ### Keywords
 
 ```markdown
-Man verwendet `func` für Funktionen in Go und `local` in Lua.
+Use `func` for functions in Go and `local` in Lua.
 ```
 
-**Ergebnis**:
-- `func` → Go-Keyword, hervorgehoben
-- `local` → Lua-Keyword, hervorgehoben
+**Result**:
+- `func` → Go keyword, highlighted
+- `local` → Lua keyword, highlighted
 
-### Symbole und Pfeile
+---
+
+### Symbols and Arrows
 
 ```markdown
-Datenfluss: `A → B → C` mit Checkpoint `★`.
+Data flow: `A → B → C` with checkpoint `★`.
 ```
 
-**Ergebnis**:
-- `→` → Pfeil, hervorgehoben (Special)
-- `★` → Symbol, hervorgehoben (Delimiter)
+**Result**:
+- `→` → Arrow, highlighted (Special)
+- `★` → Symbol, highlighted (Delimiter)
 
-### Operatoren
+---
+
+### Operators
 
 ```markdown
-Go verwendet `:=` für Deklarationen und `<-` für Channels.
+Go uses `:=` for declarations and `<-` for channels.
 ```
 
-**Ergebnis**:
-- `:=` → Go-Operator
-- `<-` → Go-Operator
+**Result**:
+- `:=` → Go operator
+- `<-` → Go operator
 
-### Funktionsnamen
+---
+
+### Function Names
 
 ```markdown
-Nutze `calculate(x)` für die Berechnung.
+Use `calculate(x)` for computation.
 ```
 
-**Mit `enable_function_names = true`**:
-- `calculate` → als Funktion hervorgehoben
+**With `enable_function_names = true`**:
+- `calculate` → highlighted as function
 
-## Priorität
+---
 
-Die Highlighting-Priorität in Inline-Code ist identisch zu ASCII-Blöcken:
+## Priority
 
-1. `default_text_hl` (niedrigste, falls gesetzt)
+The highlighting priority in inline code is identical to ASCII blocks:
+
+1. `default_text_hl` (lowest, if set)
 2. Character highlights
 3. Function names
-4. Keywords (höchste)
+4. Keywords (highest)
 
-## Anwendungsfälle
+---
 
-### Dokumentation
+## Use Cases
 
-Inline-Code in technischer Dokumentation:
+### Documentation
+
+Inline code in technical documentation:
 
 ```markdown
 ## API Reference
 
-Die Funktion `init()` initialisiert das System.
-Nutze `→` für Referenzen und `★` für wichtige Punkte.
+The function `init()` initializes the system.
+Use `→` for references and `★` for important points.
 ```
 
-### Code-Erklärungen
+---
+
+### Code Explanations
 
 ```markdown
-In Rust verwendet man `fn` statt `function` und `let` statt `var`.
-Der Operator `::` trennt Namespaces, `->` zeigt Return-Typen.
+In Rust, use `fn` instead of `function` and `let` instead of `var`.
+The operator `::` separates namespaces, `->` shows return types.
 ```
 
-### Inline-Diagramme
+---
+
+### Inline Diagrams
 
 ```markdown
 Flow: `start → process → end`
@@ -103,20 +164,24 @@ Flow: `start → process → end`
 States: `idle ● running ● done ✓`
 ```
 
-## Konfiguration
+---
 
-### Mit gedämpftem Text
+## Configuration
+
+### With Dimmed Text
 
 ```lua
 require('color_my_ascii').setup({
   enable_inline_code = true,
-  default_text_hl = { fg = '#808080' },  -- Grauer Text
+  default_text_hl = { fg = '#808080' },  -- Gray text
 })
 ```
 
-**Ergebnis**: Normaler Text in Inline-Code wird grau, Keywords bleiben farbig.
+**Result**: Normal text in inline code becomes gray, keywords remain colorful.
 
-### Mit allen Features
+---
+
+### With All Features
 
 ```lua
 require('color_my_ascii').setup({
@@ -127,187 +192,220 @@ require('color_my_ascii').setup({
 })
 ```
 
-### Nur Symbole, keine Keywords
+---
+
+### Only Symbols, No Keywords
 
 ```lua
 require('color_my_ascii').setup({
   enable_inline_code = true,
-  enable_keywords = false,  -- Keywords aus
+  enable_keywords = false,  -- Keywords off
 })
 ```
 
-**Ergebnis**: Nur Symbole (→, ★, etc.) werden hervorgehoben, keine Wörter.
+**Result**: Only symbols (→, ★, etc.) are highlighted, no words.
+
+---
 
 ## Performance
 
 ### Overhead
 
-Inline-Code-Highlighting scannt **jede Zeile** im Buffer:
-- O(n) für Anzahl Zeilen
-- O(m) für Zeilen-Länge
-- Effizient durch Pattern-Matching
+Inline code highlighting scans **every line** in the buffer:
+- O(n) for number of lines
+- O(m) for line length
+- Efficient through pattern matching
 
-**Empfehlung**: Bei sehr großen Dokumenten (>5000 Zeilen) kann man das Feature deaktivieren.
+**Recommendation**: For very large documents (>5000 lines), consider disabling the feature.
+
+---
 
 ### Debouncing
 
-Wie bei ASCII-Blöcken ist auch Inline-Code-Highlighting debounced:
-- 100ms Verzögerung nach Textänderung
-- Verhindert Flackern beim Tippen
+Like ASCII blocks, inline code highlighting is also debounced:
+- 100ms delay after text change
+- Prevents flickering while typing
 
-## Einschränkungen
+---
+
+## Limitations
 
 ### Escaped Backticks
 
-Escaped Backticks werden nicht korrekt behandelt:
+Escaped backticks are not handled correctly:
 
 ```markdown
-Use \`code\` for inline  → Wird nicht als Inline-Code erkannt
+Use \`code\` for inline  → Not recognized as inline code
 ```
 
-Dies ist eine Limitation des aktuellen Parsers.
+This is a limitation of the current parser.
 
-### Verschachtelte Backticks
+---
 
-Nicht unterstützt:
+### Nested Backticks
+
+Not supported:
 
 ```markdown
-``nested `code` here``  → Funktioniert nicht korrekt
+``nested `code` here``  → Does not work correctly
 ```
 
-### Code-Spans über Zeilen
+---
 
-Inline-Code über mehrere Zeilen wird nicht erkannt:
+### Code Spans Across Lines
+
+Inline code spanning multiple lines is not recognized:
 
 ```markdown
 `start
-end`  → Wird nicht als Inline-Code erkannt
+end`  → Not recognized as inline code
 ```
 
-Dies ist beabsichtigt, da Markdown-Inline-Code typischerweise einzeilig ist.
+This is intentional, as Markdown inline code is typically single-line.
 
-## Kombination mit ASCII-Blöcken
+---
 
-Beide Features können gleichzeitig aktiv sein:
+## Combination with ASCII Blocks
 
-```markdown
-Flow-Diagramm:
+Both features can be active simultaneously:
+
+Flow Diagram:
 
 ```ascii
 ┌──────┐
 │ Start│ → Process → End
 └──────┘
+
+Use `→` for arrows.
 ```
 
-Man verwendet `→` für Pfeile.
-```
+**Result**:
+- ASCII block: All elements highlighted
+- Inline `→`: Also highlighted
 
-**Ergebnis**:
-- ASCII-Block: Alle Elemente hervorgehoben
-- Inline `→`: Auch hervorgehoben
+---
 
 ## Language Detection
 
-Im Gegensatz zu ASCII-Blöcken gibt es **keine Language Detection** für Inline-Code:
+Unlike ASCII blocks, there is **no language detection** for inline code:
 
-**Grund**: Inline-Code ist zu kurz für zuverlässige Heuristik.
+**Reason**: Inline code is too short for reliable heuristic analysis.
 
-**Konsequenz**: Alle Keywords aller Sprachen werden geprüft.
+**Consequence**: All keywords from all languages are checked.
 
-Beispiel:
+Example:
+
 ```markdown
-`func` und `function` werden beide hervorgehoben (Go und Lua).
+`func` and `function` are both highlighted (Go and Lua).
 ```
+
+---
 
 ## Best Practices
 
-### Wann aktivieren?
+### When to Enable?
 
-**Aktivieren**, wenn:
-- Dokumentation viele Inline-Code-Beispiele enthält
-- Keywords und Symbole in Fließtext hervorgehoben werden sollen
-- Konsistentes Highlighting zwischen Blöcken und Inline-Code gewünscht ist
+**Enable** when:
+- Documentation contains many inline code examples
+- Keywords and symbols in prose should be highlighted
+- Consistent highlighting between blocks and inline code is desired
 
-**Deaktivieren**, wenn:
-- Dokumentation ist sehr groß (>5000 Zeilen)
-- Inline-Code enthält hauptsächlich Variable/Platzhalter (keine Keywords)
-- Performance kritisch ist
+**Disable** when:
+- Documentation is very large (>5000 lines)
+- Inline code mainly contains variables/placeholders (no keywords)
+- Performance is critical
 
-### Kombination mit Colorschemes
+---
+
+### Combination with Colorschemes
 
 ```lua
--- Matrix-Scheme hat enable_inline_code = true
+-- Matrix scheme has enable_inline_code = true
 require('color_my_ascii').setup(
   require('color_my_ascii.schemes.matrix')
 )
 ```
 
-Eigene Anpassung:
+Custom adjustment:
+
 ```lua
 local config = require('color_my_ascii.schemes.nord')
-config.enable_inline_code = true  -- Falls im Schema deaktiviert
+config.enable_inline_code = true  -- If disabled in scheme
 require('color_my_ascii').setup(config)
 ```
 
-### Mit default_text_hl
+---
 
-Für bessere Lesbarkeit:
+### With default_text_hl
+
+For better readability:
 
 ```lua
 require('color_my_ascii').setup({
   enable_inline_code = true,
-  default_text_hl = 'Comment',  -- Gedämpfter Text
+  default_text_hl = 'Comment',  -- Dimmed text
 })
 ```
 
-**Effekt**: Keywords stechen deutlicher hervor.
+**Effect**: Keywords stand out more clearly.
+
+---
 
 ## Troubleshooting
 
-### Inline-Code wird nicht hervorgehoben
+### Inline Code Not Highlighted
 
-1. Feature aktiviert?
+1. Feature enabled?
+
 ```lua
 local config = require('color_my_ascii.config').get()
 print(config.enable_inline_code)
 ```
 
-2. Buffer ist Markdown?
+2. Buffer is Markdown?
+
 ```vim
 :set filetype?
 ```
 
-3. Backticks korrekt?
+3. Backticks correct?
+
 ```markdown
-`code`  ✓ Funktioniert
-'code'  ✗ Falsche Quotes
+`code`  ✓ Works
+'code'  ✗ Wrong quotes
 ```
 
-### Zu viele False Positives
+---
 
-Inline-Code hebt alle möglichen Keywords hervor:
+### Too Many False Positives
 
-**Lösung 1**: Keywords deaktivieren
+Inline code highlights all possible keywords:
+
+**Solution 1**: Disable keywords
+
 ```lua
 require('color_my_ascii').setup({
   enable_inline_code = true,
-  enable_keywords = false,  -- Nur Symbole
+  enable_keywords = false,  -- Only symbols
 })
 ```
 
-**Lösung 2**: Feature deaktivieren
+**Solution 2**: Disable feature
+
 ```lua
 require('color_my_ascii').setup({
   enable_inline_code = false,
 })
 ```
 
-### Performance-Probleme
+---
 
-Bei sehr großen Dateien:
+### Performance Issues
 
-1. Feature deaktivieren
-2. Oder: Nur für spezifische Buffers aktivieren
+For very large files:
+
+1. Disable feature
+2. Or: Only activate for specific buffers
 
 ```lua
 vim.api.nvim_create_autocmd('BufEnter', {
@@ -315,16 +413,19 @@ vim.api.nvim_create_autocmd('BufEnter', {
   callback = function()
     local lines = vim.api.nvim_buf_line_count(0)
     if lines < 1000 then
-      -- Aktiviere nur für kleine Dateien
+      -- Only activate for small files
       require('color_my_ascii.config').get().enable_inline_code = true
     end
   end
 })
 ```
 
-## Siehe auch
+---
 
-- [Language Detection](language-detection.md)
-- [Function Detection](function-detection.md)
-- [Character Groups](character-groups.md)
+## See Also
+
+- [Language Detection](./language-detection.md)
+- [Function Detection](./function-detection.md)
 - [Performance](../performance.md)
+
+---

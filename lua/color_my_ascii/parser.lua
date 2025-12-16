@@ -7,8 +7,8 @@ local M = {}
 local api = vim.api
 
 --- Find all ASCII code blocks in the buffer.
---- Uses a state machine: outside block -> inside block -> outside block.
---- A fence with language is always opening. An empty fence is opening if outside block, closing if inside.
+--- Uses a state machine that tracks ALL code blocks, but only returns ASCII blocks.
+--- This prevents closing fences of non-ASCII blocks from being misinterpreted.
 ---@param bufnr integer Buffer number to search
 ---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
 function M.find_ascii_blocks(bufnr)
@@ -20,7 +20,7 @@ function M.find_ascii_blocks(bufnr)
   local lines = api.nvim_buf_get_lines(bufnr, 0, -1, false)
   local line_count = #lines
 
-  --- State: are we currently inside an ASCII block?
+  --- State: are we currently inside ANY code block?
   local in_block = false
 
   --- Information about currently open fence (nil if not in block).
@@ -30,10 +30,8 @@ function M.find_ascii_blocks(bufnr)
   for i = 1, line_count do
     local line = lines[i]
 
-    -- Try to match a fence line
+    -- Try to match a fence line (backtick or tilde)
     local fence, lang = line:match("^%s*(```+)%s*(.*)$")
-
-    -- Also try tilde fences
     if not fence then
       fence, lang = line:match("^%s*(~~~+)%s*(.*)$")
     end
@@ -43,34 +41,40 @@ function M.find_ascii_blocks(bufnr)
       lang = vim.trim(lang or "")
 
       if not in_block then
-        -- We're OUTSIDE a block: check if this fence should start an ASCII block
+        -- We're OUTSIDE any block: this fence opens a new block
         local is_ascii = lang:match("^ascii") ~= nil
         local is_empty = lang == ""
 
-        if is_ascii or (is_empty and cfg.treat_empty_fence_as_ascii) then
-          -- Start ASCII block
-          in_block = true
-          open_fence_info = {
-            start_line = i,
-            fence_line = line,
-            fence_length = #fence,
-            block_lines = {},
-          }
-        end
-        -- else: fence with other language, ignore
+        -- Determine if this is an ASCII block we want to track
+        local track_as_ascii = is_ascii or (is_empty and cfg.treat_empty_fence_as_ascii)
+
+        -- Start tracking this block (ASCII or not)
+        in_block = true
+        open_fence_info = {
+          start_line = i,
+          fence_line = line,
+          fence_length = #fence,
+          is_ascii = track_as_ascii,
+          block_lines = {},
+        }
 
       else
-        -- We're INSIDE a block: this fence closes the block
+        -- We're INSIDE a block: this fence closes it
         -- Check fence length (closing must be >= opening)
         if open_fence_info and #fence >= open_fence_info.fence_length then
           -- Valid closing fence
-          table.insert(blocks, {
-            start_line = open_fence_info.start_line - 1,  -- 0-indexed
-            end_line = i - 1,                              -- 0-indexed
-            lines = open_fence_info.block_lines,
-            fence_line = open_fence_info.fence_line,
-          })
 
+          -- Only save block if it's an ASCII block
+          if open_fence_info.is_ascii then
+            table.insert(blocks, {
+              start_line = open_fence_info.start_line - 1,  -- 0-indexed
+              end_line = i - 1,                              -- 0-indexed
+              lines = open_fence_info.block_lines,
+              fence_line = open_fence_info.fence_line,
+            })
+          end
+
+          -- Reset state
           in_block = false
           open_fence_info = nil
         end
@@ -79,13 +83,15 @@ function M.find_ascii_blocks(bufnr)
 
     elseif in_block and open_fence_info then
       -- Not a fence, and we're in a block: add line to block content
-      table.insert(open_fence_info.block_lines, line)
+      -- Only collect lines if this is an ASCII block
+      if open_fence_info.is_ascii then
+        table.insert(open_fence_info.block_lines, line)
+      end
     end
   end
 
-  -- If block is still open at EOF, discard it silently
-  -- (or optionally log a warning)
-  if in_block and open_fence_info then
+  -- If block is still open at EOF, log warning only for ASCII blocks
+  if in_block and open_fence_info and open_fence_info.is_ascii then
     vim.notify(
       string.format("Unclosed ASCII block at line %d", open_fence_info.start_line),
       vim.log.levels.WARN

@@ -57,12 +57,12 @@
 ---@field end_col integer End column (0-indexed, byte offset, exclusive)
 ---@field content string Content inside backticks
 
---- Information about an open fence block.
 ---@class OpenFenceInfo
 ---@field start_line integer Line number where block starts (1-indexed)
 ---@field fence_line string The opening fence line content
 ---@field fence_length integer Length of the fence sequence
----@field block_lines string[] Accumulated block content lines
+---@field is_ascii boolean? Whether this is an ASCII block we want to highlight
+---@field block_lines string[] Accumulated block content lines (only for ASCII blocks)
 
 ---@class CacheEntry
 ---@field blocks ColorMyAscii.Block[] Parsed ASCII blocks

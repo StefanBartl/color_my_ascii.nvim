@@ -1,4 +1,11 @@
 # color_my_ascii.nvim
+![version](https://img.shields.io/badge/version-0.2-blue.svg)
+![State](https://img.shields.io/badge/status-beta-orange.svg)
+![Lazy.nvim compatible](https://img.shields.io/badge/lazy.nvim-supported-success)
+![Neovim](https://img.shields.io/badge/Neovim-0.9+-success.svg)
+![Lua](https://img.shields.io/badge/language-Lua-yellow.svg)
+
+> 🔧 Beta stage – under active development. Changes possible.
 
 A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks with automatic language detection, custom highlights, and predefined color schemes.
 
@@ -138,6 +145,7 @@ The plugin activates automatically for Markdown files.
 ````lua
 require('color_my_ascii').setup({
   debug_enabled = false,
+  debug_verbose = false,
   scheme = 'default',
 
   -- Character-specific overrides (highest priority)
@@ -274,25 +282,20 @@ Additional languages can be easily added (see [Contributing](#contributing)).
 | `:ColorMyAsciiSwitchScheme <name>` | Switch to a different scheme |
 | `:ColorMyAsciiSchemes` | Pick scheme with Telescope (live preview) |
 
-**Available Schemes:**
-- `default` - Built-in Neovim highlights
-- `matrix` - Green hacker style
-- `nord` - Cool blue/cyan
-- `gruvbox` - Warm retro colors
-- `dracula` - Vibrant purple/pink
-
-**Example:**
-```vim
-:ColorMyAsciiSwitchScheme matrix
-```
-
-**Telescope Picker:**
-```vim
-:ColorMyAsciiSchemes
-```
-Navigate with `j/k`, scheme applies on cursor move (live preview). Press `Enter` to confirm.
-
 ---
+
+#### Available Schemes
+
+- `default`    - Built-in Neovim highlights
+- `matrix`     - Green hacker style
+- `nord`       - Cool blue/cyan
+- `gruvbox`    - Warm retro colors
+- `dracula`    - Vibrant purple/pink
+- `catppuccin` - Soft pastel colors
+- `onedark`    - Dark theme with subtle highlights
+- `solarized`  - Solarized color palette
+- `tokyonight` - Dark theme with blue accents
+- `monokai`    - # Classic Monokai color scheme
 
 ### Keybinding Examples
 
@@ -343,47 +346,17 @@ vim.keymap.set('n', '<leader>ac', '<cmd>ColorMyAsciiShowConfig<cr>', {
 
 ## Color Schemes
 
-### Matrix (Hacker Style)
+Pick one scheme from the list of [available schemes](#available-schemes) and set it in the initialization like:
+
+Example with Matrix Scheme:
+
 ````lua
 require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.matrix')
+  scheme = "matrix",
 )
 ````
 
 Dark background with bright green elements. All features enabled.
-
----
-
-### Nord
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.nord')
-)
-````
-
-Cool blue/cyan tones. Corners specially highlighted.
-
----
-
-### Gruvbox
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.gruvbox')
-)
-````
-
-Warm retro colors. Bracket highlighting enabled.
-
----
-
-### Dracula
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.dracula')
-)
-````
-
-Vibrant purple/pink accents. All features enabled.
 
 ---
 

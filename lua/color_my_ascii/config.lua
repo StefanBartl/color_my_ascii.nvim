@@ -159,6 +159,7 @@ end
 ---@type ColorMyAscii.Config
 local defaults = {
   debug_enabled = false,
+  scheme = 'default',
   groups = {},
   keywords = {},
   overrides = {},

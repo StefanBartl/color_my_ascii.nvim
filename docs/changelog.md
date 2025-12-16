@@ -193,15 +193,14 @@ None currently.
 
 Special thanks to all contributors who helped make this plugin better!
 
-- [@username] - Initial development
 - Community feedback and bug reports
 
 ---
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/username/color_my_ascii.nvim/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/username/color_my_ascii.nvim/discussions)
+- **Issues**: [GitHub Issues](https://github.com/StefanBartl/color_my_ascii.nvim/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/StefanBartl/color_my_ascii.nvim/discussions)
 
 ---
 

@@ -80,7 +80,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 ### With lazy.nvim
 ````lua
 {
-  'username/color_my_ascii.nvim',
+  'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
   opts = {
     -- Optional: Configuration here
@@ -93,7 +93,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 ### With packer.nvim
 ````lua
 use {
-  'username/color_my_ascii.nvim',
+  'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
   config = function()
     require('color_my_ascii').setup({
@@ -134,6 +134,9 @@ The plugin activates automatically for Markdown files.
 ### Default Configuration
 ````lua
 require('color_my_ascii').setup({
+  debug_enabled = false,
+  scheme = 'default',
+
   -- Character-specific overrides (highest priority)
   overrides = {},
 

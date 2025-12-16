@@ -81,7 +81,7 @@ function M.setup_buffer(bufnr)
 	state.buffers[bufnr] = true
 
 	-- Initial highlight
-	local success, err = M.highlight_buffer(bufnr)
+	local success, err = pcall(M.highlight_buffer, bufnr)
 	if not success and cfg.debug_enabled then
 		notify(string.format("color_my_ascii: Initial highlighting failed: %s", err), levels.WARN)
 	end
@@ -139,9 +139,9 @@ function M.highlight_buffer(bufnr)
 
 	if cache_hit then
 		-- Use cached data
-		local success, err = highlighter.clear_buffer(bufnr)
+		local success, err = pcall(highlighter.clear_buffer, bufnr)
 		if not success then
-			return false, string.format("Failed to clear buffer: %s", err)
+			return false, string.format(("Failed to clear buffer (cache hit): %s"):format(), err)
 		end
 
 		-- Check if cached_blocks is valid
@@ -154,7 +154,7 @@ function M.highlight_buffer(bufnr)
 			-- Highlight cached blocks safely
 			for _, block in ipairs(cached_blocks) do
 				if type(block) == "table" then
-					success, err = highlighter.highlight_block(bufnr, block)
+					success, err = pcall(highlighter.highlight_block, bufnr, block)
 					if not success then
 						notify(string.format("Failed to highlight block: %s", err), levels.ERROR)
 					end
@@ -165,7 +165,7 @@ function M.highlight_buffer(bufnr)
 		end
 
 		-- Highlight inline codes
-		success, err = highlighter.highlight_inline_codes(bufnr)
+		success, err = pcall(highlighter.highlight_inline_codes, bufnr)
 		if not success then
 			return false, string.format("Failed to highlight inline codes: %s", err)
 		end
@@ -174,21 +174,21 @@ function M.highlight_buffer(bufnr)
 	end
 
 	-- Cache miss - parse and highlight
-	local success, err = highlighter.clear_buffer(bufnr)
+	local success, err = pcall(highlighter.clear_buffer, bufnr)
 	if not success then
-		return false, string.format("Failed to clear buffer: %s", err)
+		return false, string.format("Failed to clear buffer (cache miss): %s", err)
 	end
 
 	-- Parse blocks
-	local blocks, parse_err = parser.find_ascii_blocks(bufnr)
-	if parse_err then
-		return false, string.format("Failed to parse blocks: %s", parse_err)
+	local parse_ok, blocks = pcall(parser.find_ascii_blocks, bufnr)
+	if not parse_ok then
+		return false, string.format("Failed to parse blocks: %s", blocks)
 	end
 
 	-- Parse inline codes
-	local inline_codes, inline_err = parser.find_inline_codes(bufnr)
-	if inline_err then
-		return false, string.format("Failed to parse inline codes: %s", inline_err)
+	local inline_ok, inline_codes = pcall(parser.find_inline_codes, bufnr)
+	if not inline_ok then
+		return false, string.format("Failed to parse inline codes: %s", inline_codes)
 	end
 
 	-- Cache parsed data
@@ -196,7 +196,7 @@ function M.highlight_buffer(bufnr)
 
 	-- Highlight each block
 	for _, block in ipairs(blocks) do
-		success, err = highlighter.highlight_block(bufnr, block)
+		success, err = pcall(highlighter.highlight_block, bufnr, block)
 		if not success and cfg.debug_enabled then
 			-- Log error but continue with other blocks
 			notify(string.format("color_my_ascii: Block highlighting error: %s", err), levels.WARN)
@@ -204,9 +204,9 @@ function M.highlight_buffer(bufnr)
 	end
 
 	-- Highlight inline codes
-	success, err = highlighter.highlight_inline_codes(bufnr)
+	success, err = pcall(highlighter.highlight_inline_codes, bufnr)
 	if not success and cfg.debug_enabled then
-		notify(string.format("color_my_ascii: Inline code highlighting error: %s", err), levels.WARN)
+		notify(string.format(("color_my_ascii: Inline code highlighting error: %s"):format(), err), levels.WARN)
 	end
 
 	return true, nil

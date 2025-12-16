@@ -36,7 +36,7 @@
 
 ---@class ColorMyAscii.Config
 ---@field scheme? ColorMyAscii.SchemeName Color scheme name to load (e.g., "nord", "gruvbox")
----@field debug_enabled? boolean Toggle debug mode (usercommands)
+---@field debug_enabled? boolean Toggle debug mode
 ---@field debug_verbose? boolean Toggle write debug logs to file
 ---@field groups? table<string, ColorMyAscii.CharGroup> Named character groups with their highlight settings
 ---@field keywords? table<string, ColorMyAscii.KeywordGroup> Language-specific keyword definitions

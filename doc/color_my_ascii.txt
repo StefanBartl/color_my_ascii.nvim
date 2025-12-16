@@ -37,12 +37,15 @@ Features:~
   • Bracket highlighting
   • Inline code highlighting
   • Fence validation
+  • Scheme switcher with live preview
+  • Code block formatting
 
 ==============================================================================
 2. REQUIREMENTS                                 *color_my_ascii-requirements*
 
   • Neovim >= 0.7.0
   • Markdown files (filetype=markdown)
+  • Optional: telescope.nvim for scheme picker
 
 ==============================================================================
 3. INSTALLATION                                 *color_my_ascii-installation*
@@ -50,7 +53,7 @@ Features:~
 Using lazy.nvim:~
 >lua
     {
-      'StefanBartl/color_my_ascii.nvim',
+      'username/color_my_ascii.nvim',
       ft = 'markdown',
       opts = {}
     }
@@ -59,7 +62,7 @@ Using lazy.nvim:~
 Using packer.nvim:~
 >lua
     use {
-      'StefanBartl/color_my_ascii.nvim',
+      'username/color_my_ascii.nvim',
       ft = 'markdown',
       config = function()
         require('color_my_ascii').setup()
@@ -74,20 +77,20 @@ After installation, the plugin activates automatically for markdown files.
 
 Basic usage:~
 >markdown
-````ascii
+```ascii
     ┌─────────────┐
     │ Hello World │
     └─────────────┘
-````
+```
 
 
 With explicit language:~
 >markdown
-````ascii-c
+```ascii-c
     ┌──────────────┐
     │ int x = 42;  │
     └──────────────┘
-````
+```
 
 
 See |color_my_ascii-config| for configuration options.
@@ -123,6 +126,7 @@ Custom configuration:~
       enable_bracket_highlighting = false,
       treat_empty_fence_as_ascii = false,
       enable_inline_code = false,
+      debug_enabled = false,
     })
 
 
@@ -178,6 +182,11 @@ Configuration options:~
 
 *color_my_ascii-config-enable_inline_code*
     enable_inline_code      Highlight inline code (`...`)
+                            Type: boolean
+                            Default: false
+
+*color_my_ascii-config-debug_enabled*
+    debug_enabled           Enable debug mode (verbose logging)
                             Type: boolean
                             Default: false
 
@@ -254,3 +263,357 @@ Empty Fence Support~                            *color_my_ascii-empty-fence*
 
 When enabled, treats empty fences (``` without language) as ASCII blocks:
 >markdown
+```
+    ┌────┐
+    │ OK │
+    └────┘
+```
+
+
+See |color_my_ascii-config-treat_empty_fence_as_ascii|.
+
+==============================================================================
+7. COMMANDS                                     *color_my_ascii-commands*
+
+Core Commands~
+
+*:ColorMyAscii*
+    Manually trigger highlighting for the current buffer.
+
+*:ColorMyAsciiToggle*
+    Toggle the plugin on/off.
+
+*:ColorMyAsciiDebug*
+    Show basic debug information (languages, groups, features).
+
+*:ColorMyAsciiShowConfig*
+    Show detailed configuration information including:
+      • All feature flags
+      • Loaded languages and groups
+      • Lookup table statistics
+      • Highlight configuration
+
+Fence Management~
+
+*:ColorMyAsciiCheckFences*
+    Check current buffer for unmatched fenced code blocks.
+    Reports opening fences without closing, and vice versa.
+
+*:ColorMyAsciiEnsureBlankLines*
+    Ensure blank lines before and after all fenced code blocks.
+    Adds missing blank lines automatically.
+    Reports number of changes made.
+
+Scheme Management~                              *color_my_ascii-scheme-commands*
+
+*:ColorMyAsciiListSchemes*
+    List all available color schemes with their enabled features.
+    Output shows scheme names and feature flags.
+
+*:ColorMyAsciiSwitchScheme* {name}
+    Switch to a different color scheme.
+    Tab completion available for scheme names.
+    Automatically re-highlights all active buffers.
+
+    Available schemes:~
+      • default  - Built-in Neovim highlights
+      • matrix   - Dark with bright green (hacker style)
+      • nord     - Cool blue/cyan colors
+      • gruvbox  - Warm, retro colors
+      • dracula  - Vibrant purple and pink
+
+    Example:~
+>vim
+        :ColorMyAsciiSwitchScheme matrix
+
+
+*:ColorMyAsciiSchemes*
+    Open Telescope picker for interactive scheme selection.
+    Features live preview - scheme applies as you navigate.
+    Press <CR> to confirm selection.
+
+    Requires:~
+      • telescope.nvim installed
+
+    Keybindings in picker:~
+      • j/k or ↓/↑  - Navigate schemes (live preview)
+      • <CR>        - Apply selected scheme
+      • <Esc>       - Cancel and keep current scheme
+
+==============================================================================
+8. COLOR SCHEMES                                *color_my_ascii-schemes*
+
+The plugin includes pre-configured color schemes:
+
+Loading a color scheme:~
+>lua
+    require('color_my_ascii').setup(
+      require('color_my_ascii.schemes.matrix')
+    )
+
+
+Available schemes:~
+
+*color_my_ascii-scheme-default*
+    default                 Uses built-in Neovim highlights
+                            Maximum compatibility
+                            Features: keywords, detection
+
+*color_my_ascii-scheme-matrix*
+    matrix                  Dark with bright green (hacker style)
+                            Features: all enabled
+                            Text: dimmed dark green
+
+*color_my_ascii-scheme-nord*
+    nord                    Cool blue/cyan colors
+                            Based on Nord theme
+                            Features: keywords, detection, functions
+                            Special: highlighted corners
+
+*color_my_ascii-scheme-gruvbox*
+    gruvbox                 Warm, retro colors
+                            Based on Gruvbox theme
+                            Features: keywords, detection, brackets, inline
+
+*color_my_ascii-scheme-dracula*
+    dracula                 Vibrant purple and pink
+                            Based on Dracula theme
+                            Features: all enabled
+
+Switching schemes:~
+
+Via command:
+>vim
+    :ColorMyAsciiSwitchScheme nord
+
+
+Via Telescope (with live preview):
+>vim
+    :ColorMyAsciiSchemes
+
+
+Via API:
+>lua
+    local scheme = require('color_my_ascii.schemes.nord')
+    require('color_my_ascii').setup(scheme)
+
+
+Creating custom schemes:~
+>lua
+    require('color_my_ascii').setup({
+      groups = {
+        box_drawing = {
+          chars = "─│┌┐└┘",
+          hl = { fg = '#00ff00', bold = true },
+        },
+      },
+      overrides = {
+        ['┌'] = { fg = '#ff0000' },
+      },
+    })
+
+
+See docs/schemes.md for detailed guide.
+
+==============================================================================
+9. API                                          *color_my_ascii-api*
+
+*color_my_ascii.setup()*
+    Setup the plugin with configuration options.
+
+    Parameters:~
+        {opts}  (table|nil)  Configuration options
+
+    Usage:~
+>lua
+        require('color_my_ascii').setup({
+          enable_keywords = true,
+        })
+
+
+*color_my_ascii.highlight_buffer()*
+    Manually trigger highlighting for a buffer.
+
+    Parameters:~
+        {bufnr}  (integer|nil)  Buffer number (default: current buffer)
+
+    Usage:~
+>lua
+        require('color_my_ascii').highlight_buffer()
+
+
+*color_my_ascii.toggle()*
+    Toggle the plugin on/off.
+
+    Returns:~
+        boolean  New state (true = enabled, false = disabled)
+
+    Usage:~
+>lua
+        local enabled = require('color_my_ascii').toggle()
+        print('Plugin enabled:', enabled)
+
+
+*color_my_ascii.get_state()*
+    Get the current plugin state.
+
+    Returns:~
+        table  State containing enabled status and active buffers
+
+*color_my_ascii.setup_buffer()*
+    Setup highlighting for a specific buffer.
+
+    Parameters:~
+        {bufnr}  (integer)  Buffer number
+
+    Usage:~
+>lua
+        require('color_my_ascii').setup_buffer(vim.api.nvim_get_current_buf())
+
+
+==============================================================================
+10. TROUBLESHOOTING                             *color_my_ascii-troubleshooting*
+
+No highlighting visible~
+
+1. Check if plugin is loaded:
+   >vim
+       :ColorMyAsciiDebug
+
+
+2. Verify buffer is markdown:
+   >vim
+       :set filetype?
+
+
+3. Check for errors:
+   >vim
+       :messages
+
+
+4. Run health check:
+   >vim
+       :checkhealth color_my_ascii
+
+
+Incorrect language detection~
+
+Use explicit language marker:
+>markdown
+```ascii-c
+    int x = 42;
+```
+
+
+Or adjust detection threshold:
+>lua
+    require('color_my_ascii').setup({
+      language_detection_threshold = 3,  -- More strict
+    })
+
+
+Performance issues~
+
+Disable features you don't need:
+>lua
+    require('color_my_ascii').setup({
+      enable_function_names = false,
+      enable_inline_code = false,
+    })
+
+
+Keywords not highlighting~
+
+Check if language is loaded:
+>vim
+    :ColorMyAsciiDebug
+
+
+Verify keywords are enabled:
+>lua
+    require('color_my_ascii').setup({
+      enable_keywords = true,
+    })
+
+
+Unmatched fences~
+
+Check for mismatched code blocks:
+>vim
+    :ColorMyAsciiCheckFences
+
+
+The command will report:
+  • Opening fences without closing
+  • Closing fences without opening
+  • Line numbers for each issue
+
+Colors not displaying~
+
+1. Enable true colors:
+>lua
+    vim.opt.termguicolors = true
+
+
+2. Check terminal support:
+   Ensure your terminal supports 24-bit color
+
+Wrong colors after colorscheme change~
+
+Reload plugin after changing colorscheme:
+>vim
+    :ColorMyAscii
+
+
+Or use built-in highlight groups for automatic adaptation:
+>lua
+    require('color_my_ascii').setup({
+      groups = {
+        box_drawing = { chars = "...", hl = 'Keyword' },
+      }
+    })
+
+
+Telescope scheme picker not working~
+
+1. Check if Telescope is installed:
+>vim
+    :echo has('nvim-0.7') && luaeval('pcall(require, "telescope")')
+
+
+2. Install Telescope:
+>lua
+    {
+      'nvim-telescope/telescope.nvim',
+      dependencies = { 'nvim-lua/plenary.nvim' }
+    }
+
+
+Scheme not applying~
+
+1. Verify scheme name:
+>vim
+    :ColorMyAsciiListSchemes
+
+
+2. Check for typos in command:
+>vim
+    :ColorMyAsciiSwitchScheme matrix  " Correct
+    :ColorMyAsciiSwitchScheme Matrix  " Wrong (case-sensitive)
+
+
+Blank lines command issues~
+
+1. Check buffer is modifiable:
+>vim
+    :set modifiable?
+
+
+2. Verify changes with undo:
+>vim
+    :ColorMyAsciiEnsureBlankLines
+    :undo  " Revert if needed
+
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:

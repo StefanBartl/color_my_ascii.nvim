@@ -57,7 +57,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
   - Fallback to buffer filetype
 - ✅ **Modular Character Groups**: Customizable groups for lines, blocks, arrows, symbols, operators
 - ✅ **Custom Highlights with RGB/Hex**: Full color and style control
-- ✅ **5 Predefined Color Schemes**: Default, Matrix, Nord, Gruvbox, Dracula
+- ✅ **Predefined Color Schemes**: Default, Matrix, Nord, Gruvbox, Dracula,...
 - ✅ **Non-intrusive**: Uses extmarks, no buffer modification
 
 ---
@@ -66,7 +66,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 
 - ✅ **Function Name Detection**: Heuristic for `word()` pattern
 - ✅ **Bracket Highlighting**: Automatic highlighting of `()[]{}`
-- ✅ **Inline Code Highlighting**: Keywords and symbols in `` `...` ``
+- ✅ **Inline Code Highlighting**: Keywords and symbols backticks highlighted: `` `...` ``
 - ✅ **Empty Fenced Blocks**: Optionally treat ``` without language as ASCII
 - ✅ **Default Text Color**: Dimmed representation for normal text
 - ✅ **Health Check**: `:checkhealth color_my_ascii`
@@ -147,10 +147,10 @@ require('color_my_ascii').setup({
   enable_keywords = true,
   enable_language_detection = true,
   language_detection_threshold = 2,
-  enable_function_names = false,
-  enable_bracket_highlighting = false,
-  treat_empty_fence_as_ascii = false,
-  enable_inline_code = false,
+  enable_function_names = true,
+  enable_bracket_highlighting = true,
+  treat_empty_fence_as_ascii = true,
+  enable_inline_code = true,
 })
 ````
 
@@ -341,22 +341,6 @@ See [Color Schemes Guide](docs/schemes.md) for details.
 
 ---
 
-## Architecture
-
-The plugin consists of several modules:
-
-- `init.lua` - Main entry point, API, state management
-- `config.lua` - Configuration management, dynamic loading
-- `parser.lua` - Detection of ASCII code blocks and inline code
-- `highlighter.lua` - Application of highlights via extmarks
-- `language_detector.lua` - Intelligent language detection
-- `health.lua` - Health check for `:checkhealth`
-- `languages/*.lua` - Modular language definitions
-- `groups/*.lua` - Modular character group definitions
-- `schemes/*.lua` - Predefined color schemes
-
----
-
 ## Performance
 
 The plugin uses:
@@ -419,8 +403,6 @@ require('color_my_ascii').setup({
   enable_inline_code = false,
 })
 ````
-
-See [Troubleshooting Guide](docs/troubleshooting.md) for more.
 
 ---
 

@@ -15,53 +15,8 @@ vim.g.loaded_color_my_ascii = 1
 -- This must happen before any buffer setup
 require('color_my_ascii').setup()
 
--- Create user command to manually trigger highlighting
-api.nvim_create_user_command('ColorMyAscii', function()
-  require('color_my_ascii').highlight_buffer()
-end, {
-  desc = 'Highlight ASCII art in current buffer',
-})
-
--- Create user command to toggle the plugin
-api.nvim_create_user_command('ColorMyAsciiToggle', function()
-  require('color_my_ascii').toggle()
-end, {
-  desc = 'Toggle ASCII art highlighting',
-})
-
--- Create debug command to show loaded configuration
-api.nvim_create_user_command('ColorMyAsciiLoadedConfig', function()
-  local config = require('color_my_ascii.config')
-  local cfg = config.get()
-
-  local langs = vim.tbl_keys(cfg.keywords)
-  table.sort(langs)
-
-  local groups = vim.tbl_keys(cfg.groups)
-  table.sort(groups)
-
-  local char_count = vim.tbl_count(config.char_lookup)
-  local keyword_count = vim.tbl_count(config.keyword_lookup)
-
-  print('=== color_my_ascii.nvim Debug Info ===')
-  print('Languages loaded: ' .. #langs)
-  print('  ' .. table.concat(langs, ', '))
-  print('Groups loaded: ' .. #groups)
-  print('  ' .. table.concat(groups, ', '))
-  print('Character lookup entries: ' .. char_count)
-  print('Keyword lookup entries: ' .. keyword_count)
-  print('Language detection: ' .. tostring(cfg.enable_language_detection))
-  print('Keywords enabled: ' .. tostring(cfg.enable_keywords))
-end, {
-  desc = 'Show debug information about color_my_ascii configuration',
-})
-
--- Check fenced blocks
-api.nvim_create_user_command("ColorMyAsciiCheckFences", function()
-  require("color_my_ascii.commands.fence_check").check_current_buffer()
-end, {
-  desc = "Check current buffer for unmatched fenced code blocks",
-})
+-- Register all commands
+require('color_my_ascii.commands').register_all()
 
 -- Create autogroup for plugin autocommands
 local group = api.nvim_create_augroup('ColorMyAscii', { clear = true })

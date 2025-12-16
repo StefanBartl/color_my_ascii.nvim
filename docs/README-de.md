@@ -20,6 +20,11 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
     - [Alle Features aktiviert](#alle-features-aktiviert)
   - [Unterstützte Sprachen](#untersttzte-sprachen)
   - [Befehle](#befehle)
+    - [Kern-Befehle](#kern-befehle)
+    - [Fence-Verwaltung](#fence-verwaltung)
+    - [Scheme-Verwaltung](#scheme-verwaltung)
+    - [Keybinding-Beispiele](#keybinding-beispiele)
+  - [10. Commit Message](#10-commit-message)
   - [Dokumentation](#dokumentation)
     - [Features](#features-1)
     - [Guides](#guides)
@@ -238,17 +243,108 @@ Weitere Sprachen können einfach hinzugefügt werden (siehe [Contributing](#cont
 
 ## Befehle
 
+### Kern-Befehle
+
 | Befehl | Beschreibung |
 |--------|--------------|
 | `:ColorMyAscii` | Manuelles Aktualisieren der Hervorhebung |
 | `:ColorMyAsciiToggle` | Plugin aktivieren/deaktivieren |
-| `:ColorMyAsciiDebug` | Debug-Informationen anzeigen |
-| `:ColorMyAsciiCheckFences` | Nicht geschlossene Fences prüfen |
+| `:ColorMyAsciiDebug` | Debug-Informationen anzeigen (einfach) |
+| `:ColorMyAsciiShowConfig` | Detaillierte Konfiguration anzeigen |
 | `:checkhealth color_my_ascii` | Health-Check durchführen |
 | `:h color_my_ascii` | Vim-Help öffnen |
 
+### Fence-Verwaltung
+
+| Befehl | Beschreibung |
+|--------|--------------|
+| `:ColorMyAsciiCheckFences` | Nicht geschlossene Fences prüfen |
+| `:ColorMyAsciiEnsureBlankLines` | Leerzeilen um Codeblöcke sicherstellen |
+
+### Scheme-Verwaltung
+
+| Befehl | Beschreibung |
+|--------|--------------|
+| `:ColorMyAsciiListSchemes` | Verfügbare Schemes auflisten |
+| `:ColorMyAsciiSwitchScheme <name>` | Zu anderem Scheme wechseln |
+| `:ColorMyAsciiSchemes` | Scheme mit Telescope auswählen (Live-Vorschau) |
+
+**Verfügbare Schemes:**
+- `default` - Built-in Neovim Highlights
+- `matrix` - Grüner Hacker-Style
+- `nord` - Kühles Blau/Cyan
+- `gruvbox` - Warme Retro-Farben
+- `dracula` - Lebendiges Lila/Pink
+
+**Beispiel:**
+```vim
+:ColorMyAsciiSwitchScheme matrix
+```
+
+**Telescope Picker:**
+```vim
+:ColorMyAsciiSchemes
+```
+Navigation mit `j/k`, Scheme wird beim Bewegen sofort angewendet (Live-Vorschau). `Enter` zum Bestätigen.
+
+### Keybinding-Beispiele
+```lua
+-- Scheme-Wechsler
+vim.keymap.set('n', '<leader>as', '<cmd>ColorMyAsciiSchemes<cr>', {
+  desc = 'Scheme wechseln'
+})
+
+-- Codeblöcke formatieren
+vim.keymap.set('n', '<leader>af', '<cmd>ColorMyAsciiEnsureBlankLines<cr>', {
+  desc = 'Codeblöcke formatieren'
+})
+
+-- Konfiguration anzeigen
+vim.keymap.set('n', '<leader>ac', '<cmd>ColorMyAsciiShowConfig<cr>', {
+  desc = 'Konfiguration anzeigen'
+})
+```
+
 ---
 
+## 10. Commit Message
+```
+feat: add scheme switcher, format command, and enhanced config display
+
+Commands Module:
+- Refactor all commands into lua/color_my_ascii/commands/
+- Split into logical modules: init, debug, config, schemes, format, fence_check
+- Register all commands via commands.register_all()
+
+New Commands:
+- :ColorMyAsciiShowConfig - detailed configuration display with stats
+- :ColorMyAsciiListSchemes - list all available color schemes
+- :ColorMyAsciiSwitchScheme <name> - switch schemes with tab completion
+- :ColorMyAsciiSchemes - Telescope picker with live preview
+- :ColorMyAsciiEnsureBlankLines - format code blocks with blank lines
+
+Scheme Management:
+- Live preview in Telescope picker (applies on cursor move)
+- Tab completion for scheme names
+- Hot-reload all buffers on scheme switch
+- Display enabled features for each scheme
+
+Type Safety:
+- Add ColorMyAscii.SchemeName enum for LSP autocomplete
+- Schemes: "default" | "matrix" | "nord" | "gruvbox" | "dracula"
+
+Format Command:
+- Ensures blank line before and after every fenced code block
+- Reports number of changes made
+- Non-destructive (only adds lines, never removes content)
+
+Enhanced Config Display:
+- Shows all features status
+- Lists languages and groups
+- Displays lookup table statistics
+- Shows highlight configuration
+
+Breaking Changes: None (fully backward compatible)
 ## Dokumentation
 
 ### Features

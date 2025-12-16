@@ -454,7 +454,7 @@ groups = {
 
 ## See Also
 
-- [Custom Colors](custom-colors.md) - Individual character colors
-- [Custom Highlights](custom-highlights.md) - Advanced styling
+- [Custom Colors](./custom-colors.md) - Individual character colors
+- [Custom Highlights](./custom-highlights.md) - Advanced styling
 
 ---

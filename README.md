@@ -19,7 +19,11 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
     - [Custom Highlights](#custom-highlights)
     - [All Features Enabled](#all-features-enabled)
   - [Supported Languages](#supported-languages)
-  - [Commands](#commands)
+  - [Command](#command)
+    - [Core Commands](#core-commands)
+    - [Fence Management](#fence-management)
+    - [Scheme Management](#scheme-management)
+    - [Keybinding Examples](#keybinding-examples)
   - [Documentation](#documentation)
     - [Features](#features-1)
     - [Guides](#guides)
@@ -30,7 +34,6 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
     - [Gruvbox](#gruvbox)
     - [Dracula](#dracula)
     - [Create Your Own Scheme](#create-your-own-scheme)
-  - [Architecture](#architecture)
   - [Performance](#performance)
   - [Troubleshooting](#troubleshooting)
     - [No Highlights Visible](#no-highlights-visible)
@@ -239,16 +242,76 @@ Additional languages can be easily added (see [Contributing](#contributing)).
 
 ---
 
-## Commands
+## Command
+
+### Core Commands
 
 | Command | Description |
 |---------|-------------|
 | `:ColorMyAscii` | Manually update highlighting |
 | `:ColorMyAsciiToggle` | Enable/disable plugin |
-| `:ColorMyAsciiDebug` | Show debug information |
-| `:ColorMyAsciiCheckFences` | Check for unmatched fences |
+| `:ColorMyAsciiDebug` | Show debug information (basic) |
+| `:ColorMyAsciiShowConfig` | Show detailed configuration |
 | `:checkhealth color_my_ascii` | Run health check |
 | `:h color_my_ascii` | Open Vim help |
+
+---
+
+### Fence Management
+
+| Command | Description |
+|---------|-------------|
+| `:ColorMyAsciiCheckFences` | Check for unmatched fences |
+| `:ColorMyAsciiEnsureBlankLines` | Ensure blank lines around code blocks |
+
+---
+
+### Scheme Management
+
+| Command | Description |
+|---------|-------------|
+| `:ColorMyAsciiListSchemes` | List available color schemes |
+| `:ColorMyAsciiSwitchScheme <name>` | Switch to a different scheme |
+| `:ColorMyAsciiSchemes` | Pick scheme with Telescope (live preview) |
+
+**Available Schemes:**
+- `default` - Built-in Neovim highlights
+- `matrix` - Green hacker style
+- `nord` - Cool blue/cyan
+- `gruvbox` - Warm retro colors
+- `dracula` - Vibrant purple/pink
+
+**Example:**
+```vim
+:ColorMyAsciiSwitchScheme matrix
+```
+
+**Telescope Picker:**
+```vim
+:ColorMyAsciiSchemes
+```
+Navigate with `j/k`, scheme applies on cursor move (live preview). Press `Enter` to confirm.
+
+---
+
+### Keybinding Examples
+
+```lua
+-- Scheme switcher
+vim.keymap.set('n', '<leader>as', '<cmd>ColorMyAsciiSchemes<cr>', {
+  desc = 'Switch color scheme'
+})
+
+-- Format code blocks
+vim.keymap.set('n', '<leader>af', '<cmd>ColorMyAsciiEnsureBlankLines<cr>', {
+  desc = 'Format code blocks'
+})
+
+-- Show config
+vim.keymap.set('n', '<leader>ac', '<cmd>ColorMyAsciiShowConfig<cr>', {
+  desc = 'Show config'
+})
+```
 
 ---
 

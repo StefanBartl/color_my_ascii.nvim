@@ -52,6 +52,7 @@
 ---@field enable_inline_code? boolean Enable highlighting in inline code ...`)
 ---@field enable_function_names? boolean Enable heuristic function name detection
 ---@field enable_bracket_highlighting? boolean Enable highlighting of brackets/parentheses
+---@field fence_language_map? table<string, string> Map of markdown fence language tags to plugin language names (e.g., { vim = "vim" })
 
 ---@class ColorMyAscii.State
 ---@field enabled boolean Whether the plugin is currently enabled

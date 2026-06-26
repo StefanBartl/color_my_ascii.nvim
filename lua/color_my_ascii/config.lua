@@ -174,6 +174,14 @@ local defaults = {
   enable_inline_code = true,
   enable_function_names = true,
   enable_bracket_highlighting = true,
+  -- Maps standard markdown fence language identifiers to plugin language names.
+  -- Fences whose language appears here are treated as ASCII blocks and highlighted
+  -- with the corresponding language definition.
+  fence_language_map = {
+    vim = 'vim',
+    vimscript = 'vim',
+    viml = 'vim',
+  },
 }
 
 --- Current configuration

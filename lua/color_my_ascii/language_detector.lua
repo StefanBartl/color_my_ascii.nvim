@@ -9,6 +9,7 @@ local parser = require("color_my_ascii.parser")
 
 --- Detect language from explicit block marker
 --- Supports formats: ```ascii-c, ```ascii lua, ```ascii:python
+--- Also resolves standard fence language tags via fence_language_map (e.g., ```vim).
 ---@param fence_line string The opening fence line
 ---@return string? language Detected language name or nil
 local function detect_from_fence(fence_line)
@@ -28,6 +29,16 @@ local function detect_from_fence(fence_line)
 	lang = fence_line:match("ascii:([%w_]+)")
 	if lang then
 		return lang
+	end
+
+	-- Pattern 4: standard markdown fence tag resolved via fence_language_map
+	-- (e.g., ```vim → "vim", ```vimscript → "vim")
+	local fence_tag = fence_line:match("^%s*[`~]+%s*([%w_]+)")
+	if fence_tag then
+		local fence_map = config.get().fence_language_map
+		if fence_map and fence_map[fence_tag] then
+			return fence_map[fence_tag]
+		end
 	end
 
 	return nil

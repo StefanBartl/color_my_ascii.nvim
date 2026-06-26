@@ -60,9 +60,10 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 ### Core Features
 
 - ✅ **Automatic Detection** of `ascii` code blocks in Markdown files
-- ✅ **Modular Language Definitions**: 10 predefined languages (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR)
+- ✅ **Modular Language Definitions**: 11 predefined languages (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR, Vimscript)
 - ✅ **Intelligent Language Detection**:
   - Explicit via ````ascii-c`, ````ascii lua`, ````ascii:python`
+  - Standard markdown fence tags via `fence_language_map` (e.g., ` ```vim `)
   - Heuristic based on keyword frequency
   - Fallback to buffer filetype
 - ✅ **Modular Character Groups**: Customizable groups for lines, blocks, arrows, symbols, operators
@@ -165,6 +166,14 @@ require('color_my_ascii').setup({
   enable_bracket_highlighting = true,
   treat_empty_fence_as_ascii = true,
   enable_inline_code = true,
+
+  -- Standard markdown fence tags treated as ASCII blocks.
+  -- Maps the fence language identifier to the plugin's language name.
+  fence_language_map = {
+    vim = 'vim',
+    vimscript = 'vim',
+    viml = 'vim',
+  },
 })
 ````
 
@@ -245,6 +254,35 @@ The plugin includes predefined keyword definitions for:
 | Bash | `fi`, `esac`, `done` | `if`, `then`, `else` |
 | Zig | `comptime`, `errdefer` | `anytype`, `unreachable` |
 | LLVM IR | `getelementptr`, `phi` | `alloca`, `icmp`, `zext` |
+| Vimscript | `endif`, `endfunction`, `nnoremap` | `augroup`, `echom`, `setlocal` |
+
+### Standard Fence Tag Support
+
+In addition to the `ascii`-prefixed formats, blocks with a standard markdown fence
+language tag are automatically highlighted when that tag is listed in `fence_language_map`:
+
+````markdown
+```vim
+function! MyFunc()
+  ┌──────────────────────────┐
+  │  nnoremap <leader>w :w<CR>│
+  └──────────────────────────┘
+endfunction
+```
+````
+
+The default map recognises `vim`, `vimscript`, and `viml`. Extend it for other
+languages by adding entries to `fence_language_map` in your setup:
+
+````lua
+require('color_my_ascii').setup({
+  fence_language_map = {
+    vim = 'vim',
+    sh  = 'bash',   -- ```sh blocks → bash highlighting
+    ts  = 'typescript',
+  },
+})
+````
 
 Additional languages can be easily added (see [Contributing](#contributing)).
 
@@ -421,6 +459,13 @@ Use explicit language specification:
 ````markdown
 ```ascii-c
 int x = 42;
+```
+````
+
+Or use a standard fence tag if the language is in `fence_language_map`:
+````markdown
+```vim
+nnoremap <leader>w :w<CR>
 ```
 ````
 

@@ -30,8 +30,9 @@ custom color schemes, and various highlighting features.
 
 Features:~
   • Highlight box-drawing characters, blocks, arrows, and symbols
-  • Language-specific keyword highlighting (C, C++, Lua, Go, Rust, etc.)
+  • Language-specific keyword highlighting (C, C++, Lua, Go, Rust, Vimscript, etc.)
   • Automatic language detection using heuristics
+  • Standard markdown fence tags via fence_language_map (e.g., ```vim)
   • Custom color schemes with RGB/hex colors
   • Function name detection
   • Bracket highlighting
@@ -93,6 +94,16 @@ With explicit language:~
 ```
 
 
+With a standard fence tag (via fence_language_map):~
+>markdown
+```vim
+    nnoremap <leader>w :w<CR>
+    augroup MyGroup
+      autocmd!
+    augroup END
+```
+
+
 See |color_my_ascii-config| for configuration options.
 
 ==============================================================================
@@ -127,6 +138,13 @@ Custom configuration:~
       treat_empty_fence_as_ascii = false,
       enable_inline_code = false,
       debug_enabled = false,
+
+      -- Map standard markdown fence tags to plugin language names
+      fence_language_map = {
+        vim = 'vim',
+        vimscript = 'vim',
+        viml = 'vim',
+      },
     })
 
 
@@ -190,6 +208,27 @@ Configuration options:~
                             Type: boolean
                             Default: false
 
+*color_my_ascii-config-fence_language_map*
+    fence_language_map      Map of standard markdown fence language identifiers
+                            to plugin language names. Fences whose tag appears
+                            in this map are treated as ASCII blocks and
+                            highlighted with the corresponding language.
+                            Type: table<string, string>
+                            Default: { vim='vim', vimscript='vim', viml='vim' }
+
+                            Example:~
+>lua
+    require('color_my_ascii').setup({
+      fence_language_map = {
+        vim        = 'vim',
+        vimscript  = 'vim',
+        viml       = 'vim',
+        sh         = 'bash',
+        ts         = 'typescript',
+      },
+    })
+<
+
 Custom highlight specification:~
 
 Highlights can be specified as strings (built-in highlight groups) or tables
@@ -221,14 +260,17 @@ The plugin highlights different types of characters:
 
 Language Detection~                             *color_my_ascii-language-detection*
 
-The plugin can detect programming languages using three strategies:
+The plugin can detect programming languages using four strategies:
 
 1. Explicit marker:     ```ascii-c, ```ascii lua, ```ascii:python
-2. Heuristic analysis:  Counts unique keywords per language
-3. Buffer context:      Uses buffer filetype as fallback
+2. fence_language_map:  Standard fence tag mapped in config (e.g., ```vim)
+3. Heuristic analysis:  Counts unique keywords per language
+4. Buffer context:      Uses buffer filetype as fallback
 
 Supported languages:~
-  C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR
+  C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR, Vimscript
+
+See |color_my_ascii-config-fence_language_map| for mapping additional fence tags.
 
 See |color_my_ascii-config-enable_language_detection| to enable/disable.
 
@@ -505,10 +547,27 @@ Use explicit language marker:
 ```
 
 
+Use a standard fence tag (if listed in fence_language_map):
+>markdown
+```vim
+    nnoremap <leader>w :w<CR>
+```
+
+
 Or adjust detection threshold:
 >lua
     require('color_my_ascii').setup({
       language_detection_threshold = 3,  -- More strict
+    })
+
+
+Or extend the fence_language_map:
+>lua
+    require('color_my_ascii').setup({
+      fence_language_map = {
+        vim = 'vim',
+        sh  = 'bash',
+      },
     })
 
 

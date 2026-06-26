@@ -44,9 +44,10 @@ function M.find_ascii_blocks(bufnr)
         -- We're OUTSIDE any block: this fence opens a new block
         local is_ascii = lang:match("^ascii") ~= nil
         local is_empty = lang == ""
+        local is_mapped = cfg.fence_language_map ~= nil and cfg.fence_language_map[lang] ~= nil
 
         -- Determine if this is an ASCII block we want to track
-        local track_as_ascii = is_ascii or (is_empty and cfg.treat_empty_fence_as_ascii)
+        local track_as_ascii = is_ascii or is_mapped or (is_empty and cfg.treat_empty_fence_as_ascii)
         ---@cast track_as_ascii boolean
 
         -- Start tracking this block (ASCII or not)

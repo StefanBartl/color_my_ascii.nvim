@@ -6,12 +6,30 @@ local M = {}
 
 local api = vim.api
 
---- Find all ASCII code blocks in the buffer.
+--- Decide whether a fence's language tag should be treated as an ASCII block.
+--- Shared classification rule used by both the heuristic line-scanner below and
+--- the treesitter-backed parser (parser_ts.lua), so both backends agree on which
+--- blocks count as ASCII regardless of how they detected the fence.
+---@param lang string Fence language tag, already trimmed (e.g. "ascii-c", "vim", "")
+---@return boolean is_ascii
+function M.is_ascii_fence(lang)
+  local cfg = require("color_my_ascii.config").get()
+
+  local is_ascii = lang:match("^ascii") ~= nil
+  local is_empty = lang == ""
+  local is_mapped = cfg.fence_language_map ~= nil and cfg.fence_language_map[lang] ~= nil
+
+  return is_ascii or is_mapped or (is_empty and cfg.treat_empty_fence_as_ascii) or false
+end
+
+--- Find all ASCII code blocks in the buffer using a manual line-by-line fence scan.
 --- Uses a state machine that tracks ALL code blocks, but only returns ASCII blocks.
 --- This prevents closing fences of non-ASCII blocks from being misinterpreted.
+--- This is the fallback parser used when treesitter-based detection is disabled,
+--- unavailable, or fails (see M.find_ascii_blocks).
 ---@param bufnr integer Buffer number to search
 ---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
-function M.find_ascii_blocks(bufnr)
+function M.find_ascii_blocks_heuristic(bufnr)
   local cfg = require("color_my_ascii.config").get()
 
   ---@type ColorMyAscii.Block[]
@@ -42,13 +60,7 @@ function M.find_ascii_blocks(bufnr)
 
       if not in_block then
         -- We're OUTSIDE any block: this fence opens a new block
-        local is_ascii = lang:match("^ascii") ~= nil
-        local is_empty = lang == ""
-        local is_mapped = cfg.fence_language_map ~= nil and cfg.fence_language_map[lang] ~= nil
-
-        -- Determine if this is an ASCII block we want to track
-        local track_as_ascii = is_ascii or is_mapped or (is_empty and cfg.treat_empty_fence_as_ascii)
-        ---@cast track_as_ascii boolean
+        local track_as_ascii = M.is_ascii_fence(lang)
 
         -- Start tracking this block (ASCII or not)
         in_block = true
@@ -101,6 +113,38 @@ function M.find_ascii_blocks(bufnr)
   end
 
   return blocks
+end
+
+--- Find all ASCII code blocks in the buffer.
+--- Dispatches to the treesitter-backed parser (parser_ts.lua) when
+--- config.treesitter.{enabled,block_detection} are both true and a markdown
+--- parser is available; falls back to the heuristic line scanner otherwise
+--- (including when the treesitter path errors), so this always returns a result.
+---@param bufnr integer Buffer number to search
+---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
+function M.find_ascii_blocks(bufnr)
+  local cfg = require("color_my_ascii.config").get()
+  local ts_cfg = cfg.treesitter
+
+  if ts_cfg and ts_cfg.enabled and ts_cfg.block_detection then
+    local parser_ts = require("color_my_ascii.parser_ts")
+
+    if parser_ts.markdown_available() then
+      local ok, blocks = pcall(parser_ts.find_ascii_blocks, bufnr)
+      if ok then
+        return blocks
+      end
+
+      if cfg.debug_enabled then
+        vim.notify(
+          string.format("color_my_ascii: Treesitter block detection failed, falling back to heuristic parser: %s", tostring(blocks)),
+          vim.log.levels.WARN
+        )
+      end
+    end
+  end
+
+  return M.find_ascii_blocks_heuristic(bufnr)
 end
 
 --- Extract text segments from a line for keyword matching.

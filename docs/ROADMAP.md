@@ -7,7 +7,12 @@ timeline - this is a working list of what might come next.
 
 - Additional language definitions (e.g. Java, Ruby, Elixir)
 - Additional built-in color schemes
-- Optional Treesitter-based highlighting as an alternative to the heuristic parser
+
+## Implemented
+
+- Optional treesitter-based block detection and real syntax highlighting
+  (`treesitter.block_detection` / `treesitter.syntax_highlight`, off by default).
+  See [README.md](../README.md#treesitter-integration).
 
 ## Under Consideration
 

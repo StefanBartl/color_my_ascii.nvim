@@ -7,6 +7,8 @@ local M = {}
 local config = require('color_my_ascii.config')
 local parser = require('color_my_ascii.parser')
 local language_detector = require('color_my_ascii.language_detector')
+local safe_api = require('color_my_ascii.utils.safe_api')
+local highlighter_ts = require('color_my_ascii.highlighter_ts')
 
 local api = vim.api
 local notify = vim.notify
@@ -35,65 +37,22 @@ end
 ---@param line integer Line number (0-indexed)
 ---@param col_start integer Start column (0-indexed, byte offset)
 ---@param col_end integer End column (0-indexed, byte offset, exclusive)
----@param hl_group string|ColorMyAscii.CustomHighlight Highlight group name
+---@param hl_group string|ColorMyAscii.CustomHighlight Highlight group name (already resolved to a string at runtime, see config.resolve_highlight)
 ---@param context string Context for debug messages (e.g., "default", "chars", "keywords")
 ---@param line_content string Content of the line (used to validate columns)
 local function highlight_range(bufnr, line, col_start, col_end, hl_group, context, line_content)
   local cfg = config.get()
 
-  if type(line_content) ~= "string" then
-    if cfg.debug_enabled then
-      notify(
-        string.format("line %d %s: Missing line content", line + 1, context),
-        levels.WARN
-      )
-    end
-    return
-  end
-
-  local line_length = #line_content
-
-  -- Clamp columns to valid range
-  if col_start < 0 or col_start > line_length then
-    if cfg.debug_enabled then
-      notify(
-        string.format("line %d %s: col_start %d out of range (line length: %d)",
-          line + 1, context, col_start, line_length),
-        levels.WARN
-      )
-    end
-    return
-  end
-
-  if col_end < col_start or col_end > line_length then
-    if cfg.debug_enabled then
-      notify(
-        string.format("line %d %s: col_end %d out of range (line length: %d, col_start: %d)",
-          line + 1, context, col_end, line_length, col_start),
-        levels.WARN
-      )
-    end
-    return
-  end
-
-  -- Set extmark
-  local ok, result = pcall(api.nvim_buf_set_extmark, bufnr, namespace, line, col_start, {
-    end_col = col_end,
-    hl_group = hl_group,
-    priority = 100,
-  })
+  local ok, id, err = safe_api.set_extmark(bufnr, namespace, line, col_start, col_end, hl_group, line_content, 100)
 
   if ok then
     buffer_extmarks[bufnr] = buffer_extmarks[bufnr] or {}
-    table.insert(buffer_extmarks[bufnr], result)
-  else
-    -- Only log errors in debug mode
-    if cfg.debug_enabled then
-      notify(
-        string.format("line %d %s: Failed to set extmark: %s", line + 1, context, tostring(result)),
-        levels.ERROR
-      )
-    end
+    table.insert(buffer_extmarks[bufnr], id)
+  elseif cfg.debug_enabled then
+    notify(
+      string.format("line %d %s: Failed to set extmark: %s", line + 1, context, tostring(err)),
+      levels.WARN
+    )
   end
 end
 
@@ -237,6 +196,17 @@ function M.highlight_block(bufnr, block)
 
     -- Pass 4: Highlight keywords (highest priority, will override everything)
     highlight_keywords(bufnr, line_num, line_content, detected_language)
+  end
+
+  -- Pass 5: Optional treesitter-based real syntax highlighting (best-effort, additive).
+  -- Runs once for the whole block rather than per-line, since it parses the block's
+  -- content as a single unit.
+  local ts_cfg = user_config.treesitter
+  if ts_cfg and ts_cfg.enabled and ts_cfg.syntax_highlight then
+    local ok, err = pcall(highlighter_ts.highlight_block, bufnr, block, detected_language, namespace)
+    if not ok and user_config.debug_enabled then
+      notify(string.format("color_my_ascii: Treesitter syntax highlighting error: %s", err), levels.WARN)
+    end
   end
 end
 

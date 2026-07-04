@@ -29,23 +29,30 @@ API-Aufrufe pro Block von O(Zeichen×Zeilen) auf O(Zeilen).
 **Risiko**: niedrig — reine interne Signaturänderung, keine öffentliche API betroffen.
 **Aufwand**: klein (eine Funktion, ~4 Call-Sites in derselben Datei).
 
-### 2. Totes Feature: `enable_treesitter`
+### 2. Totes Feature: `enable_treesitter` — ✅ erledigt
 
-**Problem**: `config/DEFAULTS.lua` definiert `enable_treesitter = false`,
-`health.lua:178` prüft es, aber es gibt **keine** tatsächliche Treesitter-Integration
-im Code. Aktiviert ein Nutzer das Flag, passiert nichts außer einer Warnung, falls
-`nvim-treesitter` fehlt — aber auch wenn es vorhanden ist, ändert sich nichts.
+**Ursprüngliches Problem**: `config/DEFAULTS.lua` definierte `enable_treesitter = false`,
+`health.lua` prüfte es, aber es gab keine tatsächliche Treesitter-Integration im Code.
 
-**Fix-Optionen** (Entscheidung beim nächsten Schritt):
-- (a) Flag vorerst entfernen und stattdessen nur in `docs/ROADMAP.md` als "Planned"
-  führen (bereits dort gelistet), bis eine echte Implementierung ansteht — vermeidet
-  ein irreführendes No-Op-Flag in der Public API.
-- (b) Flag behalten, aber `health.lua` um einen expliziten Hinweis ergänzen
-  ("Treesitter integration is planned but not yet implemented") statt nur bei
-  fehlendem `nvim-treesitter` zu warnen.
+**Umsetzung**: `enable_treesitter` (Boolean) wurde durch ein `treesitter`-Config-Table
+ersetzt (`{ enabled, block_detection, syntax_highlight }`, alle default
+`enabled=false`). Zwei neue, unabhängig voneinander aktivierbare Fähigkeiten:
 
-**Empfehlung**: (b) — kleinerer, nicht-breaking Fix; vermeidet stille Verwirrung ohne
-eine bestehende (wenn auch ungenutzte) Config-Option zu entfernen.
+- **Block-Erkennung** (`lua/color_my_ascii/parser_ts.lua`): nutzt die Markdown-
+  Treesitter-Grammatik statt `parser.lua`s heuristischem Zeilen-Scan, mit
+  garantiert identischer Blockklassifikation (`parser.is_ascii_fence`, von beiden
+  Backends geteilt) und stillem Fallback auf die Heuristik, falls kein
+  Markdown-Parser installiert ist oder der Treesitter-Pfad fehlschlägt.
+- **Echtes Syntax-Highlighting** (`lua/color_my_ascii/highlighter_ts.lua`): parst
+  den Blockinhalt mit der echten Grammatik der erkannten Sprache und highlightet
+  zusätzlich per `@`-Capture-Gruppen (höhere Priorität als die Heuristik). Best-effort
+  ohne Gate auf Parse-Fehler — ASCII-Art liefert i. d. R. unvollständige/fehlerhafte
+  Bäume, aber valide Teilbereiche werden trotzdem korrekt erfasst.
+
+Verifiziert: identische Blockgrenzen zwischen beiden Backends, identisches
+Extmark-Verhalten bei `treesitter.enabled=false` (Default) und bei
+`block_detection`-only, zusätzliche `@`-Extmarks bei aktiviertem
+`syntax_highlight` auf echtem Code. Siehe [README.md](../../README.md#treesitter-integration).
 
 ## Priorität 🟡 — Tooling (optional, kein akuter Bedarf)
 
@@ -81,7 +88,6 @@ GitHub-Actions-Workflow, der `stylua --check` auf PRs laufen lässt.
 
 ## Nächste Schritte
 
-1. `.luarc.json` anlegen (dieser Durchgang, siehe unten).
-2. Bei Freigabe: Fix #1 (Hot-Path) und Fix #2b (Treesitter-Health-Hinweis) umsetzen —
-   beide klein, risikoarm, unabhängig voneinander.
+1. ✅ `.luarc.json` angelegt.
+2. ✅ Fix #1 (Hot-Path) und Fix #2 (echte Treesitter-Integration statt totem Flag) umgesetzt.
 3. Tooling-Punkte (#4) nur bei Bedarf/auf Anfrage.

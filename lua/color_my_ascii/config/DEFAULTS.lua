@@ -16,7 +16,13 @@ return {
   enable_keywords = true,
   enable_language_detection = true,
   language_detection_threshold = 2,
-  enable_treesitter = false,
+  -- Optional treesitter-based block detection and syntax highlighting.
+  -- Off by default (enabled = false): the plugin behaves exactly as without treesitter.
+  treesitter = {
+    enabled = false,
+    block_detection = true,
+    syntax_highlight = true,
+  },
   treat_empty_fence_as_ascii = true,
   enable_inline_code = true,
   enable_function_names = true,

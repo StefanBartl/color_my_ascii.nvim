@@ -33,6 +33,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
     - [Example](#example)
   - [Configuration](#configuration)
     - [Default Configuration](#default-configuration)
+    - [Treesitter Integration](#treesitter-integration)
     - [With Color Scheme](#with-color-scheme)
     - [Custom Highlights](#custom-highlights)
     - [All Features Enabled](#all-features-enabled)
@@ -191,8 +192,47 @@ require('color_my_ascii').setup({
     vimscript = 'vim',
     viml = 'vim',
   },
+
+  -- Optional treesitter integration (off by default, see "Treesitter Integration" below)
+  treesitter = {
+    enabled = false,
+    block_detection = true,
+    syntax_highlight = true,
+  },
 })
 ````
+
+---
+
+### Treesitter Integration
+
+Off by default (`treesitter.enabled = false`) - the plugin behaves exactly as
+without treesitter. Set `enabled = true` to turn on either or both of:
+
+- **`block_detection`**: use Neovim's markdown treesitter grammar to find fenced
+  code blocks instead of the built-in line scanner. More robust for edge cases
+  (nested fences, unusual indentation). Requires a `markdown` parser
+  (`:TSInstall markdown`); falls back to the heuristic scanner if unavailable.
+- **`syntax_highlight`**: additionally highlight a block's content using the real
+  grammar of its detected language (e.g. real Lua/Python/C syntax via `@`-prefixed
+  highlight groups), on top of the existing character/keyword highlighting. This is
+  best-effort - ASCII art is usually not valid syntax, so this only has a visible
+  effect on blocks (or portions of blocks) that happen to contain real, parseable
+  code. Requires a parser for that language (`:TSInstall <language>`); silently
+  does nothing where unavailable or unparseable.
+
+```lua
+require('color_my_ascii').setup({
+  treesitter = {
+    enabled = true,
+    block_detection = true,
+    syntax_highlight = true,
+  },
+})
+```
+
+Both sub-options can be toggled independently. `:checkhealth color_my_ascii`
+reports whether the required parsers are installed.
 
 ---
 

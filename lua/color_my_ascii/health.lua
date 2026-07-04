@@ -174,13 +174,20 @@ function M.check()
   -- Check for common issues
   health.info('Checking for common issues...')
 
-  -- enable_treesitter is a reserved config flag for a planned feature (see
-  -- docs/ROADMAP.md); it has no effect yet, regardless of nvim-treesitter's presence.
-  if ok and config.get().enable_treesitter then
-    health.info('enable_treesitter is set, but Treesitter-based highlighting is planned and not yet implemented - this flag currently has no effect')
-    local ts_ok = pcall(require, 'nvim-treesitter')
-    if not ts_ok then
-      health.warn('nvim-treesitter not found (irrelevant until the feature is implemented)')
+  -- Treesitter integration (config.treesitter.{enabled,block_detection,syntax_highlight})
+  local ts_cfg = ok and config.get().treesitter
+  if ts_cfg and ts_cfg.enabled then
+    if ts_cfg.block_detection then
+      local parser_ts_ok, parser_ts = pcall(require, 'color_my_ascii.parser_ts')
+      if parser_ts_ok and parser_ts.markdown_available() then
+        health.ok('Treesitter block detection: markdown parser available')
+      else
+        health.info('Treesitter block detection enabled, but no markdown parser found - falling back to the heuristic parser (:TSInstall markdown to enable)')
+      end
+    end
+
+    if ts_cfg.syntax_highlight then
+      health.info('Treesitter syntax highlighting enabled - availability is checked per block based on the detected language (:TSInstall <language> as needed); silently falls back to heuristic-only highlighting where unavailable')
     end
   end
 

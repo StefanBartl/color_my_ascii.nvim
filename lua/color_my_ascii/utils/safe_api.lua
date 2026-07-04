@@ -192,6 +192,44 @@ function M.buf_set_extmark(bufnr, ns_id, line, col, opts)
   return safe_call(api.nvim_buf_set_extmark, bufnr, ns_id, line, col, opts)
 end
 
+--- Safe extmark setter with column-bounds validation against line content.
+--- Clamps/validates col_start/col_end against the given line's length before creating
+--- the extmark, so callers highlighting many ranges per line (once per character/
+--- keyword/capture) don't need to re-fetch or re-validate the line themselves.
+---@param bufnr integer Buffer number
+---@param ns_id integer Namespace ID
+---@param line integer Line number (0-indexed)
+---@param col_start integer Start column (0-indexed, byte offset)
+---@param col_end integer End column (0-indexed, byte offset, exclusive)
+---@param hl_group any Highlight group name (resolved to a string by the caller)
+---@param line_content string Content of the line (used to validate columns)
+---@param priority? integer Extmark priority (default 100)
+---@return boolean success
+---@return integer|nil id Extmark ID if successful
+---@return string|nil error Error message if failed or out of range
+function M.set_extmark(bufnr, ns_id, line, col_start, col_end, hl_group, line_content, priority)
+  if type(line_content) ~= 'string' then
+    return false, nil, 'Missing line content'
+  end
+
+  local line_length = #line_content
+
+  if type(col_start) ~= 'number' or col_start < 0 or col_start > line_length then
+    return false, nil, string.format('col_start %s out of range (line length: %d)', tostring(col_start), line_length)
+  end
+
+  if type(col_end) ~= 'number' or col_end < col_start or col_end > line_length then
+    return false, nil,
+      string.format('col_end %s out of range (line length: %d, col_start: %d)', tostring(col_end), line_length, col_start)
+  end
+
+  return M.buf_set_extmark(bufnr, ns_id, line, col_start, {
+    end_col = col_end,
+    hl_group = hl_group,
+    priority = priority or 100,
+  })
+end
+
 --- Safe namespace clear
 --- Clear all extmarks in namespace with validation
 ---@param bufnr integer Buffer number

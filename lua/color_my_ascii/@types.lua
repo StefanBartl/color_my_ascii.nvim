@@ -34,6 +34,11 @@
 ---@field chars string Characters to highlight with this group
 ---@field hl string|ColorMyAscii.CustomHighlight Highlight specification
 
+---@class ColorMyAscii.TreesitterConfig
+---@field enabled? boolean Master switch for both features below (default false = identical to pre-treesitter behavior)
+---@field block_detection? boolean Use treesitter's markdown grammar to detect fenced code blocks instead of the heuristic line scanner (default true, only applies if enabled=true)
+---@field syntax_highlight? boolean Use treesitter to highlight real syntax inside blocks with the target language's grammar, in addition to the heuristic character/keyword highlighting (default true, only applies if enabled=true). Best-effort: silently falls back to heuristic-only if no parser is available or the content doesn't parse.
+
 ---@class ColorMyAscii.Config
 ---@field scheme? ColorMyAscii.SchemeName Color scheme name to load (e.g., "nord", "gruvbox")
 ---@field debug_enabled? boolean Toggle debug mode
@@ -47,7 +52,7 @@
 ---@field enable_keywords? boolean Whether to highlight keywords in ASCII blocks
 ---@field enable_language_detection? boolean Whether to use heuristic language detection
 ---@field language_detection_threshold? integer Minimum unique keyword matches for language detection
----@field enable_treesitter? boolean Whether to use treesitter for additional syntax highlighting
+---@field treesitter? ColorMyAscii.TreesitterConfig Optional treesitter-based block detection and syntax highlighting
 ---@field treat_empty_fence_as_ascii? boolean Treat `` without language as ASCII block
 ---@field enable_inline_code? boolean Enable highlighting in inline code ...`)
 ---@field enable_function_names? boolean Enable heuristic function name detection

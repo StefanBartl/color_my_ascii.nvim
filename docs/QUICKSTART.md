@@ -14,7 +14,7 @@ Quick introduction to color_my_ascii.nvim with all important features.
     - [Minimal](#minimal)
     - [With Features](#with-features)
     - [With Color Scheme](#with-color-scheme)
-    - [Optional: Treesitter Integration](#optional-treesitter-integration)
+    - [Treesitter Integration](#treesitter-integration)
   - [Feature Examples](#feature-examples)
     - [1. Language Detection](#1-language-detection)
     - [2. Custom Highlights](#2-custom-highlights)
@@ -147,15 +147,19 @@ require('color_my_ascii').setup(
 
 ---
 
-### Optional: Treesitter Integration
+### Treesitter Integration
+
+On by default (`treesitter.enabled = true`) with a silent fallback to
+heuristic-only behavior wherever a parser isn't installed. Disable if you
+don't want it:
 
 ```lua
 require('color_my_ascii').setup({
-  treesitter = { enabled = true },  -- block_detection + syntax_highlight both default to true
+  treesitter = { enabled = false },
 })
 ```
 
-Off by default. See [README.md](../README.md#treesitter-integration) for details.
+See [README.md](../README.md#treesitter-integration) for details.
 
 ---
 

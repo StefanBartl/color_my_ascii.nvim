@@ -87,15 +87,18 @@ require('color_my_ascii').setup(
 )
 ```
 
-### Optional: Treesitter-Integration
+### Treesitter-Integration
+
+Standardmäßig an (`treesitter.enabled = true`), mit stillem Fallback auf
+rein heuristisches Verhalten, wenn kein Parser installiert ist. Bei Bedarf deaktivieren:
 
 ```lua
 require('color_my_ascii').setup({
-  treesitter = { enabled = true },  -- block_detection + syntax_highlight sind standardmäßig true
+  treesitter = { enabled = false },
 })
 ```
 
-Standardmäßig aus. Details siehe [README.md](../README.md#treesitter-integration).
+Details siehe [README.md](../README.md#treesitter-integration).
 
 ## Feature-Beispiele
 

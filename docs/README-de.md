@@ -192,9 +192,9 @@ require('color_my_ascii').setup({
     viml = 'vim',
   },
 
-  -- Optionale Treesitter-Integration (standardmäßig aus, siehe unten)
+  -- Optionale Treesitter-Integration, standardmäßig an (siehe unten)
   treesitter = {
-    enabled = false,
+    enabled = true,
     block_detection = true,
     syntax_highlight = true,
   },
@@ -205,9 +205,11 @@ require('color_my_ascii').setup({
 
 ### Treesitter-Integration
 
-Standardmäßig aus (`treesitter.enabled = false`) - das Plugin verhält sich
-exakt wie ohne Treesitter. Mit `enabled = true` lassen sich einzeln oder
-zusammen aktivieren:
+Standardmäßig an. Beide Teilfunktionen fallen automatisch und still auf rein
+heuristisches Verhalten zurück, wenn der jeweilige Parser nicht installiert
+ist — es gibt also keinen Nachteil, das aktiviert zu lassen, selbst ganz ohne
+Treesitter-Setup. Mit `enabled = false` komplett deaktivieren. Die beiden
+Teil-Flags lassen sich außerdem unabhängig voneinander umschalten:
 
 - **`block_detection`**: Nutzt Neovims Markdown-Treesitter-Grammatik zur
   Erkennung von Fenced-Code-Blöcken statt des eingebauten Zeilen-Scanners.
@@ -224,16 +226,17 @@ zusammen aktivieren:
   stillschweigend nichts.
 
 ```lua
+-- Komplett deaktivieren
 require('color_my_ascii').setup({
-  treesitter = {
-    enabled = true,
-    block_detection = true,
-    syntax_highlight = true,
-  },
+  treesitter = { enabled = false },
+})
+
+-- Oder Block-Erkennung behalten, aber die (teurere) Syntax-Highlighting-Phase überspringen
+require('color_my_ascii').setup({
+  treesitter = { syntax_highlight = false },
 })
 ```
 
-Beide Optionen lassen sich unabhängig voneinander aktivieren.
 `:checkhealth color_my_ascii` zeigt an, ob die benötigten Parser installiert sind.
 
 ---

@@ -17,9 +17,11 @@ return {
   enable_language_detection = true,
   language_detection_threshold = 2,
   -- Optional treesitter-based block detection and syntax highlighting.
-  -- Off by default (enabled = false): the plugin behaves exactly as without treesitter.
+  -- On by default: both sub-features silently fall back to heuristic-only
+  -- behavior when the relevant parser isn't installed, so there's no downside
+  -- to leaving this enabled even without treesitter set up at all.
   treesitter = {
-    enabled = false,
+    enabled = true,
     block_detection = true,
     syntax_highlight = true,
   },
@@ -65,7 +67,10 @@ return {
     llvm = 'llvm',
   },
   -- Optional default keymaps (see lua/color_my_ascii/bindings/keymaps.lua).
-  -- false = no keymaps are set. Pass a table to enable and customize individual mappings.
+  -- Deliberately off by default, unlike most other features: keymaps claim a
+  -- slot in the user's global keymap namespace and can silently collide with
+  -- mappings the user already has, which a purely visual/heuristic feature
+  -- toggle can't. Pass a table to enable and customize individual mappings.
   keymaps = false,
   -- Optional overrides for cache_manager/debounce_manager defaults.
   -- nil = use the plugin's built-in defaults.

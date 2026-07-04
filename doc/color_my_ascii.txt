@@ -171,9 +171,9 @@ Full default configuration:~
       cache = nil,
       debounce = nil,
 
-      -- Optional treesitter integration, see |color_my_ascii-treesitter|
+      -- Optional treesitter integration, on by default, see |color_my_ascii-treesitter|
       treesitter = {
-        enabled = false,
+        enabled = true,
         block_detection = true,
         syntax_highlight = true,
       },
@@ -288,7 +288,7 @@ Configuration options:~
     treesitter              Optional treesitter-based block detection and
                             syntax highlighting.
                             Type: table { enabled, block_detection, syntax_highlight }
-                            Default: { enabled = false, block_detection = true,
+                            Default: { enabled = true, block_detection = true,
                             syntax_highlight = true }
                             See |color_my_ascii-treesitter|
 
@@ -383,8 +383,11 @@ See |color_my_ascii-config-treat_empty_fence_as_ascii|.
 ==============================================================================
 7. TREESITTER INTEGRATION                       *color_my_ascii-treesitter*
 
-Off by default (treesitter.enabled = false) - the plugin behaves exactly as
-without treesitter. Two independently toggleable sub-features:
+On by default. Both sub-features fall back silently to heuristic-only
+behavior when the relevant parser isn't installed, so there's no downside to
+leaving this enabled even without treesitter set up at all. Set
+treesitter.enabled = false to fully disable and behave exactly as without
+treesitter. Two independently toggleable sub-features:
 
 *color_my_ascii-treesitter-block_detection*
     block_detection          Use Neovim's markdown treesitter grammar to
@@ -408,14 +411,16 @@ without treesitter. Two independently toggleable sub-features:
                             silently does nothing where unavailable or
                             unparseable.
 
-Example:~
+Example (disabling):~
 >lua
+    -- Disable entirely
     require('color_my_ascii').setup({
-      treesitter = {
-        enabled = true,
-        block_detection = true,
-        syntax_highlight = true,
-      },
+      treesitter = { enabled = false },
+    })
+
+    -- Or keep block detection but skip the syntax highlighting pass
+    require('color_my_ascii').setup({
+      treesitter = { syntax_highlight = false },
     })
 <
 

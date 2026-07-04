@@ -35,7 +35,7 @@
 ---@field hl string|ColorMyAscii.CustomHighlight Highlight specification
 
 ---@class ColorMyAscii.TreesitterConfig
----@field enabled? boolean Master switch for both features below (default false = identical to pre-treesitter behavior)
+---@field enabled? boolean Master switch for both features below (default true; both sub-features fall back to heuristic-only behavior when no parser is installed)
 ---@field block_detection? boolean Use treesitter's markdown grammar to detect fenced code blocks instead of the heuristic line scanner (default true, only applies if enabled=true)
 ---@field syntax_highlight? boolean Use treesitter to highlight real syntax inside blocks with the target language's grammar, in addition to the heuristic character/keyword highlighting (default true, only applies if enabled=true). Best-effort: silently falls back to heuristic-only if no parser is available or the content doesn't parse.
 

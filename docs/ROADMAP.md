@@ -10,7 +10,9 @@ timeline - this is a working list of what might come next.
 ## Implemented
 
 - Optional treesitter-based block detection and real syntax highlighting
-  (`treesitter.block_detection` / `treesitter.syntax_highlight`, off by default).
+  (`treesitter.block_detection` / `treesitter.syntax_highlight`), on by
+  default via `treesitter.enabled = true` - falls back silently to
+  heuristic-only behavior wherever a parser isn't installed.
   See [README.md](../README.md#treesitter-integration).
 - 31 predefined languages (up from 11), with `fence_language_map` now covering
   every one of them under its common tag(s) by default - plain ` ```go `/

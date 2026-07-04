@@ -15,3 +15,14 @@ timeline - this is a working list of what might come next.
 - Additional autocommand hooks (e.g. re-highlight on `ColorScheme` change)
 - Additional user commands for scheme/keyword introspection
 - Deeper `lib.nvim` integration if/once its API stabilizes
+
+## Engineering Checklists & Implementation Plan
+
+Internal (German) notes distilling the project's Lua/Neovim architecture and coding
+checklists down to what's actually relevant for this plugin's size, plus a concrete
+implementation plan derived from them:
+
+- [ROADMAP/Arch&Coding.md](ROADMAP/Arch&Coding.md)
+- [ROADMAP/Zentral-Prinzipien.md](ROADMAP/Zentral-Prinzipien.md)
+- [ROADMAP/Checklist.md](ROADMAP/Checklist.md)
+- [ROADMAP/IMPLEMENTATION_PLAN.md](ROADMAP/IMPLEMENTATION_PLAN.md)

@@ -35,6 +35,26 @@ local LANGUAGE_MAP = {
   typescript = 'typescript',
   vim = 'vim',
   zig = 'zig',
+  javascript = 'javascript',
+  json = 'json',
+  java = 'java',
+  html = 'html',
+  css = 'css',
+  csharp = 'c_sharp', -- treesitter's grammar is registered as "c_sharp", not "csharp"
+  php = 'php',
+  ruby = 'ruby',
+  kotlin = 'kotlin',
+  swift = 'swift',
+  scala = 'scala',
+  dart = 'dart',
+  elixir = 'elixir',
+  haskell = 'haskell',
+  perl = 'perl',
+  r = 'r',
+  clojure = 'clojure',
+  groovy = 'groovy',
+  powershell = 'powershell',
+  sql = 'sql',
   -- llvm intentionally omitted: no common treesitter grammar for LLVM IR.
 }
 

@@ -101,7 +101,7 @@ require('color_my_ascii').setup()
 ```
 
 Automatically loads:
-- 11 languages (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM, Vimscript)
+- 31 languages, auto-detected via their standard fence tag (C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS - see [README.md](../README.md#supported-languages) for the full list)
 - 5 character groups (Box-Drawing, Blocks, Arrows, Symbols, Operators)
 
 ---

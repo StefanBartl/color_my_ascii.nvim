@@ -5,7 +5,6 @@ timeline - this is a working list of what might come next.
 
 ## Planned
 
-- Additional language definitions (e.g. Java, Ruby, Elixir)
 - Additional built-in color schemes
 
 ## Implemented
@@ -13,6 +12,10 @@ timeline - this is a working list of what might come next.
 - Optional treesitter-based block detection and real syntax highlighting
   (`treesitter.block_detection` / `treesitter.syntax_highlight`, off by default).
   See [README.md](../README.md#treesitter-integration).
+- 31 predefined languages (up from 11), with `fence_language_map` now covering
+  every one of them under its common tag(s) by default - plain ` ```go `/
+  ` ```javascript `/` ```json ` etc. blocks are highlighted without needing the
+  `ascii-` prefix. See [README.md](../README.md#supported-languages).
 
 ## Under Consideration
 

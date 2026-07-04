@@ -57,7 +57,7 @@ require('color_my_ascii').setup()
 ```
 
 Nutzt alle Standard-Einstellungen und lädt automatisch:
-- 11 Sprachen (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM, Vimscript)
+- 31 Sprachen, automatisch erkannt über ihren Standard-Fence-Tag (C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS - vollständige Liste siehe [README-de.md](README-de.md#untersttzte-sprachen))
 - 5 Zeichengruppen (Box-Drawing, Blocks, Arrows, Symbols, Operators)
 
 ### Mit Features

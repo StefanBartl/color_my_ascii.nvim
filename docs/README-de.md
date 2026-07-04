@@ -68,7 +68,7 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
 ### Core-Features
 
 - ✅ **Automatische Erkennung** von `ascii`-Codeblöcken in Markdown-Dateien
-- ✅ **Modulare Sprach-Definitionen**: 11 vordefinierte Sprachen (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR, Vimscript)
+- ✅ **Modulare Sprach-Definitionen**: 31 vordefinierte Sprachen (C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM IR, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS)
 - ✅ **Intelligente Sprach-Erkennung**:
   - Explizite Angabe via ````ascii-c`, ````ascii lua`, ````ascii:python`
   - Standard-Markdown-Fence-Tags via `fence_language_map` (z. B. ` ```vim `)
@@ -305,21 +305,43 @@ Das Plugin enthält vordefinierte Keyword-Definitionen für:
 |---------|----------------|----------|
 | C | `restrict`, `_Bool`, `_Complex` | `int`, `void`, `char` |
 | C++ | `class`, `namespace`, `template` | `virtual`, `override`, `nullptr` |
+| C# | `foreach`, `delegate`, `sealed` | `class`, `async`, `await` |
 | Lua | `then`, `elseif`, `end` | `function`, `local`, `nil` |
 | Go | `func`, `chan`, `defer` | `go`, `:=`, `<-` |
 | Rust | `fn`, `mut`, `impl` | `trait`, `match`, `loop` |
 | TypeScript | `interface`, `namespace` | `async`, `await`, `Promise` |
+| JavaScript | `console`, `NaN`, `globalThis` | `function`, `async`, `await` |
 | Python | `def`, `elif`, `pass` | `lambda`, `self`, `yield` |
 | Bash | `fi`, `esac`, `done` | `if`, `then`, `else` |
 | Zig | `comptime`, `errdefer` | `anytype`, `unreachable` |
 | LLVM IR | `getelementptr`, `phi` | `alloca`, `icmp`, `zext` |
 | Vimscript | `endif`, `endfunction`, `nnoremap` | `augroup`, `echom`, `setlocal` |
+| Java | `implements`, `throws`, `synchronized` | `class`, `public`, `static` |
+| PHP | `echo`, `require_once`, `isset` | `function`, `class`, `foreach` |
+| Ruby | `elsif`, `unless`, `attr_accessor` | `def`, `end`, `module` |
+| Kotlin | `fun`, `companion`, `suspend` | `val`, `var`, `class` |
+| Swift | `guard`, `fileprivate`, `deinit` | `func`, `var`, `let` |
+| Scala | `trait`, `implicit`, `object` | `def`, `val`, `case` |
+| Dart | `mixin`, `covariant`, `late` | `void`, `class`, `async` |
+| Elixir | `defmodule`, `defp`, `defmacro` | `def`, `do`, `end` |
+| Haskell | `newtype`, `deriving`, `Maybe` | `data`, `type`, `where` |
+| Perl | `bless`, `wantarray`, `qw` | `my`, `sub`, `if` |
+| R | `sapply`, `lapply`, `ifelse` | `function`, `TRUE`, `FALSE` |
+| Clojure | `defn`, `recur`, `deref` | `let`, `fn`, `def` |
+| Groovy | `println`, `findAll`, `GString` | `def`, `class`, `closure` |
+| PowerShell | `param`, `trap` | `function`, `foreach`, `try` |
+| SQL | `SELECT`, `INSERT`, `JOIN` | `WHERE`, `FROM`, `UPDATE` |
+| JSON | *(keine - nur explizites Tag)* | `true`, `false`, `null` |
+| HTML | `DOCTYPE`, `textarea`, `thead` | `div`, `span`, `class` |
+| CSS | `keyframes`, `rgba`, `important` | `display`, `flex`, `color` |
 
 ### Standard-Fence-Tag-Unterstützung
 
-Zusätzlich zu den `ascii`-präfixierten Formaten werden Blöcke mit einem
-Standard-Markdown-Fence-Tag automatisch hervorgehoben, wenn dieser Tag in
-`fence_language_map` gelistet ist:
+Blöcke mit einem Standard-Markdown-Fence-Tag werden automatisch hervorgehoben,
+wenn dieser Tag in `fence_language_map` gelistet ist - das schließt
+standardmäßig **jede der obigen Sprachen unter ihrem gängigen Tag** ein (z. B.
+` ```go `, ` ```js `/` ```javascript `, ` ```py `/` ```python `,
+` ```rb `/` ```ruby `, ...), nicht nur die `ascii`-präfixierten Formate:
 
 ````markdown
 ```vim
@@ -331,15 +353,14 @@ endfunction
 ```
 ````
 
-Die Standard-Map erkennt `vim`, `vimscript` und `viml`. Erweitere sie für
-weitere Sprachen über `fence_language_map` im Setup:
+Siehe [config/DEFAULTS.lua](../lua/color_my_ascii/config/DEFAULTS.lua) für die
+vollständige Default-Map (inkl. Aliase wie `sh`/`py`/`ts`/`rs`/`kt`/`cs`).
+Eigene Einträge ergänzen oder überschreiben:
 
 ````lua
 require('color_my_ascii').setup({
   fence_language_map = {
-    vim = 'vim',
-    sh  = 'bash',   -- ```sh-Blöcke → bash-Highlighting
-    ts  = 'typescript',
+    myasciitag = 'python',  -- zusätzlichen Tag zu den Defaults hinzufügen
   },
 })
 ````

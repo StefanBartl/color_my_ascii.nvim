@@ -71,7 +71,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 ### Core Features
 
 - ✅ **Automatic Detection** of `ascii` code blocks in Markdown files
-- ✅ **Modular Language Definitions**: 11 predefined languages (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR, Vimscript)
+- ✅ **Modular Language Definitions**: 31 predefined languages (C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM IR, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS)
 - ✅ **Intelligent Language Detection**:
   - Explicit via ````ascii-c`, ````ascii lua`, ````ascii:python`
   - Standard markdown fence tags via `fence_language_map` (e.g., ` ```vim `)
@@ -303,20 +303,43 @@ The plugin includes predefined keyword definitions for:
 |----------|----------------|---------|
 | C | `restrict`, `_Bool`, `_Complex` | `int`, `void`, `char` |
 | C++ | `class`, `namespace`, `template` | `virtual`, `override`, `nullptr` |
+| C# | `foreach`, `delegate`, `sealed` | `class`, `async`, `await` |
 | Lua | `then`, `elseif`, `end` | `function`, `local`, `nil` |
 | Go | `func`, `chan`, `defer` | `go`, `:=`, `<-` |
 | Rust | `fn`, `mut`, `impl` | `trait`, `match`, `loop` |
 | TypeScript | `interface`, `namespace` | `async`, `await`, `Promise` |
+| JavaScript | `console`, `NaN`, `globalThis` | `function`, `async`, `await` |
 | Python | `def`, `elif`, `pass` | `lambda`, `self`, `yield` |
 | Bash | `fi`, `esac`, `done` | `if`, `then`, `else` |
 | Zig | `comptime`, `errdefer` | `anytype`, `unreachable` |
 | LLVM IR | `getelementptr`, `phi` | `alloca`, `icmp`, `zext` |
 | Vimscript | `endif`, `endfunction`, `nnoremap` | `augroup`, `echom`, `setlocal` |
+| Java | `implements`, `throws`, `synchronized` | `class`, `public`, `static` |
+| PHP | `echo`, `require_once`, `isset` | `function`, `class`, `foreach` |
+| Ruby | `elsif`, `unless`, `attr_accessor` | `def`, `end`, `module` |
+| Kotlin | `fun`, `companion`, `suspend` | `val`, `var`, `class` |
+| Swift | `guard`, `fileprivate`, `deinit` | `func`, `var`, `let` |
+| Scala | `trait`, `implicit`, `object` | `def`, `val`, `case` |
+| Dart | `mixin`, `covariant`, `late` | `void`, `class`, `async` |
+| Elixir | `defmodule`, `defp`, `defmacro` | `def`, `do`, `end` |
+| Haskell | `newtype`, `deriving`, `Maybe` | `data`, `type`, `where` |
+| Perl | `bless`, `wantarray`, `qw` | `my`, `sub`, `if` |
+| R | `sapply`, `lapply`, `ifelse` | `function`, `TRUE`, `FALSE` |
+| Clojure | `defn`, `recur`, `deref` | `let`, `fn`, `def` |
+| Groovy | `println`, `findAll`, `GString` | `def`, `class`, `closure` |
+| PowerShell | `param`, `trap` | `function`, `foreach`, `try` |
+| SQL | `SELECT`, `INSERT`, `JOIN` | `WHERE`, `FROM`, `UPDATE` |
+| JSON | *(none - explicit tag only)* | `true`, `false`, `null` |
+| HTML | `DOCTYPE`, `textarea`, `thead` | `div`, `span`, `class` |
+| CSS | `keyframes`, `rgba`, `important` | `display`, `flex`, `color` |
 
 ### Standard Fence Tag Support
 
-In addition to the `ascii`-prefixed formats, blocks with a standard markdown fence
-language tag are automatically highlighted when that tag is listed in `fence_language_map`:
+Blocks with a standard markdown fence language tag are automatically
+highlighted when that tag is listed in `fence_language_map` - this includes
+**every language above under its common tag(s)** by default (e.g. ` ```go `,
+` ```js `/` ```javascript `, ` ```py `/` ```python `, ` ```rb `/` ```ruby `, ...),
+not just the `ascii`-prefixed formats:
 
 ````markdown
 ```vim
@@ -328,15 +351,14 @@ endfunction
 ```
 ````
 
-The default map recognises `vim`, `vimscript`, and `viml`. Extend it for other
-languages by adding entries to `fence_language_map` in your setup:
+See [config/DEFAULTS.lua](lua/color_my_ascii/config/DEFAULTS.lua) for the full
+default map (aliases like `sh`/`py`/`ts`/`rs`/`kt`/`cs` included). Add or
+override entries in your own setup:
 
 ````lua
 require('color_my_ascii').setup({
   fence_language_map = {
-    vim = 'vim',
-    sh  = 'bash',   -- ```sh blocks → bash highlighting
-    ts  = 'typescript',
+    myasciitag = 'python',  -- add a custom tag on top of the defaults
   },
 })
 ````

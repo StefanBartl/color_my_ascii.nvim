@@ -31,8 +31,10 @@ highlighting features.
 
 Features:~
   • Highlight box-drawing characters, blocks, arrows, and symbols
-  • Language-specific keyword highlighting (C, C++, Lua, Go, Rust,
-    TypeScript, Python, Bash, Zig, LLVM IR, Vimscript)
+  • Language-specific keyword highlighting (31 languages: C, C++, C#, Lua,
+    Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM IR, Vimscript,
+    Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R,
+    Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS)
   • Automatic language detection using heuristics
   • Standard markdown fence tags via fence_language_map (e.g., ```vim)
   • Custom color schemes with RGB/hex colors
@@ -242,19 +244,22 @@ Configuration options:~
     fence_language_map      Map of standard markdown fence language identifiers
                             to plugin language names. Fences whose tag appears
                             in this map are treated as ASCII blocks and
-                            highlighted with the corresponding language.
+                            highlighted with the corresponding language - not
+                            just ```ascii-prefixed ones.
                             Type: table<string, string>
-                            Default: { vim='vim', vimscript='vim', viml='vim' }
+                            Default: covers every language in
+                            |color_my_ascii-language-detection| under its
+                            common tag(s) (e.g. go, js/javascript, py/python,
+                            rb/ruby, cs/csharp, ...). See
+                            lua/color_my_ascii/config/DEFAULTS.lua for the
+                            full list.
 
-                            Example:~
+                            Example (adding a custom tag on top of the
+                            defaults):~
 >lua
     require('color_my_ascii').setup({
       fence_language_map = {
-        vim        = 'vim',
-        vimscript  = 'vim',
-        viml       = 'vim',
-        sh         = 'bash',
-        ts         = 'typescript',
+        myasciitag = 'python',
       },
     })
 <
@@ -326,7 +331,10 @@ The plugin can detect programming languages using four strategies:
 4. Buffer context:      Uses buffer filetype as fallback
 
 Supported languages:~
-  C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR, Vimscript
+  C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig,
+  LLVM IR, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir,
+  Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS
+  (31 languages total)
 
 See |color_my_ascii-config-fence_language_map| for mapping additional fence tags.
 

@@ -36,15 +36,15 @@ function M.setup(opts)
 		return false, tostring(err)
 	end
 
-	-- Setup cache with default config
-	cache_manager.configure({
+	-- Setup cache (user-overridable via cfg.cache)
+	cache_manager.configure(cfg.cache or {
 		timeout = 5000,
 		max_size = 50,
 		enable_stats = false,
 	})
 
-	-- Setup debouncing with default config
-	debounce_manager.configure({
+	-- Setup debouncing (user-overridable via cfg.debounce)
+	debounce_manager.configure(cfg.debounce or {
 		small_file_threshold = 500,
 		medium_file_threshold = 2000,
 		small_delay = 100,
@@ -57,6 +57,11 @@ function M.setup(opts)
 
 	-- Start cache cleanup timer (every 30 seconds)
 	cache_manager.setup_auto_cleanup(30000)
+
+	-- Attach optional user keymaps (disabled by default)
+	if cfg.keymaps then
+		require("color_my_ascii.bindings.keymaps").attach(cfg.keymaps)
+	end
 
 	return true, nil
 end

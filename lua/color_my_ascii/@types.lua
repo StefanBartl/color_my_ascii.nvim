@@ -53,6 +53,9 @@
 ---@field enable_function_names? boolean Enable heuristic function name detection
 ---@field enable_bracket_highlighting? boolean Enable highlighting of brackets/parentheses
 ---@field fence_language_map? table<string, string> Map of markdown fence language tags to plugin language names (e.g., { vim = "vim" })
+---@field keymaps? false|table<string, string> Optional default keymaps (action name -> lhs). false (default) disables all keymaps. See lua/color_my_ascii/bindings/keymaps.lua
+---@field cache? CacheConfig Optional override for cache_manager defaults
+---@field debounce? DebounceConfig Optional override for debounce_manager defaults
 
 ---@class ColorMyAscii.State
 ---@field enabled boolean Whether the plugin is currently enabled

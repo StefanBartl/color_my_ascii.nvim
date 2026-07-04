@@ -1,32 +1,13 @@
----@module 'color_my_ascii.commands'
---- User command registration and management for color_my_ascii.nvim
+---@module 'color_my_ascii.bindings.usrcmds'
+--- User command registration for color_my_ascii.nvim.
+--- See docs/BINDINGS.lua for a full cheatsheet of all registered commands.
 
 local M = {}
 
 local create_usercommand = vim.api.nvim_create_user_command
 
---- Register all plugin commands
-function M.register_all()
-  -- Core commands
-  M.register_highlight()
-  M.register_toggle()
-  M.register_debug()
-
-  -- Fence checking
-  M.register_fence_check()
-
-  -- Configuration
-  M.register_show_config()
-
-  -- Scheme management
-  M.register_scheme_commands()
-
-  -- Formatting
-  M.register_ensure_blank_lines()
-end
-
 --- Register :ColorMyAscii command
-function M.register_highlight()
+local function register_highlight()
   create_usercommand('ColorMyAscii', function()
     require('color_my_ascii').highlight_buffer()
   end, {
@@ -35,7 +16,7 @@ function M.register_highlight()
 end
 
 --- Register :ColorMyAsciiToggle command
-function M.register_toggle()
+local function register_toggle()
   create_usercommand('ColorMyAsciiToggle', function()
     require('color_my_ascii').toggle()
   end, {
@@ -44,7 +25,7 @@ function M.register_toggle()
 end
 
 --- Register :ColorMyAsciiDebug command
-function M.register_debug()
+local function register_debug()
   create_usercommand('ColorMyAsciiDebug', function()
     require('color_my_ascii.commands.debug').show_debug_info()
   end, {
@@ -53,7 +34,7 @@ function M.register_debug()
 end
 
 --- Register :ColorMyAsciiCheckFences command
-function M.register_fence_check()
+local function register_fence_check()
   create_usercommand('ColorMyAsciiCheckFences', function()
     require('color_my_ascii.commands.fence_check').check_current_buffer()
   end, {
@@ -62,7 +43,7 @@ function M.register_fence_check()
 end
 
 --- Register :ColorMyAsciiShowConfig command
-function M.register_show_config()
+local function register_show_config()
   create_usercommand('ColorMyAsciiShowConfig', function()
     require('color_my_ascii.commands.config').show_config()
   end, {
@@ -71,7 +52,7 @@ function M.register_show_config()
 end
 
 --- Register scheme management commands
-function M.register_scheme_commands()
+local function register_scheme_commands()
   local schemes = require('color_my_ascii.commands.schemes')
 
   -- List schemes
@@ -101,12 +82,32 @@ function M.register_scheme_commands()
 end
 
 --- Register :ColorMyAsciiEnsureBlankLines command
-function M.register_ensure_blank_lines()
+local function register_ensure_blank_lines()
   create_usercommand('ColorMyAsciiEnsureBlankLines', function()
     require('color_my_ascii.commands.format').ensure_blank_lines()
   end, {
     desc = 'Ensure blank lines before and after fenced code blocks',
   })
+end
+
+--- Register all plugin user commands
+function M.enable()
+  -- Core commands
+  register_highlight()
+  register_toggle()
+  register_debug()
+
+  -- Fence checking
+  register_fence_check()
+
+  -- Configuration
+  register_show_config()
+
+  -- Scheme management
+  register_scheme_commands()
+
+  -- Formatting
+  register_ensure_blank_lines()
 end
 
 return M

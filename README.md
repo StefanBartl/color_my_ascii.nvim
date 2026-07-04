@@ -1,4 +1,15 @@
 # color_my_ascii.nvim
+
+```
+    ╔══════════════════════════════════════════╗
+    ║   c o l o r _ m y _ a s c i i . n v i m   ║
+    ║   ┌─┐ → ★ ┌─┐   function() end   ┌─┐      ║
+    ╚══════════════════════════════════════════╝
+```
+
+> See also: [markdown.nvim](https://github.com/StefanBartl/markdown.nvim) - a companion
+> plugin for working with Markdown files, pairs well with the ASCII highlighting here.
+
 ![version](https://img.shields.io/badge/version-0.2-blue.svg)
 ![State](https://img.shields.io/badge/status-beta-orange.svg)
 ![Lazy.nvim compatible](https://img.shields.io/badge/lazy.nvim-supported-success)
@@ -49,7 +60,6 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
   - [Contributing](#contributing)
     - [Add a New Language](#add-a-new-language)
     - [Add a New Character Group](#add-a-new-character-group)
-  - [License](#license)
   - [Credits](#credits)
   - [See Also](#see-also)
 
@@ -88,11 +98,17 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 
 ## Installation
 
+**Loading strategy**: the plugin is loaded via `ft = 'markdown'`, i.e. only once a
+Markdown buffer is opened. This is the recommended trigger for this plugin - more
+precise than a blanket `event = "VeryLazy"`, since there is nothing to do until a
+Markdown file is actually being edited.
+
 ### With lazy.nvim
 ````lua
 {
   'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
+  dependencies = { 'StefanBartl/lib.nvim' }, -- optional, enables graceful keymap/notify integration
   opts = {
     -- Optional: Configuration here
   }
@@ -106,6 +122,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 use {
   'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
+  requires = { 'StefanBartl/lib.nvim' }, -- optional, enables graceful keymap/notify integration
   config = function()
     require('color_my_ascii').setup({
       -- Optional: Configuration here
@@ -337,22 +354,30 @@ Additional languages can be easily added (see [Contributing](#contributing)).
 
 ### Keybinding Examples
 
+Keymaps are **opt-in** and disabled by default. Enable and customize them via the
+`keymaps` option in `setup()`:
+
 ```lua
--- Scheme switcher
-vim.keymap.set('n', '<leader>as', '<cmd>ColorMyAsciiSchemes<cr>', {
-  desc = 'Switch color scheme'
-})
-
--- Format code blocks
-vim.keymap.set('n', '<leader>af', '<cmd>ColorMyAsciiEnsureBlankLines<cr>', {
-  desc = 'Format code blocks'
-})
-
--- Show config
-vim.keymap.set('n', '<leader>ac', '<cmd>ColorMyAsciiShowConfig<cr>', {
-  desc = 'Show config'
+require('color_my_ascii').setup({
+  keymaps = {
+    highlight           = '<leader>ah',
+    toggle              = '<leader>at',
+    schemes             = '<leader>as',
+    ensure_blank_lines  = '<leader>af',
+    show_config         = '<leader>ac',
+    debug               = '<leader>ad',
+    check_fences        = '<leader>ax',
+  },
 })
 ```
+
+Each mapping is set with a `desc`, so [which-key.nvim](https://github.com/folke/which-key.nvim)
+picks them up automatically without extra configuration. If
+[lib.nvim](https://github.com/StefanBartl/lib.nvim) is installed, it is used for the
+underlying keymap registration; otherwise the plugin falls back to `vim.keymap.set`.
+
+See [docs/BINDINGS.lua](docs/BINDINGS.lua) for the full cheatsheet of user commands,
+keymap actions, and autocommands.
 
 ---
 
@@ -370,8 +395,10 @@ vim.keymap.set('n', '<leader>ac', '<cmd>ColorMyAsciiShowConfig<cr>', {
 ### Guides
 
 - [Quickstart](docs/QUICKSTART.md) - Getting started
-- [Test File](docs/TEST.md) - Test all features
+- [Test File](docs/dev/TEST.md) - Test all features
 - [Color Schemes](docs/schemes.md) - Create custom schemes
+- [Bindings Cheatsheet](docs/BINDINGS.lua) - All commands, keymaps, and autocommands
+- [Roadmap](docs/ROADMAP.md) - Planned and considered future work
 
 ---
 
@@ -533,12 +560,6 @@ return group
 ````
 
 3. Reload plugin
-
----
-
-## License
-
-[MIT](./LICENSE)
 
 ---
 

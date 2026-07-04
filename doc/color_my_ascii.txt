@@ -3,8 +3,6 @@
                         COLOR MY ASCII~
                     ASCII Art Highlighter for Neovim
 
-Author:  lavalue
-License: MIT
 Version: 1.1.0
 
 ==============================================================================

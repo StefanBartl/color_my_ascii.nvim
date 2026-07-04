@@ -182,6 +182,14 @@ function M.check()
     end
   end
 
+  -- lib.nvim is an optional dependency used for keymaps/notify integration
+  local lib_ok = pcall(require, 'lib.nvim.map')
+  if lib_ok then
+    health.ok('lib.nvim found - keymap/notify integration available')
+  else
+    health.info('lib.nvim not found (optional) - falling back to vim.keymap.set/vim.notify')
+  end
+
   -- Summary
   if all_core_ok then
     health.ok('All core modules loaded successfully')

@@ -9,6 +9,8 @@ local M = {}
 local notify = vim.notify
 local fn = vim.fn
 
+local DEFAULTS = require('color_my_ascii.config.DEFAULTS')
+
 --- Cache for dynamically created highlight groups
 ---@type table<string, boolean>
 local created_highlight_groups = {}
@@ -31,7 +33,7 @@ local function load_languages()
     return languages, errors
   end
 
-  local dir = fn.fnamemodify(source, ":h")
+  local dir = fn.fnamemodify(source, ":h:h")
   local lang_path = dir .. '/languages'
 
   -- Check directory existence
@@ -102,7 +104,7 @@ local function load_groups()
     return groups, errors
   end
 
-  local dir = fn.fnamemodify(source, ":h")
+  local dir = fn.fnamemodify(source, ":h:h")
   local group_path = dir .. '/groups'
 
   -- Check directory existence
@@ -155,34 +157,9 @@ local function load_groups()
   return groups, errors
 end
 
---- Default configuration
+--- Default configuration (mutable copy; groups/keywords get populated at setup time)
 ---@type ColorMyAscii.Config
-local defaults = {
-  debug_enabled = false,
-  debug_verbose = false,
-  scheme = 'default',
-  groups = {},
-  keywords = {},
-  overrides = {},
-  default_hl = 'Normal',
-  default_text_hl = nil,
-  enable_keywords = true,
-  enable_language_detection = true,
-  language_detection_threshold = 2,
-  enable_treesitter = false,
-  treat_empty_fence_as_ascii = true,
-  enable_inline_code = true,
-  enable_function_names = true,
-  enable_bracket_highlighting = true,
-  -- Maps standard markdown fence language identifiers to plugin language names.
-  -- Fences whose language appears here are treated as ASCII blocks and highlighted
-  -- with the corresponding language definition.
-  fence_language_map = {
-    vim = 'vim',
-    vimscript = 'vim',
-    viml = 'vim',
-  },
-}
+local defaults = vim.deepcopy(DEFAULTS)
 
 --- Current configuration
 ---@type ColorMyAscii.Config

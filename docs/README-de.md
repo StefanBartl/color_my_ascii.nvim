@@ -44,7 +44,6 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
   - [Contributing](#contributing)
     - [Neue Sprache hinzufügen](#neue-sprache-hinzufgen)
     - [Neue Zeichengruppe hinzufügen](#neue-zeichengruppe-hinzufgen)
-  - [Lizenz](#lizenz)
   - [Credits](#credits)
   - [Siehe auch](#siehe-auch)
 
@@ -563,12 +562,6 @@ return group
 ````
 
 3. Plugin neu laden
-
----
-
-## Lizenz
-
-MIT
 
 ---
 

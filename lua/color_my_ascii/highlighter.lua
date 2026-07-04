@@ -27,34 +27,24 @@ function M.clear_buffer(bufnr)
   buffer_extmarks[bufnr] = nil
 end
 
---- Apply highlighting to a single character range
+--- Apply highlighting to a single character range.
+--- Takes the line's content from the caller instead of re-fetching it via the API,
+--- since callers already hold it (from block.lines / inline.content) and this function
+--- is invoked many times per line (once per character/keyword/function name).
 ---@param bufnr integer Buffer number
 ---@param line integer Line number (0-indexed)
 ---@param col_start integer Start column (0-indexed, byte offset)
 ---@param col_end integer End column (0-indexed, byte offset, exclusive)
 ---@param hl_group string|ColorMyAscii.CustomHighlight Highlight group name
 ---@param context string Context for debug messages (e.g., "default", "chars", "keywords")
-local function highlight_range(bufnr, line, col_start, col_end, hl_group, context)
+---@param line_content string Content of the line (used to validate columns)
+local function highlight_range(bufnr, line, col_start, col_end, hl_group, context, line_content)
   local cfg = config.get()
 
-  -- Validate line exists
-  local line_count = api.nvim_buf_line_count(bufnr)
-  if line < 0 or line >= line_count then
+  if type(line_content) ~= "string" then
     if cfg.debug_enabled then
       notify(
-        string.format("line %d %s: Line out of range (total: %d)", line + 1, context, line_count),
-        levels.WARN
-      )
-    end
-    return
-  end
-
-  -- Get line content and validate columns
-  local line_content = api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
-  if not line_content then
-    if cfg.debug_enabled then
-      notify(
-        string.format("line %d %s: Failed to get line content", line + 1, context),
+        string.format("line %d %s: Missing line content", line + 1, context),
         levels.WARN
       )
     end
@@ -130,7 +120,7 @@ local function highlight_function_names(bufnr, line_num, line_content)
     local keyword_langs = config.get_keyword_languages(func_name)
 
     if not keyword_langs then
-      highlight_range(bufnr, line_num, match_start - 1, func_end, 'Function', 'function')
+      highlight_range(bufnr, line_num, match_start - 1, func_end, 'Function', 'function', line_content)
     end
 
     start_pos = match_end + 1
@@ -190,7 +180,7 @@ local function highlight_keywords(bufnr, line_num, line_content, detected_langua
               col_end = col_start + #token
             end
 
-            highlight_range(bufnr, line_num, col_start, col_end, hl_group, 'keywords')
+            highlight_range(bufnr, line_num, col_start, col_end, hl_group, 'keywords', line_content)
           end
 
           start_pos = match_end + 1
@@ -214,7 +204,7 @@ local function highlight_characters(bufnr, line_num, line_content)
     if hl_group then
       local char_len = #char
       highlight_range(bufnr, line_num, byte_pos, byte_pos + char_len, hl_group,
-        string.format('chars: char "%s" at pos %d', char, byte_pos))
+        string.format('chars: char "%s" at pos %d', char, byte_pos), line_content)
     end
 
     byte_pos = byte_pos + #char
@@ -236,7 +226,7 @@ function M.highlight_block(bufnr, block)
 
     -- Pass 1: Apply default text highlight to entire line (lowest priority)
     if user_config.default_text_hl then
-      highlight_range(bufnr, line_num, 0, #line_content, user_config.default_text_hl, 'default')
+      highlight_range(bufnr, line_num, 0, #line_content, user_config.default_text_hl, 'default', line_content)
     end
 
     -- Pass 2: Highlight special characters (will override default_text_hl)
@@ -256,13 +246,28 @@ function M.highlight_inline_codes(bufnr)
   local inline_codes = parser.find_inline_codes(bufnr)
   local user_config = config.get()
 
+  -- Cache full-line content per line number, fetched at most once per inline code segment
+  -- (not once per character) since column bounds are validated against the full buffer line.
+  ---@type table<integer, string>
+  local line_cache = {}
+  local function get_full_line(line_num)
+    local cached = line_cache[line_num]
+    if cached ~= nil then
+      return cached
+    end
+    local fetched = api.nvim_buf_get_lines(bufnr, line_num, line_num + 1, false)[1] or ''
+    line_cache[line_num] = fetched
+    return fetched
+  end
+
   for _, inline in ipairs(inline_codes) do
     local line_content = inline.content
     local content_start_col = inline.start_col + 1  -- After opening backtick
+    local full_line = get_full_line(inline.line)
 
     -- Pass 1: Apply default text highlight if configured
     if user_config.default_text_hl then
-      highlight_range(bufnr, inline.line, content_start_col, inline.end_col, user_config.default_text_hl, 'default')
+      highlight_range(bufnr, inline.line, content_start_col, inline.end_col, user_config.default_text_hl, 'default', full_line)
     end
 
     -- Pass 2: Highlight special characters in inline code
@@ -277,7 +282,7 @@ function M.highlight_inline_codes(bufnr)
         local abs_start = content_start_col + rel_byte_pos
         local abs_end = abs_start + char_len
         highlight_range(bufnr, inline.line, abs_start, abs_end, hl_group,
-          string.format('chars: char "%s" at pos %d', char, rel_byte_pos))
+          string.format('chars: char "%s" at pos %d', char, rel_byte_pos), full_line)
       end
 
       rel_byte_pos = rel_byte_pos + #char
@@ -301,7 +306,7 @@ function M.highlight_inline_codes(bufnr)
         if not keyword_langs then
           local abs_start = content_start_col + match_start - 1
           local abs_end = content_start_col + func_end
-          highlight_range(bufnr, inline.line, abs_start, abs_end, 'Function', 'function')
+          highlight_range(bufnr, inline.line, abs_start, abs_end, 'Function', 'function', full_line)
         end
 
         start_pos = match_end + 1
@@ -333,7 +338,7 @@ function M.highlight_inline_codes(bufnr)
             if is_whole_word then
               local abs_start = content_start_col + match_start - 1
               local abs_end = content_start_col + match_end
-              highlight_range(bufnr, inline.line, abs_start, abs_end, hl_group, 'keywords')
+              highlight_range(bufnr, inline.line, abs_start, abs_end, hl_group, 'keywords', full_line)
             end
 
             start_pos = match_end + 1

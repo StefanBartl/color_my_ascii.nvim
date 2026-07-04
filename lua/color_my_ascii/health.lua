@@ -174,11 +174,13 @@ function M.check()
   -- Check for common issues
   health.info('Checking for common issues...')
 
-  -- Check if treesitter is enabled but not available
+  -- enable_treesitter is a reserved config flag for a planned feature (see
+  -- docs/ROADMAP.md); it has no effect yet, regardless of nvim-treesitter's presence.
   if ok and config.get().enable_treesitter then
+    health.info('enable_treesitter is set, but Treesitter-based highlighting is planned and not yet implemented - this flag currently has no effect')
     local ts_ok = pcall(require, 'nvim-treesitter')
     if not ts_ok then
-      health.warn('Treesitter integration enabled but nvim-treesitter not found')
+      health.warn('nvim-treesitter not found (irrelevant until the feature is implemented)')
     end
   end
 

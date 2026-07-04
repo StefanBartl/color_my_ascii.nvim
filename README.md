@@ -456,9 +456,9 @@ Pick one scheme from the list of [available schemes](#available-schemes) and set
 Example with Matrix Scheme:
 
 ````lua
-require('color_my_ascii').setup(
+require('color_my_ascii').setup({
   scheme = "matrix",
-)
+})
 ````
 
 Dark background with bright green elements. All features enabled.

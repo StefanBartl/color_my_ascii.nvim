@@ -14,21 +14,25 @@ CONTENTS                                        *color_my_ascii-contents*
     4. Quick Start ............................ |color_my_ascii-quickstart|
     5. Configuration .......................... |color_my_ascii-config|
     6. Features ............................... |color_my_ascii-features|
-    7. Commands ............................... |color_my_ascii-commands|
-    8. Color Schemes .......................... |color_my_ascii-schemes|
-    9. API .................................... |color_my_ascii-api|
-    10. Troubleshooting ....................... |color_my_ascii-troubleshooting|
+    7. Treesitter Integration ................. |color_my_ascii-treesitter|
+    8. Commands ................................ |color_my_ascii-commands|
+    9. Keybindings ............................. |color_my_ascii-keybindings|
+    10. Color Schemes ......................... |color_my_ascii-schemes|
+    11. API .................................... |color_my_ascii-api|
+    12. Troubleshooting ....................... |color_my_ascii-troubleshooting|
 
 ==============================================================================
 1. INTRODUCTION                                 *color_my_ascii-intro*
 
 color_my_ascii.nvim is a Neovim plugin that provides syntax highlighting for
 ASCII art in markdown code blocks. It supports automatic language detection,
-custom color schemes, and various highlighting features.
+custom color schemes, optional treesitter integration, and various
+highlighting features.
 
 Features:~
   • Highlight box-drawing characters, blocks, arrows, and symbols
-  • Language-specific keyword highlighting (C, C++, Lua, Go, Rust, Vimscript, etc.)
+  • Language-specific keyword highlighting (C, C++, Lua, Go, Rust,
+    TypeScript, Python, Bash, Zig, LLVM IR, Vimscript)
   • Automatic language detection using heuristics
   • Standard markdown fence tags via fence_language_map (e.g., ```vim)
   • Custom color schemes with RGB/hex colors
@@ -38,36 +42,49 @@ Features:~
   • Fence validation
   • Scheme switcher with live preview
   • Code block formatting
+  • Optional treesitter-based block detection and real syntax highlighting
+  • Optional, disableable default keymaps with which-key support
 
 ==============================================================================
 2. REQUIREMENTS                                 *color_my_ascii-requirements*
 
-  • Neovim >= 0.7.0
+  • Neovim >= 0.9
   • Markdown files (filetype=markdown)
-  • Optional: telescope.nvim for scheme picker
+  • Optional: telescope.nvim for the scheme picker
+  • Optional: lib.nvim (github.com/StefanBartl/lib.nvim) for graceful
+    keymap/notify integration - falls back to vim.keymap.set/vim.notify
+  • Optional: nvim-treesitter with the "markdown" parser (and a parser for
+    the relevant language) for treesitter integration
 
 ==============================================================================
 3. INSTALLATION                                 *color_my_ascii-installation*
 
+The plugin is loaded via ft = 'markdown', i.e. only once a markdown buffer is
+opened. This is the recommended trigger - more precise than a blanket
+event = "VeryLazy", since there is nothing to do until a markdown file is
+actually being edited.
+
 Using lazy.nvim:~
 >lua
     {
-      'username/color_my_ascii.nvim',
+      'StefanBartl/color_my_ascii.nvim',
       ft = 'markdown',
+      dependencies = { 'StefanBartl/lib.nvim' }, -- optional
       opts = {}
     }
-
+<
 
 Using packer.nvim:~
 >lua
     use {
-      'username/color_my_ascii.nvim',
+      'StefanBartl/color_my_ascii.nvim',
       ft = 'markdown',
+      requires = { 'StefanBartl/lib.nvim' }, -- optional
       config = function()
         require('color_my_ascii').setup()
       end
     }
-
+<
 
 ==============================================================================
 4. QUICK START                                  *color_my_ascii-quickstart*
@@ -81,7 +98,7 @@ Basic usage:~
     │ Hello World │
     └─────────────┘
 ```
-
+<
 
 With explicit language:~
 >markdown
@@ -90,7 +107,7 @@ With explicit language:~
     │ int x = 42;  │
     └──────────────┘
 ```
-
+<
 
 With a standard fence tag (via fence_language_map):~
 >markdown
@@ -100,7 +117,7 @@ With a standard fence tag (via fence_language_map):~
       autocmd!
     augroup END
 ```
-
+<
 
 See |color_my_ascii-config| for configuration options.
 
@@ -110,32 +127,32 @@ See |color_my_ascii-config| for configuration options.
 Setup with defaults:~
 >lua
     require('color_my_ascii').setup()
+<
 
-
-Custom configuration:~
+Full default configuration:~
 >lua
     require('color_my_ascii').setup({
-      -- Character-specific overrides
-      overrides = {
-        ['┌'] = 'Special',
-        ['└'] = { fg = '#ff0000', bold = true },
-      },
+      debug_enabled = false,
+      debug_verbose = false,
+      scheme = 'default',
+
+      -- Character-specific overrides (highest priority)
+      overrides = {},
 
       -- Default highlight for unmatched characters
       default_hl = 'Normal',
 
-      -- Dim normal text in blocks
-      default_text_hl = 'Comment',
+      -- Optional: default highlight for normal text in blocks
+      default_text_hl = nil,  -- e.g. 'Comment' for dimmed display
 
       -- Feature toggles
       enable_keywords = true,
       enable_language_detection = true,
       language_detection_threshold = 2,
-      enable_function_names = false,
-      enable_bracket_highlighting = false,
-      treat_empty_fence_as_ascii = false,
-      enable_inline_code = false,
-      debug_enabled = false,
+      enable_function_names = true,
+      enable_bracket_highlighting = true,
+      treat_empty_fence_as_ascii = true,
+      enable_inline_code = true,
 
       -- Map standard markdown fence tags to plugin language names
       fence_language_map = {
@@ -143,8 +160,23 @@ Custom configuration:~
         vimscript = 'vim',
         viml = 'vim',
       },
-    })
 
+      -- Optional default keymaps (false = disabled). See |color_my_ascii-keybindings|
+      keymaps = false,
+
+      -- Optional overrides for cache_manager/debounce_manager internals.
+      -- nil = use the plugin's built-in defaults.
+      cache = nil,
+      debounce = nil,
+
+      -- Optional treesitter integration, see |color_my_ascii-treesitter|
+      treesitter = {
+        enabled = false,
+        block_detection = true,
+        syntax_highlight = true,
+      },
+    })
+<
 
 Configuration options:~
 
@@ -182,24 +214,24 @@ Configuration options:~
 *color_my_ascii-config-enable_function_names*
     enable_function_names   Enable heuristic function name detection
                             Type: boolean
-                            Default: false
+                            Default: true
 
 *color_my_ascii-config-enable_bracket_highlighting*
     enable_bracket_highlighting
                             Highlight brackets/parentheses
                             Type: boolean
-                            Default: false
+                            Default: true
 
 *color_my_ascii-config-treat_empty_fence_as_ascii*
     treat_empty_fence_as_ascii
                             Treat ``` without language as ASCII
                             Type: boolean
-                            Default: false
+                            Default: true
 
 *color_my_ascii-config-enable_inline_code*
     enable_inline_code      Highlight inline code (`...`)
                             Type: boolean
-                            Default: false
+                            Default: true
 
 *color_my_ascii-config-debug_enabled*
     debug_enabled           Enable debug mode (verbose logging)
@@ -227,6 +259,34 @@ Configuration options:~
     })
 <
 
+*color_my_ascii-config-keymaps*
+    keymaps                 Optional default keymaps (action name -> key
+                            sequence). false disables all keymaps.
+                            Type: false | table<string, string>
+                            Default: false
+                            See |color_my_ascii-keybindings|
+
+*color_my_ascii-config-cache*
+    cache                   Optional override for cache_manager defaults
+                            ({ timeout, max_size, enable_stats }).
+                            Type: table or nil
+                            Default: nil (use built-in defaults)
+
+*color_my_ascii-config-debounce*
+    debounce                Optional override for debounce_manager defaults
+                            ({ small_file_threshold, medium_file_threshold,
+                            small_delay, medium_delay, large_delay }).
+                            Type: table or nil
+                            Default: nil (use built-in defaults)
+
+*color_my_ascii-config-treesitter*
+    treesitter              Optional treesitter-based block detection and
+                            syntax highlighting.
+                            Type: table { enabled, block_detection, syntax_highlight }
+                            Default: { enabled = false, block_detection = true,
+                            syntax_highlight = true }
+                            See |color_my_ascii-treesitter|
+
 Custom highlight specification:~
 
 Highlights can be specified as strings (built-in highlight groups) or tables
@@ -241,7 +301,7 @@ with custom colors:
       undercurl = true,         -- Undercurl
       strikethrough = true,     -- Strikethrough
     }
-
+<
 
 ==============================================================================
 6. FEATURES                                     *color_my_ascii-features*
@@ -277,7 +337,7 @@ Function Name Detection~                        *color_my_ascii-function-detecti
 When enabled, highlights function names using heuristics:
 >c
     result = calculate(x);  // "calculate" highlighted
-
+<
 
 See |color_my_ascii-config-enable_function_names|.
 
@@ -286,7 +346,7 @@ Bracket Highlighting~                           *color_my_ascii-bracket-highligh
 When enabled, highlights parentheses, square brackets, and curly braces:
 >c
     if (x > 0) { }  // (), {} highlighted
-
+<
 
 See |color_my_ascii-config-enable_bracket_highlighting|.
 
@@ -295,7 +355,7 @@ Inline Code Highlighting~                       *color_my_ascii-inline-code*
 When enabled, highlights keywords and symbols in inline code:
 >markdown
     Use `func` for functions and `→` for arrows.
-
+<
 
 See |color_my_ascii-config-enable_inline_code|.
 
@@ -308,12 +368,54 @@ When enabled, treats empty fences (``` without language) as ASCII blocks:
     │ OK │
     └────┘
 ```
-
+<
 
 See |color_my_ascii-config-treat_empty_fence_as_ascii|.
 
 ==============================================================================
-7. COMMANDS                                     *color_my_ascii-commands*
+7. TREESITTER INTEGRATION                       *color_my_ascii-treesitter*
+
+Off by default (treesitter.enabled = false) - the plugin behaves exactly as
+without treesitter. Two independently toggleable sub-features:
+
+*color_my_ascii-treesitter-block_detection*
+    block_detection          Use Neovim's markdown treesitter grammar to
+                            find fenced code blocks instead of the built-in
+                            line scanner. More robust for edge cases (nested
+                            fences, unusual indentation). Requires a
+                            "markdown" parser (:TSInstall markdown); falls
+                            back silently to the heuristic scanner if
+                            unavailable or if detection errors.
+
+*color_my_ascii-treesitter-syntax_highlight*
+    syntax_highlight          Additionally highlights a block's content using
+                            the real grammar of its detected language (e.g.
+                            real Lua/Python/C syntax via @-prefixed highlight
+                            groups), on top of the existing character/keyword
+                            highlighting. Best-effort: ASCII art is usually
+                            not valid syntax, so this only has a visible
+                            effect on blocks (or portions of blocks) that
+                            happen to contain real, parseable code. Requires
+                            a parser for that language (:TSInstall <language>);
+                            silently does nothing where unavailable or
+                            unparseable.
+
+Example:~
+>lua
+    require('color_my_ascii').setup({
+      treesitter = {
+        enabled = true,
+        block_detection = true,
+        syntax_highlight = true,
+      },
+    })
+<
+
+`:checkhealth color_my_ascii` reports whether the required parsers are
+installed.
+
+==============================================================================
+8. COMMANDS                                     *color_my_ascii-commands*
 
 Core Commands~
 
@@ -355,17 +457,10 @@ Scheme Management~                              *color_my_ascii-scheme-commands*
     Tab completion available for scheme names.
     Automatically re-highlights all active buffers.
 
-    Available schemes:~
-      • default  - Built-in Neovim highlights
-      • matrix   - Dark with bright green (hacker style)
-      • nord     - Cool blue/cyan colors
-      • gruvbox  - Warm, retro colors
-      • dracula  - Vibrant purple and pink
-
     Example:~
 >vim
         :ColorMyAsciiSwitchScheme matrix
-
+<
 
 *:ColorMyAsciiSchemes*
     Open Telescope picker for interactive scheme selection.
@@ -380,63 +475,112 @@ Scheme Management~                              *color_my_ascii-scheme-commands*
       • <CR>        - Apply selected scheme
       • <Esc>       - Cancel and keep current scheme
 
-==============================================================================
-8. COLOR SCHEMES                                *color_my_ascii-schemes*
+See |color_my_ascii-schemes| for the full list of available schemes.
 
-The plugin includes pre-configured color schemes:
+==============================================================================
+9. KEYBINDINGS                                  *color_my_ascii-keybindings*
+
+All keymaps are opt-in and disabled by default. Enable and customize them via
+the `keymaps` option in setup() - see |color_my_ascii-config-keymaps|.
+
+Available actions:~
+>lua
+    require('color_my_ascii').setup({
+      keymaps = {
+        highlight           = '<leader>ah',  -- :ColorMyAscii
+        toggle              = '<leader>at',  -- :ColorMyAsciiToggle
+        schemes             = '<leader>as',  -- :ColorMyAsciiSchemes
+        ensure_blank_lines  = '<leader>af',  -- :ColorMyAsciiEnsureBlankLines
+        show_config         = '<leader>ac',  -- :ColorMyAsciiShowConfig
+        debug               = '<leader>ad',  -- :ColorMyAsciiDebug
+        check_fences        = '<leader>ax',  -- :ColorMyAsciiCheckFences
+      },
+    })
+<
+
+Each mapping is set with a `desc`, so which-key.nvim picks them up
+automatically without extra configuration. If lib.nvim
+(github.com/StefanBartl/lib.nvim) is installed, its keymap helper is used for
+registration; otherwise the plugin falls back to vim.keymap.set.
+
+See the plugin's docs/BINDINGS.lua for the full cheatsheet of user commands,
+keymap actions, and autocommands.
+
+==============================================================================
+10. COLOR SCHEMES                               *color_my_ascii-schemes*
+
+The plugin includes 10 pre-configured color schemes.
 
 Loading a color scheme:~
 >lua
     require('color_my_ascii').setup(
       require('color_my_ascii.schemes.matrix')
     )
-
+<
 
 Available schemes:~
 
 *color_my_ascii-scheme-default*
     default                 Uses built-in Neovim highlights
                             Maximum compatibility
-                            Features: keywords, detection
 
 *color_my_ascii-scheme-matrix*
     matrix                  Dark with bright green (hacker style)
                             Features: all enabled
-                            Text: dimmed dark green
 
 *color_my_ascii-scheme-nord*
     nord                    Cool blue/cyan colors
-                            Based on Nord theme
                             Features: keywords, detection, functions
                             Special: highlighted corners
 
 *color_my_ascii-scheme-gruvbox*
     gruvbox                 Warm, retro colors
-                            Based on Gruvbox theme
                             Features: keywords, detection, brackets, inline
 
 *color_my_ascii-scheme-dracula*
     dracula                 Vibrant purple and pink
-                            Based on Dracula theme
                             Features: all enabled
+
+*color_my_ascii-scheme-catppuccin*
+    catppuccin              Soft pastel colors (Catppuccin Mocha)
+                            Features: keywords, detection, functions, inline
+
+*color_my_ascii-scheme-onedark*
+    onedark                 Atom-inspired dark theme, vibrant syntax colors
+                            Features: keywords, detection, functions,
+                            brackets, inline
+
+*color_my_ascii-scheme-solarized*
+    solarized               Precision colors for readability (Solarized Dark)
+                            Features: keywords, detection
+
+*color_my_ascii-scheme-tokyonight*
+    tokyonight              Deep blue night colors with vibrant accents
+                            Features: keywords, detection, functions,
+                            brackets, inline
+
+*color_my_ascii-scheme-monokai*
+    monokai                 High contrast dark theme, vibrant neon colors
+                            Features: keywords, detection, functions,
+                            brackets, inline
 
 Switching schemes:~
 
 Via command:
 >vim
     :ColorMyAsciiSwitchScheme nord
-
+<
 
 Via Telescope (with live preview):
 >vim
     :ColorMyAsciiSchemes
-
+<
 
 Via API:
 >lua
     local scheme = require('color_my_ascii.schemes.nord')
     require('color_my_ascii').setup(scheme)
-
+<
 
 Creating custom schemes:~
 >lua
@@ -451,25 +595,36 @@ Creating custom schemes:~
         ['┌'] = { fg = '#ff0000' },
       },
     })
+<
 
-
-See docs/schemes.md for detailed guide.
+See docs/schemes.md for a detailed guide.
 
 ==============================================================================
-9. API                                          *color_my_ascii-api*
+11. API                                         *color_my_ascii-api*
 
 *color_my_ascii.setup()*
     Setup the plugin with configuration options.
 
     Parameters:~
-        {opts}  (table|nil)  Configuration options
+        {opts}  (table|nil)  Configuration options, see |color_my_ascii-config|
 
     Usage:~
 >lua
         require('color_my_ascii').setup({
           enable_keywords = true,
         })
+<
 
+*color_my_ascii.setup_buffer()*
+    Setup highlighting for a specific buffer.
+
+    Parameters:~
+        {bufnr}  (integer)  Buffer number
+
+    Usage:~
+>lua
+        require('color_my_ascii').setup_buffer(vim.api.nvim_get_current_buf())
+<
 
 *color_my_ascii.highlight_buffer()*
     Manually trigger highlighting for a buffer.
@@ -480,7 +635,7 @@ See docs/schemes.md for detailed guide.
     Usage:~
 >lua
         require('color_my_ascii').highlight_buffer()
-
+<
 
 *color_my_ascii.toggle()*
     Toggle the plugin on/off.
@@ -492,7 +647,7 @@ See docs/schemes.md for detailed guide.
 >lua
         local enabled = require('color_my_ascii').toggle()
         print('Plugin enabled:', enabled)
-
+<
 
 *color_my_ascii.get_state()*
     Get the current plugin state.
@@ -500,41 +655,76 @@ See docs/schemes.md for detailed guide.
     Returns:~
         table  State containing enabled status and active buffers
 
-*color_my_ascii.setup_buffer()*
-    Setup highlighting for a specific buffer.
+*color_my_ascii.get_cache_stats()*
+    Get cache statistics (hits, misses, size, etc.).
+
+    Returns:~
+        table  Cache statistics
+
+*color_my_ascii.get_cache_hit_rate()*
+    Get the cache hit rate.
+
+    Returns:~
+        number  Hit rate as a percentage (0-100)
+
+*color_my_ascii.clear_caches()*
+    Clear all cached parse results for all buffers.
+
+    Returns:~
+        integer  Number of cleared entries
+
+*color_my_ascii.get_debounce_config()*
+    Get the current debounce configuration.
+
+    Returns:~
+        table  Debounce configuration
+
+*color_my_ascii.configure_cache()*
+    Reconfigure cache behavior at runtime.
 
     Parameters:~
-        {bufnr}  (integer)  Buffer number
+        {opts}  (table)  Cache configuration ({ timeout, max_size, enable_stats })
 
     Usage:~
 >lua
-        require('color_my_ascii').setup_buffer(vim.api.nvim_get_current_buf())
+        require('color_my_ascii').configure_cache({ timeout = 10000 })
+<
 
+*color_my_ascii.configure_debounce()*
+    Reconfigure debounce behavior at runtime.
+
+    Parameters:~
+        {opts}  (table)  Debounce configuration
+
+    Usage:~
+>lua
+        require('color_my_ascii').configure_debounce({ small_delay = 50 })
+<
 
 ==============================================================================
-10. TROUBLESHOOTING                             *color_my_ascii-troubleshooting*
+12. TROUBLESHOOTING                             *color_my_ascii-troubleshooting*
 
 No highlighting visible~
 
 1. Check if plugin is loaded:
    >vim
        :ColorMyAsciiDebug
-
+<
 
 2. Verify buffer is markdown:
    >vim
        :set filetype?
-
+<
 
 3. Check for errors:
    >vim
        :messages
-
+<
 
 4. Run health check:
    >vim
        :checkhealth color_my_ascii
-
+<
 
 Incorrect language detection~
 
@@ -543,21 +733,21 @@ Use explicit language marker:
 ```ascii-c
     int x = 42;
 ```
-
+<
 
 Use a standard fence tag (if listed in fence_language_map):
 >markdown
 ```vim
     nnoremap <leader>w :w<CR>
 ```
-
+<
 
 Or adjust detection threshold:
 >lua
     require('color_my_ascii').setup({
       language_detection_threshold = 3,  -- More strict
     })
-
+<
 
 Or extend the fence_language_map:
 >lua
@@ -567,7 +757,7 @@ Or extend the fence_language_map:
         sh  = 'bash',
       },
     })
-
+<
 
 Performance issues~
 
@@ -577,28 +767,31 @@ Disable features you don't need:
       enable_function_names = false,
       enable_inline_code = false,
     })
+<
 
+Or tune the cache/debounce settings, see |color_my_ascii-config-cache| and
+|color_my_ascii-config-debounce|.
 
 Keywords not highlighting~
 
 Check if language is loaded:
 >vim
     :ColorMyAsciiDebug
-
+<
 
 Verify keywords are enabled:
 >lua
     require('color_my_ascii').setup({
       enable_keywords = true,
     })
-
+<
 
 Unmatched fences~
 
 Check for mismatched code blocks:
 >vim
     :ColorMyAsciiCheckFences
-
+<
 
 The command will report:
   • Opening fences without closing
@@ -610,7 +803,7 @@ Colors not displaying~
 1. Enable true colors:
 >lua
     vim.opt.termguicolors = true
-
+<
 
 2. Check terminal support:
    Ensure your terminal supports 24-bit color
@@ -620,7 +813,7 @@ Wrong colors after colorscheme change~
 Reload plugin after changing colorscheme:
 >vim
     :ColorMyAscii
-
+<
 
 Or use built-in highlight groups for automatic adaptation:
 >lua
@@ -629,14 +822,14 @@ Or use built-in highlight groups for automatic adaptation:
         box_drawing = { chars = "...", hl = 'Keyword' },
       }
     })
-
+<
 
 Telescope scheme picker not working~
 
 1. Check if Telescope is installed:
 >vim
-    :echo has('nvim-0.7') && luaeval('pcall(require, "telescope")')
-
+    :echo has('nvim-0.9') && luaeval('pcall(require, "telescope")')
+<
 
 2. Install Telescope:
 >lua
@@ -644,33 +837,49 @@ Telescope scheme picker not working~
       'nvim-telescope/telescope.nvim',
       dependencies = { 'nvim-lua/plenary.nvim' }
     }
-
+<
 
 Scheme not applying~
 
 1. Verify scheme name:
 >vim
     :ColorMyAsciiListSchemes
-
+<
 
 2. Check for typos in command:
 >vim
     :ColorMyAsciiSwitchScheme matrix  " Correct
     :ColorMyAsciiSwitchScheme Matrix  " Wrong (case-sensitive)
-
+<
 
 Blank lines command issues~
 
 1. Check buffer is modifiable:
 >vim
     :set modifiable?
-
+<
 
 2. Verify changes with undo:
 >vim
     :ColorMyAsciiEnsureBlankLines
     :undo  " Revert if needed
+<
 
+Treesitter integration not working~
+
+1. Check parser availability:
+>vim
+    :checkhealth color_my_ascii
+<
+
+2. Install the required parsers:
+>vim
+    :TSInstall markdown
+    :TSInstall lua   " or whichever language you need
+<
+
+Note: syntax_highlight is best-effort - it silently does nothing on content
+that doesn't parse as valid syntax (expected for most ASCII art).
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:

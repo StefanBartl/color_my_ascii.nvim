@@ -1,5 +1,23 @@
 # color_my_ascii.nvim
 
+```
+    ╔══════════════════════════════════════════╗
+    ║   c o l o r _ m y _ a s c i i . n v i m   ║
+    ║   ┌─┐ → ★ ┌─┐   function() end   ┌─┐      ║
+    ╚══════════════════════════════════════════╝
+```
+
+> Siehe auch: [markdown.nvim](https://github.com/StefanBartl/markdown.nvim) - ein
+> Begleit-Plugin für die Arbeit mit Markdown-Dateien, ergänzt das ASCII-Highlighting hier gut.
+
+![version](https://img.shields.io/badge/version-0.2-blue.svg)
+![State](https://img.shields.io/badge/status-beta-orange.svg)
+![Lazy.nvim compatible](https://img.shields.io/badge/lazy.nvim-supported-success)
+![Neovim](https://img.shields.io/badge/Neovim-0.9+-success.svg)
+![Lua](https://img.shields.io/badge/language-Lua-yellow.svg)
+
+> 🔧 Beta-Stadium – aktive Entwicklung. Änderungen möglich.
+
 Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöcken mit automatischer Sprach-Erkennung, Custom-Highlights und vordefinierten Color-Schemes.
 
 ## Table of content
@@ -15,6 +33,7 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
     - [Beispiel](#beispiel)
   - [Konfiguration](#konfiguration)
     - [Standard-Konfiguration](#standard-konfiguration)
+    - [Treesitter-Integration](#treesitter-integration)
     - [Mit Color-Scheme](#mit-color-scheme)
     - [Custom-Highlights](#custom-highlights)
     - [Alle Features aktiviert](#alle-features-aktiviert)
@@ -24,16 +43,11 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
     - [Fence-Verwaltung](#fence-verwaltung)
     - [Scheme-Verwaltung](#scheme-verwaltung)
     - [Keybinding-Beispiele](#keybinding-beispiele)
-  - [10. Commit Message](#10-commit-message)
   - [Dokumentation](#dokumentation)
     - [Features](#features-1)
     - [Guides](#guides)
     - [Referenz](#referenz)
   - [Color Schemes](#color-schemes)
-    - [Matrix (Hacker Style)](#matrix-hacker-style)
-    - [Nord](#nord)
-    - [Gruvbox](#gruvbox)
-    - [Dracula](#dracula)
     - [Eigenes Schema erstellen](#eigenes-schema-erstellen)
   - [Architektur](#architektur)
   - [Performance](#performance)
@@ -54,14 +68,15 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
 ### Core-Features
 
 - ✅ **Automatische Erkennung** von `ascii`-Codeblöcken in Markdown-Dateien
-- ✅ **Modulare Sprach-Definitionen**: 10 vordefinierte Sprachen (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR)
+- ✅ **Modulare Sprach-Definitionen**: 11 vordefinierte Sprachen (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM IR, Vimscript)
 - ✅ **Intelligente Sprach-Erkennung**:
   - Explizite Angabe via ````ascii-c`, ````ascii lua`, ````ascii:python`
+  - Standard-Markdown-Fence-Tags via `fence_language_map` (z. B. ` ```vim `)
   - Heuristische Erkennung basierend auf Keyword-Häufigkeit
   - Fallback auf Buffer-Filetype
 - ✅ **Modulare Zeichengruppen**: Anpassbare Gruppen für Linien, Blöcke, Pfeile, Symbole, Operatoren
 - ✅ **Custom-Highlights mit RGB/Hex**: Vollständige Farb- und Style-Kontrolle
-- ✅ **5 vordefinierte Color-Schemes**: Default, Matrix, Nord, Gruvbox, Dracula
+- ✅ **10 vordefinierte Color-Schemes**: Default, Matrix, Nord, Gruvbox, Dracula, Catppuccin, One Dark, Solarized, Tokyo Night, Monokai
 - ✅ **Nicht-intrusiv**: Verwendet Extmarks, keine Puffer-Änderung
 
 ---
@@ -76,16 +91,24 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
 - ✅ **Health Check**: `:checkhealth color_my_ascii`
 - ✅ **Fence-Validierung**: `:ColorMyAsciiCheckFences` zur Erkennung nicht geschlossener Blöcke
 - ✅ **Vim Help**: `:h color_my_ascii`
+- ✅ **Optionale Treesitter-Integration**: Block-Erkennung und echtes Syntax-Highlighting
+- ✅ **Optionale, deaktivierbare Default-Keymaps** mit which-key-Unterstützung
 
 ---
 
 ## Installation
+
+**Lade-Strategie**: Das Plugin wird via `ft = 'markdown'` geladen, also erst sobald
+eine Markdown-Datei geöffnet wird. Das ist der empfohlene Trigger für dieses
+Plugin - präziser als ein pauschales `event = "VeryLazy"`, da es nichts zu tun
+gibt, bevor tatsächlich eine Markdown-Datei bearbeitet wird.
 
 ### Mit lazy.nvim
 ````lua
 {
   'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
+  dependencies = { 'StefanBartl/lib.nvim' }, -- optional, ermöglicht Keymap-/Notify-Integration
   opts = {
     -- Optional: Konfiguration hier
   }
@@ -99,6 +122,7 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
 use {
   'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
+  requires = { 'StefanBartl/lib.nvim' }, -- optional, ermöglicht Keymap-/Notify-Integration
   config = function()
     require('color_my_ascii').setup({
       -- Optional: Konfiguration hier
@@ -138,6 +162,10 @@ Das Plugin aktiviert sich automatisch für Markdown-Dateien.
 ### Standard-Konfiguration
 ````lua
 require('color_my_ascii').setup({
+  debug_enabled = false,
+  debug_verbose = false,
+  scheme = 'default',
+
   -- Zeichenspezifische Overrides (höchste Priorität)
   overrides = {},
 
@@ -145,18 +173,68 @@ require('color_my_ascii').setup({
   default_hl = 'Normal',
 
   -- Optional: Standard-Highlighting für normalen Text in Blöcken
-  default_text_hl = nil,  -- z.B. 'Comment' für gedämpfte Darstellung
+  default_text_hl = nil,  -- z. B. 'Comment' für gedämpfte Darstellung
 
   -- Feature-Toggles
   enable_keywords = true,
   enable_language_detection = true,
   language_detection_threshold = 2,
-  enable_function_names = false,
-  enable_bracket_highlighting = false,
-  treat_empty_fence_as_ascii = false,
-  enable_inline_code = false,
+  enable_function_names = true,
+  enable_bracket_highlighting = true,
+  treat_empty_fence_as_ascii = true,
+  enable_inline_code = true,
+
+  -- Standard-Markdown-Fence-Tags, die als ASCII-Blöcke behandelt werden.
+  -- Mappt die Fence-Sprachkennung auf den Plugin-Sprachnamen.
+  fence_language_map = {
+    vim = 'vim',
+    vimscript = 'vim',
+    viml = 'vim',
+  },
+
+  -- Optionale Treesitter-Integration (standardmäßig aus, siehe unten)
+  treesitter = {
+    enabled = false,
+    block_detection = true,
+    syntax_highlight = true,
+  },
 })
 ````
+
+---
+
+### Treesitter-Integration
+
+Standardmäßig aus (`treesitter.enabled = false`) - das Plugin verhält sich
+exakt wie ohne Treesitter. Mit `enabled = true` lassen sich einzeln oder
+zusammen aktivieren:
+
+- **`block_detection`**: Nutzt Neovims Markdown-Treesitter-Grammatik zur
+  Erkennung von Fenced-Code-Blöcken statt des eingebauten Zeilen-Scanners.
+  Robuster bei Randfällen (verschachtelte Fences, ungewöhnliche Einrückung).
+  Benötigt einen `markdown`-Parser (`:TSInstall markdown`); fällt bei
+  fehlendem Parser automatisch auf den heuristischen Scanner zurück.
+- **`syntax_highlight`**: Highlightet den Blockinhalt zusätzlich mit der
+  echten Grammatik der erkannten Sprache (z. B. echte Lua-/Python-/C-Syntax
+  via `@`-Highlight-Gruppen), zusätzlich zum bestehenden Zeichen-/Keyword-
+  Highlighting. Best-effort: ASCII-Art ist meist keine valide Syntax, daher
+  wirkt sich das nur auf Blöcke (oder Blockteile) aus, die tatsächlich echten,
+  parsbaren Code enthalten. Benötigt einen Parser für die jeweilige Sprache
+  (`:TSInstall <language>`); tut bei fehlendem/nicht parsbarem Inhalt
+  stillschweigend nichts.
+
+```lua
+require('color_my_ascii').setup({
+  treesitter = {
+    enabled = true,
+    block_detection = true,
+    syntax_highlight = true,
+  },
+})
+```
+
+Beide Optionen lassen sich unabhängig voneinander aktivieren.
+`:checkhealth color_my_ascii` zeigt an, ob die benötigten Parser installiert sind.
 
 ---
 
@@ -235,6 +313,36 @@ Das Plugin enthält vordefinierte Keyword-Definitionen für:
 | Bash | `fi`, `esac`, `done` | `if`, `then`, `else` |
 | Zig | `comptime`, `errdefer` | `anytype`, `unreachable` |
 | LLVM IR | `getelementptr`, `phi` | `alloca`, `icmp`, `zext` |
+| Vimscript | `endif`, `endfunction`, `nnoremap` | `augroup`, `echom`, `setlocal` |
+
+### Standard-Fence-Tag-Unterstützung
+
+Zusätzlich zu den `ascii`-präfixierten Formaten werden Blöcke mit einem
+Standard-Markdown-Fence-Tag automatisch hervorgehoben, wenn dieser Tag in
+`fence_language_map` gelistet ist:
+
+````markdown
+```vim
+function! MyFunc()
+  ┌──────────────────────────┐
+  │  nnoremap <leader>w :w<CR>│
+  └──────────────────────────┘
+endfunction
+```
+````
+
+Die Standard-Map erkennt `vim`, `vimscript` und `viml`. Erweitere sie für
+weitere Sprachen über `fence_language_map` im Setup:
+
+````lua
+require('color_my_ascii').setup({
+  fence_language_map = {
+    vim = 'vim',
+    sh  = 'bash',   -- ```sh-Blöcke → bash-Highlighting
+    ts  = 'typescript',
+  },
+})
+````
 
 Weitere Sprachen können einfach hinzugefügt werden (siehe [Contributing](#contributing)).
 
@@ -253,12 +361,16 @@ Weitere Sprachen können einfach hinzugefügt werden (siehe [Contributing](#cont
 | `:checkhealth color_my_ascii` | Health-Check durchführen |
 | `:h color_my_ascii` | Vim-Help öffnen |
 
+---
+
 ### Fence-Verwaltung
 
 | Befehl | Beschreibung |
 |--------|--------------|
 | `:ColorMyAsciiCheckFences` | Nicht geschlossene Fences prüfen |
 | `:ColorMyAsciiEnsureBlankLines` | Leerzeilen um Codeblöcke sicherstellen |
+
+---
 
 ### Scheme-Verwaltung
 
@@ -268,151 +380,92 @@ Weitere Sprachen können einfach hinzugefügt werden (siehe [Contributing](#cont
 | `:ColorMyAsciiSwitchScheme <name>` | Zu anderem Scheme wechseln |
 | `:ColorMyAsciiSchemes` | Scheme mit Telescope auswählen (Live-Vorschau) |
 
-**Verfügbare Schemes:**
-- `default` - Built-in Neovim Highlights
-- `matrix` - Grüner Hacker-Style
-- `nord` - Kühles Blau/Cyan
-- `gruvbox` - Warme Retro-Farben
-- `dracula` - Lebendiges Lila/Pink
+---
 
-**Beispiel:**
-```vim
-:ColorMyAsciiSwitchScheme matrix
-```
+#### Verfügbare Schemes
 
-**Telescope Picker:**
-```vim
-:ColorMyAsciiSchemes
-```
-Navigation mit `j/k`, Scheme wird beim Bewegen sofort angewendet (Live-Vorschau). `Enter` zum Bestätigen.
+- `default`    - Built-in Neovim Highlights
+- `matrix`     - Grüner Hacker-Style
+- `nord`       - Kühles Blau/Cyan
+- `gruvbox`    - Warme Retro-Farben
+- `dracula`    - Lebendiges Lila/Pink
+- `catppuccin` - Sanfte Pastellfarben
+- `onedark`    - Dunkles Theme mit dezenten Highlights
+- `solarized`  - Solarized-Farbpalette
+- `tokyonight` - Dunkles Theme mit blauen Akzenten
+- `monokai`    - Klassisches Monokai-Farbschema
 
 ### Keybinding-Beispiele
+
+Keymaps sind **opt-in** und standardmäßig deaktiviert. Aktivieren und anpassen
+lassen sie sich über die `keymaps`-Option in `setup()`:
+
 ```lua
--- Scheme-Wechsler
-vim.keymap.set('n', '<leader>as', '<cmd>ColorMyAsciiSchemes<cr>', {
-  desc = 'Scheme wechseln'
-})
-
--- Codeblöcke formatieren
-vim.keymap.set('n', '<leader>af', '<cmd>ColorMyAsciiEnsureBlankLines<cr>', {
-  desc = 'Codeblöcke formatieren'
-})
-
--- Konfiguration anzeigen
-vim.keymap.set('n', '<leader>ac', '<cmd>ColorMyAsciiShowConfig<cr>', {
-  desc = 'Konfiguration anzeigen'
+require('color_my_ascii').setup({
+  keymaps = {
+    highlight           = '<leader>ah',
+    toggle              = '<leader>at',
+    schemes             = '<leader>as',
+    ensure_blank_lines  = '<leader>af',
+    show_config         = '<leader>ac',
+    debug               = '<leader>ad',
+    check_fences        = '<leader>ax',
+  },
 })
 ```
+
+Jede Keymap wird mit `desc` gesetzt, sodass [which-key.nvim](https://github.com/folke/which-key.nvim)
+sie automatisch erkennt, ohne zusätzliche Konfiguration. Ist
+[lib.nvim](https://github.com/StefanBartl/lib.nvim) installiert, wird es für
+die Keymap-Registrierung genutzt; andernfalls nutzt das Plugin `vim.keymap.set`.
+
+Siehe [docs/BINDINGS.lua](BINDINGS.lua) für die vollständige Übersicht aller
+Commands, Keymap-Aktionen und Autocommands.
 
 ---
 
-## 10. Commit Message
-```
-feat: add scheme switcher, format command, and enhanced config display
-
-Commands Module:
-- Refactor all commands into lua/color_my_ascii/commands/
-- Split into logical modules: init, debug, config, schemes, format, fence_check
-- Register all commands via commands.register_all()
-
-New Commands:
-- :ColorMyAsciiShowConfig - detailed configuration display with stats
-- :ColorMyAsciiListSchemes - list all available color schemes
-- :ColorMyAsciiSwitchScheme <name> - switch schemes with tab completion
-- :ColorMyAsciiSchemes - Telescope picker with live preview
-- :ColorMyAsciiEnsureBlankLines - format code blocks with blank lines
-
-Scheme Management:
-- Live preview in Telescope picker (applies on cursor move)
-- Tab completion for scheme names
-- Hot-reload all buffers on scheme switch
-- Display enabled features for each scheme
-
-Type Safety:
-- Add ColorMyAscii.SchemeName enum for LSP autocomplete
-- Schemes: "default" | "matrix" | "nord" | "gruvbox" | "dracula"
-
-Format Command:
-- Ensures blank line before and after every fenced code block
-- Reports number of changes made
-- Non-destructive (only adds lines, never removes content)
-
-Enhanced Config Display:
-- Shows all features status
-- Lists languages and groups
-- Displays lookup table statistics
-- Shows highlight configuration
-
-Breaking Changes: None (fully backward compatible)
 ## Dokumentation
 
 ### Features
 
-- [Custom Highlights](docs/features/custom-highlights.md) - RGB/Hex-Farben und Styles
-- [Function Detection](docs/features/function-detection.md) - Automatische Funktionsnamen-Erkennung
-- [Bracket Highlighting](docs/features/bracket-highlighting.md) - Klammern hervorheben
-- [Inline Code](docs/features/inline-code.md) - Highlighting in `` `...` ``
+- [Custom Highlights](features/custom-highlights.md) - RGB/Hex-Farben und Styles
+- [Function Detection](features/function-detection.md) - Automatische Funktionsnamen-Erkennung
+- [Bracket Highlighting](features/bracket-highlighting.md) - Klammern hervorheben
+- [Inline Code](features/inline-code.md) - Highlighting in `` `...` ``
 
 ---
 
 ### Guides
 
-- [Quickstart](docs/QUICKSTART.md) - Erste Schritte
-- [Test File](docs/TEST.md) - Alle Features testen
-- [Color Schemes](docs/schemes.md) - Eigene Schemes erstellen
+- [Quickstart](QUICKSTART-de.md) - Erste Schritte
+- [Test File](dev/TEST.md) - Alle Features testen
+- [Color Schemes](schemes.md) - Eigene Schemes erstellen
+- [Bindings-Übersicht](BINDINGS.lua) - Alle Commands, Keymaps und Autocommands
+- [Roadmap](ROADMAP.md) - Geplante und erwogene zukünftige Arbeit
 
 ---
 
 ### Referenz
 
-- [Vim Help](doc/color_my_ascii.txt) - Vollständige Referenz
-- [Changelog](docs/CHANGELOG.md) - Versionshistorie
+- [Vim Help](../doc/color_my_ascii.txt) - Vollständige Referenz
+- [Changelog](CHANGELOG.md) - Versionshistorie
 
 ---
 
 ## Color Schemes
 
-### Matrix (Hacker Style)
+Wähle ein Schema aus der Liste der [verfügbaren Schemes](#verfgbare-schemes)
+und setze es in der Initialisierung:
+
+Beispiel mit Matrix-Schema:
+
 ````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.matrix')
-)
+require('color_my_ascii').setup({
+  scheme = "matrix",
+})
 ````
 
 Dunkler Hintergrund mit leuchtend grünen Elementen. Alle Features aktiviert.
-
----
-
-### Nord
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.nord')
-)
-````
-
-Kühle Blau/Cyan-Töne. Ecken besonders hervorgehoben.
-
----
-
-### Gruvbox
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.gruvbox')
-)
-````
-
-Warme Retro-Farben. Bracket-Highlighting aktiviert.
-
----
-
-### Dracula
-````lua
-require('color_my_ascii').setup(
-  require('color_my_ascii.schemes.dracula')
-)
-````
-
-Lebendige Lila/Pink-Akzente. Alle Features aktiviert.
 
 ---
 
@@ -432,7 +485,7 @@ require('color_my_ascii').setup({
 })
 ````
 
-Siehe [Color Schemes Guide](docs/schemes.md) für Details.
+Siehe [Color Schemes Guide](schemes.md) für Details.
 
 ---
 
@@ -440,11 +493,17 @@ Siehe [Color Schemes Guide](docs/schemes.md) für Details.
 
 Das Plugin besteht aus mehreren Modulen:
 
-- `init.lua` - Haupteinstiegspunkt, API, State-Management
-- `config.lua` - Konfigurationsverwaltung, dynamisches Laden
-- `parser.lua` - Erkennung von ASCII-Codeblöcken und Inline-Code
-- `highlighter.lua` - Anwendung von Highlights via Extmarks
+- `init.lua` - Haupteinstiegspunkt, öffentliche API, State-Management
+- `config/` - Konfigurationsverwaltung (`DEFAULTS.lua` + `init.lua`), dynamisches Laden
+- `bindings/` - Registrierung von Usercommands (`usrcmds.lua`), Autocommands
+  (`autocmds.lua`) und optionalen Keymaps (`keymaps.lua`)
+- `parser.lua` / `parser_ts.lua` - Erkennung von ASCII-Codeblöcken (heuristisch
+  bzw. via Treesitter) und Inline-Code
+- `highlighter.lua` / `highlighter_ts.lua` - Anwendung von Highlights via
+  Extmarks (heuristisch bzw. via Treesitter-Syntax)
 - `language_detector.lua` - Intelligente Sprach-Erkennung
+- `cache_manager.lua` / `debounce_manager.lua` - Performance (Caching,
+  adaptives Debouncing)
 - `health.lua` - Health-Check für `:checkhealth`
 - `languages/*.lua` - Modulare Sprach-Definitionen
 - `groups/*.lua` - Modulare Zeichengruppen-Definitionen
@@ -456,7 +515,7 @@ Das Plugin besteht aus mehreren Modulen:
 
 Das Plugin verwendet:
 - Extmarks für non-intrusive Highlights
-- Debounced Updates (100ms) bei Textänderungen
+- Debounced Updates (adaptiv, 100–500ms je nach Dateigröße) bei Textänderungen
 - Effiziente Lookup-Tabellen (O(1) Zugriff)
 - Lazy-Loading für Markdown-Dateien
 
@@ -496,6 +555,13 @@ int x = 42;
 ```
 ````
 
+Oder einen Standard-Fence-Tag nutzen (falls in `fence_language_map` gelistet):
+````markdown
+```vim
+nnoremap <leader>w :w<CR>
+```
+````
+
 Oder Detection-Threshold anpassen:
 ````lua
 require('color_my_ascii').setup({
@@ -514,8 +580,6 @@ require('color_my_ascii').setup({
   enable_inline_code = false,
 })
 ````
-
-Siehe [Troubleshooting Guide](docs/troubleshooting.md) für mehr.
 
 ---
 

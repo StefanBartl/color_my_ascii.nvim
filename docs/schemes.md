@@ -11,6 +11,11 @@ This guide explains how color schemes work and how to create your own.
     - [Nord](#nord)
     - [Gruvbox](#gruvbox)
     - [Dracula](#dracula)
+    - [Catppuccin](#catppuccin)
+    - [One Dark](#one-dark)
+    - [Solarized](#solarized)
+    - [Tokyo Night](#tokyo-night)
+    - [Monokai](#monokai)
   - [Loading a Scheme](#loading-a-scheme)
   - [Customizing a Scheme](#customizing-a-scheme)
   - [Creating a Custom Scheme](#creating-a-custom-scheme)
@@ -28,10 +33,6 @@ This guide explains how color schemes work and how to create your own.
     - [Conditional Schemes](#conditional-schemes)
     - [Dynamic Colors](#dynamic-colors)
     - [Inheritance](#inheritance)
-  - [Scheme Gallery](#scheme-gallery)
-    - [Solarized Light](#solarized-light)
-    - [Monokai](#monokai)
-    - [Tokyo Night](#tokyo-night)
   - [Best Practices](#best-practices)
   - [Troubleshooting](#troubleshooting)
     - [Colors Don't Match Colorscheme](#colors-dont-match-colorscheme)
@@ -126,6 +127,91 @@ require('color_my_ascii.schemes.dracula')
 - Arrows: Pink (#ff79c6), bold
 - Blocks: Blue-gray (#6272a4)
 - Text: Comment color (#6272a4)
+
+---
+
+### Catppuccin
+
+```lua
+require('color_my_ascii.schemes.catppuccin')
+```
+
+**Style**: Soft pastel colors, based on Catppuccin Mocha
+**Features**: Function names and inline code enabled
+**Colors**:
+- Box-drawing: Blue (#89b4fa)
+- Blocks: Sapphire (#74c7ec)
+- Arrows: Pink (#f5c2e7), bold
+- Symbols: Mauve (#cba6f7)
+- Text: Surface2 (#585b70)
+
+---
+
+### One Dark
+
+```lua
+require('color_my_ascii.schemes.onedark')
+```
+
+**Style**: Atom-inspired dark theme with vibrant syntax colors
+**Features**: Function names, brackets, and inline code enabled
+**Colors**:
+- Box-drawing: Blue (#61afef), bold
+- Blocks: Cyan (#56b6c2)
+- Arrows: Purple (#c678dd), bold
+- Symbols: Yellow (#e5c07b)
+- Text: Comment gray (#5c6370)
+
+---
+
+### Solarized
+
+```lua
+require('color_my_ascii.schemes.solarized')
+```
+
+**Style**: Precision colors for readability, based on Solarized Dark
+**Features**: Minimal configuration, maximum compatibility
+**Colors**:
+- Box-drawing: Blue (#268bd2)
+- Blocks: Cyan (#2aa198)
+- Arrows: Magenta (#d33682), bold
+- Symbols: Violet (#6c71c4)
+- Text: Base01 (#586e75)
+
+---
+
+### Tokyo Night
+
+```lua
+require('color_my_ascii.schemes.tokyonight')
+```
+
+**Style**: Deep blue night colors with vibrant accents, based on Tokyo Night Storm
+**Features**: Function names, brackets, and inline code enabled
+**Colors**:
+- Box-drawing: Blue (#7aa2f7), bold
+- Blocks: Cyan (#2ac3de)
+- Arrows: Purple (#bb9af7), bold
+- Symbols: Orange (#ff9e64)
+- Text: Comment (#565f89)
+
+---
+
+### Monokai
+
+```lua
+require('color_my_ascii.schemes.monokai')
+```
+
+**Style**: High contrast dark theme with vibrant neon colors
+**Features**: Function names, brackets, and inline code enabled
+**Colors**:
+- Box-drawing: Cyan (#66d9ef)
+- Blocks: Light cyan (#a1efe4)
+- Arrows: Pink/red (#f92672), bold
+- Symbols: Purple (#ae81ff)
+- Text: Comment (#75715e)
 
 ---
 
@@ -398,53 +484,6 @@ local scheme = vim.tbl_deep_extend('force', base, {
 })
 
 require('color_my_ascii').setup(scheme)
-```
-
----
-
-## Scheme Gallery
-
-### Solarized Light
-
-```lua
-return {
-  groups = {
-    box_drawing = { chars = "...", hl = { fg = '#268bd2' } },  -- Blue
-    arrows      = { chars = "...", hl = { fg = '#2aa198' } },  -- Cyan
-    symbols     = { chars = "...", hl = { fg = '#859900' } },  -- Green
-  },
-  default_text_hl = { fg = '#586e75' },  -- Base01
-}
-```
-
----
-
-### Monokai
-
-```lua
-return {
-  groups = {
-    box_drawing = { chars = "...", hl = { fg = '#66d9ef' } },  -- Cyan
-    arrows      = { chars = "...", hl = { fg = '#f92672' } },  -- Pink
-    symbols     = { chars = "...", hl = { fg = '#a6e22e' } },  -- Green
-  },
-  default_text_hl = { fg = '#75715e' },  -- Comment
-}
-```
-
----
-
-### Tokyo Night
-
-```lua
-return {
-  groups = {
-    box_drawing = { chars = "...", hl = { fg = '#7aa2f7' } },  -- Blue
-    arrows      = { chars = "...", hl = { fg = '#bb9af7' } },  -- Purple
-    symbols     = { chars = "...", hl = { fg = '#9ece6a' } },  -- Green
-  },
-  default_text_hl = { fg = '#565f89' },  -- Comment
-}
 ```
 
 ---

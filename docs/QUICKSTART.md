@@ -14,6 +14,7 @@ Quick introduction to color_my_ascii.nvim with all important features.
     - [Minimal](#minimal)
     - [With Features](#with-features)
     - [With Color Scheme](#with-color-scheme)
+    - [Optional: Treesitter Integration](#optional-treesitter-integration)
   - [Feature Examples](#feature-examples)
     - [1. Language Detection](#1-language-detection)
     - [2. Custom Highlights](#2-custom-highlights)
@@ -100,7 +101,7 @@ require('color_my_ascii').setup()
 ```
 
 Automatically loads:
-- 10 languages (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM)
+- 11 languages (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM, Vimscript)
 - 5 character groups (Box-Drawing, Blocks, Arrows, Symbols, Operators)
 
 ---
@@ -143,6 +144,18 @@ require('color_my_ascii').setup(
   require('color_my_ascii.schemes.dracula')
 )
 ```
+
+---
+
+### Optional: Treesitter Integration
+
+```lua
+require('color_my_ascii').setup({
+  treesitter = { enabled = true },  -- block_detection + syntax_highlight both default to true
+})
+```
+
+Off by default. See [README.md](../README.md#treesitter-integration) for details.
 
 ---
 
@@ -255,6 +268,11 @@ require('color_my_ascii').setup({
 | `nord` | Blue/Cyan | Function names |
 | `gruvbox` | Warm/Retro | Brackets, Inline |
 | `dracula` | Purple/Pink | All enabled |
+| `catppuccin` | Soft pastel | Functions, Inline |
+| `onedark` | Atom-inspired dark | Functions, Brackets, Inline |
+| `solarized` | Precision colors | Minimal, compatible |
+| `tokyonight` | Deep blue night | Functions, Brackets, Inline |
+| `monokai` | High contrast neon | Functions, Brackets, Inline |
 
 ---
 
@@ -418,7 +436,7 @@ require('color_my_ascii').setup({
    - [Inline Code](features/inline-code.md)
 
 2. **Try test file**:
-   - Open [TEST.md](TEST.md)
+   - Open [TEST.md](dev/TEST.md)
    - Test all features systematically
 
 3. **Create custom scheme**:
@@ -444,7 +462,7 @@ require('color_my_ascii').setup({
 ## See Also
 
 - [README.md](../README.md) - Complete documentation
-- [TEST.md](TEST.md) - Test all features
+- [TEST.md](dev/TEST.md) - Test all features
 - [doc/color_my_ascii.txt](../doc/color_my_ascii.txt) - Vim help
 
 ---

@@ -57,7 +57,7 @@ require('color_my_ascii').setup()
 ```
 
 Nutzt alle Standard-Einstellungen und lädt automatisch:
-- 10 Sprachen (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM)
+- 11 Sprachen (C, C++, Lua, Go, Rust, TypeScript, Python, Bash, Zig, LLVM, Vimscript)
 - 5 Zeichengruppen (Box-Drawing, Blocks, Arrows, Symbols, Operators)
 
 ### Mit Features
@@ -86,6 +86,16 @@ require('color_my_ascii').setup(
   require('color_my_ascii.schemes.nord')
 )
 ```
+
+### Optional: Treesitter-Integration
+
+```lua
+require('color_my_ascii').setup({
+  treesitter = { enabled = true },  -- block_detection + syntax_highlight sind standardmäßig true
+})
+```
+
+Standardmäßig aus. Details siehe [README.md](../README.md#treesitter-integration).
 
 ## Feature-Beispiele
 
@@ -183,6 +193,11 @@ require('color_my_ascii').setup({
 | `nord` | Blau/Cyan | Function names |
 | `gruvbox` | Warm/Retro | Brackets, Inline |
 | `dracula` | Lila/Pink | Alle aktiviert |
+| `catppuccin` | Sanfte Pastellfarben | Functions, Inline |
+| `onedark` | Atom-inspiriert, dunkel | Functions, Brackets, Inline |
+| `solarized` | Präzisionsfarben | Minimal, kompatibel |
+| `tokyonight` | Dunkles Nachtblau | Functions, Brackets, Inline |
+| `monokai` | Kontrastreiches Neon | Functions, Brackets, Inline |
 
 ### Schema laden
 
@@ -318,7 +333,7 @@ require('color_my_ascii').setup({
    - [Inline Code](features/inline-code.md)
 
 2. **Test-Datei** ausprobieren:
-   - Öffne [TEST.md](TEST.md)
+   - Öffne [TEST.md](dev/TEST.md)
    - Teste alle Features systematisch
 
 3. **Eigenes Schema** erstellen:
@@ -339,5 +354,5 @@ require('color_my_ascii').setup({
 ## Siehe auch
 
 - [README.md](../README.md) - Vollständige Dokumentation
-- [TEST.md](TEST.md) - Alle Features testen
+- [TEST.md](dev/TEST.md) - Alle Features testen
 - [doc/color_my_ascii.txt](../doc/color_my_ascii.txt) - Vim-Help

@@ -443,7 +443,7 @@ sie automatisch erkennt, ohne zusätzliche Konfiguration. Ist
 [lib.nvim](https://github.com/StefanBartl/lib.nvim) installiert, wird es für
 die Keymap-Registrierung genutzt; andernfalls nutzt das Plugin `vim.keymap.set`.
 
-Siehe [docs/BINDINGS.lua](BINDINGS.lua) für die vollständige Übersicht aller
+Siehe [docs/BINDINGS.md](BINDINGS.md) für die vollständige Übersicht aller
 Commands, Keymap-Aktionen und Autocommands.
 
 ---
@@ -464,7 +464,7 @@ Commands, Keymap-Aktionen und Autocommands.
 - [Quickstart](QUICKSTART-de.md) - Erste Schritte
 - [Test File](dev/TEST.md) - Alle Features testen
 - [Color Schemes](schemes.md) - Eigene Schemes erstellen
-- [Bindings-Übersicht](BINDINGS.lua) - Alle Commands, Keymaps und Autocommands
+- [Bindings-Übersicht](BINDINGS.md) - Alle Commands, Keymaps und Autocommands
 - [Roadmap](ROADMAP.md) - Geplante und erwogene zukünftige Arbeit
 
 ---

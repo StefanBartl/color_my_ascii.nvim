@@ -516,7 +516,7 @@ automatically without extra configuration. If lib.nvim
 (github.com/StefanBartl/lib.nvim) is installed, its keymap helper is used for
 registration; otherwise the plugin falls back to vim.keymap.set.
 
-See the plugin's docs/BINDINGS.lua for the full cheatsheet of user commands,
+See the plugin's docs/BINDINGS.md for the full cheatsheet of user commands,
 keymap actions, and autocommands.
 
 ==============================================================================

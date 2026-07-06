@@ -21,7 +21,7 @@ timeline - this is a working list of what might come next.
 
 ## Under Consideration
 
-- Additional default keymap actions (see [BINDINGS.lua](BINDINGS.lua) for the current set)
+- Additional default keymap actions (see [BINDINGS.md](BINDINGS.md) for the current set)
 - Additional autocommand hooks (e.g. re-highlight on `ColorScheme` change)
 - Additional user commands for scheme/keyword introspection
 - Deeper `lib.nvim` integration if/once its API stabilizes

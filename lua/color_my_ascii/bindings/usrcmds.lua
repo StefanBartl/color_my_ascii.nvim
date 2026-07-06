@@ -1,6 +1,6 @@
 ---@module 'color_my_ascii.bindings.usrcmds'
 --- User command registration for color_my_ascii.nvim.
---- See docs/BINDINGS.lua for a full cheatsheet of all registered commands.
+--- See docs/BINDINGS.md for a full cheatsheet of all registered commands.
 
 local M = {}
 

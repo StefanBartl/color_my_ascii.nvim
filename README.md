@@ -442,7 +442,7 @@ picks them up automatically without extra configuration. If
 [lib.nvim](https://github.com/StefanBartl/lib.nvim) is installed, it is used for the
 underlying keymap registration; otherwise the plugin falls back to `vim.keymap.set`.
 
-See [docs/BINDINGS.lua](docs/BINDINGS.lua) for the full cheatsheet of user commands,
+See [docs/BINDINGS.md](docs/BINDINGS.md) for the full cheatsheet of user commands,
 keymap actions, and autocommands.
 
 ---
@@ -463,7 +463,7 @@ keymap actions, and autocommands.
 - [Quickstart](docs/QUICKSTART.md) - Getting started
 - [Test File](docs/dev/TEST.md) - Test all features
 - [Color Schemes](docs/schemes.md) - Create custom schemes
-- [Bindings Cheatsheet](docs/BINDINGS.lua) - All commands, keymaps, and autocommands
+- [Bindings Cheatsheet](docs/BINDINGS.md) - All commands, keymaps, and autocommands
 - [Roadmap](docs/ROADMAP.md) - Planned and considered future work
 
 ---

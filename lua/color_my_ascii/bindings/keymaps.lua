@@ -2,7 +2,7 @@
 --- Optional, user-configurable keymaps for color_my_ascii.nvim.
 --- Disabled by default (config.keymaps = false). Enable by passing a table mapping
 --- action names to key sequences via setup({ keymaps = { ... } }).
---- See docs/BINDINGS.lua for the full list of action names.
+--- See docs/BINDINGS.md for the full list of action names.
 ---
 --- Uses lib.nvim.map when available (https://github.com/StefanBartl/lib.nvim) and
 --- falls back to vim.keymap.set otherwise, so lib.nvim remains an optional dependency.

@@ -91,6 +91,8 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 - ✅ **Inline Code Highlighting**: Keywords and symbols backticks highlighted: `` `...` ``
 - ✅ **Empty Fenced Blocks**: Optionally treat ``` without language as ASCII
 - ✅ **Default Text Color**: Dimmed representation for normal text
+- ✅ **Fence-line Highlighting**: Optional full-line highlight of ` ``` ` delimiter lines (4 presets — see below)
+- ✅ **Public Fence API**: `require("color_my_ascii").fences` — reusable fenced-block detection for other plugins (see below)
 - ✅ **Health Check**: `:checkhealth color_my_ascii`
 - ✅ **Fence Validation**: `:ColorMyAsciiCheckFences` to detect unmatched blocks
 - ✅ **Vim Help**: `:h color_my_ascii`
@@ -199,6 +201,16 @@ require('color_my_ascii').setup({
     block_detection = true,
     syntax_highlight = true,
   },
+
+  -- Optional full-line highlight of fence delimiter lines (see "Fence-line
+  -- highlighting" below). Off by default.
+  fence_line_highlight = {
+    enable   = false,
+    preset   = 'subtle',  -- 'subtle' | 'accent' | 'underline' | 'bar'
+    open     = nil,        -- override: hl-group name (string) or attr table
+    close    = nil,        -- override: hl-group name (string) or attr table
+    apply_to = 'all',      -- 'all' fenced blocks | 'ascii' only
+  },
 })
 ````
 
@@ -296,6 +308,88 @@ require('color_my_ascii').setup({
   default_text_hl = 'Comment',
 })
 ````
+
+---
+
+## Fence-line highlighting
+
+Optionally paint the **whole** opening (`` ```lang ``) and closing (`` ``` ``)
+line of fenced code blocks, as a visual boundary:
+
+```javascript   ← this whole line
+// ...
+```            ← and this whole line
+
+Enable and pick a look:
+
+````lua
+require('color_my_ascii').setup({
+  fence_line_highlight = {
+    enable   = true,
+    preset   = 'accent',   -- 'subtle' | 'accent' | 'underline' | 'bar'
+    apply_to = 'all',      -- 'all' fenced blocks, or 'ascii' only
+  },
+})
+````
+
+| Preset | Look (theme-adaptive) |
+|--------|-----------------------|
+| `subtle` | links to `CursorLine` (soft full-line tint) |
+| `accent` | links to `Visual` (prominent tint) |
+| `underline` | underlines the fence line |
+| `bar` | links to `ColorColumn` (bar-like block) |
+
+For full control, `open` / `close` each accept either an existing highlight
+group name (string, linked) **or** an attribute table forwarded to
+`nvim_set_hl`:
+
+````lua
+fence_line_highlight = {
+  enable = true,
+  open   = 'Title',                       -- link to an existing group
+  close  = { fg = '#5c6370', italic = true }, -- custom attributes
+  apply_to = 'all',
+}
+````
+
+The highlight lives in its own extmark namespace (priority below the character
+highlights, so tokens stay visible), refreshes on edit, and re-resolves its
+groups on `:colorscheme` changes.
+
+---
+
+## Fence API (for plugin authors)
+
+color_my_ascii owns robust, CommonMark-compatible fenced-block detection
+(heuristic state machine + treesitter). Other plugins can consume it instead of
+reimplementing fence parsing — this is how
+[markdown.nvim](https://github.com/StefanBartl/markdown.nvim) implements its
+"treat a `` ```markdown `` block as its own document scope" feature.
+
+````lua
+local fences = require('color_my_ascii').fences   -- available without setup()
+
+-- Every fenced block in a buffer, in document order.
+-- Each block: { open_row, close_row, content_start, content_end (0-indexed,
+-- content is the half-open range [content_start, content_end)), lang,
+-- fence_char, fence_len, is_ascii, fence_line, lines? }
+local blocks = fences.list_blocks(bufnr, {
+  lines    = 'none',       -- 'none' | 'ascii' | 'all' (collect content lines?)
+  markdown = false,        -- true = only markdown-family langs
+  lang     = nil,          -- string | string[] filter
+  filter   = nil,          -- fun(block): boolean
+})
+
+-- The innermost block whose *interior* contains a row (0-indexed; defaults to
+-- the cursor row). include_fence = true also matches the delimiter lines.
+local block = fences.block_at(bufnr, row, { markdown = true })
+
+-- Classify a fence language tag as markdown-family (markdown/md/mdx/…).
+fences.is_markdown_lang('mdx')  -- true
+````
+
+Range-only queries (`lines = 'none'`) are cached per buffer `changedtick`, so
+`block_at` is cheap to call on every keystroke.
 
 ---
 

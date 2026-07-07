@@ -17,6 +17,12 @@ local state = {
 
 local config = require("color_my_ascii.config")
 local parser = require("color_my_ascii.parser")
+local fence_hl = require("color_my_ascii.fence_hl")
+
+--- Public fenced-block API for other plugins (e.g. markdown.nvim) to consume.
+--- Language-agnostic block detection with precise ranges + metadata; see
+--- `color_my_ascii.api.fences`. Available without calling M.setup().
+M.fences = require("color_my_ascii.api.fences")
 local highlighter = require("color_my_ascii.highlighter")
 local cache_manager = require("color_my_ascii.cache_manager")
 local debounce_manager = require("color_my_ascii.debounce_manager")
@@ -62,6 +68,17 @@ function M.setup(opts)
 	if cfg.keymaps then
 		require("color_my_ascii.bindings.keymaps").attach(cfg.keymaps)
 	end
+
+	-- Optional fence-line highlighting: resolve its highlight groups now and keep
+	-- them in sync with colorscheme changes.
+	fence_hl.setup_hl(cfg)
+	api.nvim_create_autocmd("ColorScheme", {
+		group = api.nvim_create_augroup("ColorMyAsciiFenceLineHl", { clear = true }),
+		callback = function()
+			fence_hl.setup_hl(require("color_my_ascii.config").get())
+		end,
+		desc = "Re-resolve color_my_ascii fence-line highlight groups after colorscheme change",
+	})
 
 	return true, nil
 end
@@ -113,6 +130,7 @@ function M.setup_buffer(bufnr)
 		callback = function()
 			state.buffers[bufnr] = nil
 			highlighter.clear_buffer(bufnr)
+			fence_hl.clear(bufnr)
 			cache_manager.invalidate(bufnr)
 			debounce_manager.cancel(bufnr)
 		end,
@@ -175,6 +193,7 @@ function M.highlight_buffer(bufnr)
 			return false, string.format("Failed to highlight inline codes: %s", err)
 		end
 
+		pcall(fence_hl.apply, bufnr, cfg)
 		return true, nil
 	end
 
@@ -214,6 +233,7 @@ function M.highlight_buffer(bufnr)
 		notify(string.format(("color_my_ascii: Inline code highlighting error: %s"):format(), err), levels.WARN)
 	end
 
+	pcall(fence_hl.apply, bufnr, cfg)
 	return true, nil
 end
 
@@ -235,6 +255,7 @@ function M.toggle()
 		for bufnr, _ in pairs(state.buffers) do
 			if safe_api.is_valid_buffer(bufnr) then
 				highlighter.clear_buffer(bufnr)
+				fence_hl.clear(bufnr)
 			end
 		end
 			notify("color_my_ascii.nvim disabled", levels.INFO)

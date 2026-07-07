@@ -34,6 +34,13 @@
 ---@field chars string Characters to highlight with this group
 ---@field hl string|ColorMyAscii.CustomHighlight Highlight specification
 
+---@class ColorMyAscii.FenceLineHighlight
+---@field enable? boolean Highlight the whole opening/closing fence delimiter line (default false)
+---@field preset? "subtle"|"accent"|"underline"|"bar" Built-in look for the fence lines
+---@field open? string|ColorMyAscii.CustomHighlight Override for the opening fence line (hl group name or attr table)
+---@field close? string|ColorMyAscii.CustomHighlight Override for the closing fence line (hl group name or attr table)
+---@field apply_to? "all"|"ascii" Which blocks get the highlight: every fenced block or only ASCII ones
+
 ---@class ColorMyAscii.TreesitterConfig
 ---@field enabled? boolean Master switch for both features below (default true; both sub-features fall back to heuristic-only behavior when no parser is installed)
 ---@field block_detection? boolean Use treesitter's markdown grammar to detect fenced code blocks instead of the heuristic line scanner (default true, only applies if enabled=true)
@@ -58,6 +65,7 @@
 ---@field enable_function_names? boolean Enable heuristic function name detection
 ---@field enable_bracket_highlighting? boolean Enable highlighting of brackets/parentheses
 ---@field fence_language_map? table<string, string> Map of markdown fence language tags to plugin language names (e.g., { vim = "vim" })
+---@field fence_line_highlight? ColorMyAscii.FenceLineHighlight Optional full-line highlight of fence delimiter lines
 ---@field keymaps? false|table<string, string> Optional default keymaps (action name -> lhs). false (default) disables all keymaps. See lua/color_my_ascii/bindings/keymaps.lua
 ---@field cache? CacheConfig Optional override for cache_manager defaults
 ---@field debounce? DebounceConfig Optional override for debounce_manager defaults
@@ -71,6 +79,25 @@
 ---@field end_line integer Ending line number (0-indexed, inclusive)
 ---@field lines string[] Content lines of the block (without fence markers)
 ---@field fence_line string Opening fence line (for language detection)
+
+--- Rich, language-agnostic fenced-code-block descriptor returned by the public
+--- fence API (`color_my_ascii.api.fences`) and the generic scanners in
+--- `parser`/`parser_ts`. Superset of ColorMyAscii.Block: the `start_line`/
+--- `end_line`/`lines`/`fence_line` fields are kept as aliases so existing
+--- ASCII-highlighting consumers keep working unchanged.
+---@class ColorMyAscii.FenceBlock
+---@field open_row integer 0-indexed row of the opening fence delimiter
+---@field close_row integer 0-indexed row of the closing fence delimiter
+---@field content_start integer 0-indexed first content row (== open_row + 1)
+---@field content_end integer 0-indexed exclusive end of content (== close_row); content rows are [content_start, content_end)
+---@field lang string Trimmed fence language tag ("" if none)
+---@field fence_char string Fence delimiter character ("`" or "~")
+---@field fence_len integer Number of delimiter characters in the opening fence
+---@field is_ascii boolean Whether color_my_ascii classifies this block as ASCII
+---@field lines? string[] Content lines (populated only when requested via `lines` opt)
+---@field fence_line string Opening fence line text (for language detection)
+---@field start_line integer Alias of open_row (ColorMyAscii.Block compat)
+---@field end_line integer Alias of close_row (ColorMyAscii.Block compat)
 
 ---@class ColorMyAscii.InlineCode
 ---@field line integer Line number (0-indexed)

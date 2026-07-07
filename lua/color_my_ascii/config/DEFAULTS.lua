@@ -66,6 +66,19 @@ return {
     powershell = 'powershell', ps1 = 'powershell',
     llvm = 'llvm',
   },
+  -- Optional full-line highlight of fenced-block delimiter lines (the ```lang
+  -- opening line and its closing ``` line). Off by default. `apply_to` selects
+  -- which blocks get it: "all" fenced blocks or only "ascii" ones. `preset`
+  -- picks a look; `open`/`close` override per-delimiter and accept either an
+  -- existing highlight-group name (string) or an attribute table
+  -- (ColorMyAscii.CustomHighlight, forwarded to nvim_set_hl).
+  fence_line_highlight = {
+    enable   = false,
+    preset   = "subtle", -- "subtle" | "accent" | "underline" | "bar"
+    open     = nil,
+    close    = nil,
+    apply_to = "all", -- "all" | "ascii"
+  },
   -- Optional default keymaps (see lua/color_my_ascii/bindings/keymaps.lua).
   -- Deliberately off by default, unlike most other features: keymaps claim a
   -- slot in the user's global keymap namespace and can silently collide with

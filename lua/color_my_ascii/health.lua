@@ -199,6 +199,29 @@ function M.check()
     health.info('lib.nvim not found (optional) - falling back to vim.keymap.set/vim.notify')
   end
 
+  -- Public fence API (consumed by other plugins, e.g. markdown.nvim's fenced_scope)
+  health.info('Checking public fence API...')
+  local fences_ok, fences = pcall(require, 'color_my_ascii.api.fences')
+  if fences_ok and type(fences) == 'table'
+    and type(fences.list_blocks) == 'function'
+    and type(fences.block_at) == 'function'
+    and type(fences.is_markdown_lang) == 'function' then
+    health.ok('Fence API available at require("color_my_ascii").fences (list_blocks/block_at/is_markdown_lang)')
+  else
+    health.error('Fence API failed to load - consumers like markdown.nvim will fall back to their own scanner')
+  end
+
+  -- Fence-line highlighting (optional full-line highlight of ``` delimiter lines)
+  if ok then
+    local flh = config.get().fence_line_highlight
+    if flh and flh.enable then
+      health.ok(string.format('Fence-line highlight: enabled (preset "%s", apply_to "%s")',
+        tostring(flh.preset or 'subtle'), tostring(flh.apply_to or 'all')))
+    else
+      health.info('Fence-line highlight: disabled (set fence_line_highlight.enable = true to turn on)')
+    end
+  end
+
   -- Summary
   if all_core_ok then
     health.ok('All core modules loaded successfully')

@@ -73,14 +73,21 @@ local function inspect_fenced_block(bufnr, node)
   return lang, content_node, open_row, close_row, delimiter_count
 end
 
---- Find all ASCII code blocks in the buffer using treesitter's markdown grammar.
---- Callers should wrap this in pcall - it errors out (rather than degrading
---- silently) if the buffer has no markdown parser, so the dispatcher in
---- parser.lua can fall back to the heuristic scanner.
+--- Scan a buffer for ALL fenced code blocks (ASCII or not) using treesitter's
+--- markdown grammar. Generic foundation shared by M.find_ascii_blocks and the
+--- public fence API (color_my_ascii.api.fences). Callers should wrap this in
+--- pcall - it errors out (rather than degrading silently) if the buffer has no
+--- markdown parser, so the dispatcher in parser.lua can fall back to the
+--- heuristic scanner.
+---
+--- Content-line collection is opt-in (see parser.scan_blocks_heuristic for the
+--- "none"|"ascii"|"all" semantics) to keep range-only callers cheap.
 ---@param bufnr integer Buffer number to search
----@return ColorMyAscii.Block[] blocks List of found ASCII blocks
-function M.find_ascii_blocks(bufnr)
+---@param opts? { lines?: "none"|"ascii"|"all" }
+---@return ColorMyAscii.FenceBlock[] blocks Every closed fenced block, in order
+function M.scan_blocks_ts(bufnr, opts)
   local is_ascii_fence = require('color_my_ascii.parser').is_ascii_fence
+  local lines_mode = (opts and opts.lines) or "none"
 
   local ts_parser = vim.treesitter.get_parser(bufnr, 'markdown')
   local root = ts_parser:parse()[1]:root()
@@ -89,7 +96,7 @@ function M.find_ascii_blocks(bufnr)
   local fenced_nodes = {}
   collect_fenced_blocks(root, fenced_nodes)
 
-  ---@type ColorMyAscii.Block[]
+  ---@type ColorMyAscii.FenceBlock[]
   local blocks = {}
 
   for _, node in ipairs(fenced_nodes) do
@@ -97,24 +104,55 @@ function M.find_ascii_blocks(bufnr)
 
     -- Only trust properly closed fences (matches the heuristic scanner's behavior
     -- of ignoring a block that's still open at EOF).
-    if delimiter_count == 2 and open_row and close_row and is_ascii_fence(lang) then
-      local content_lines = {}
-      if content_node then
-        local csr, _, cer = content_node:range()
-        content_lines = api.nvim_buf_get_lines(bufnr, csr, cer, false)
+    if delimiter_count == 2 and open_row and close_row then
+      local is_ascii = is_ascii_fence(lang)
+      local fence_line = api.nvim_buf_get_lines(bufnr, open_row, open_row + 1, false)[1] or ''
+      local seq = fence_line:match("^%s*([`~]+)")
+      local fence_char = fence_line:match("^%s*([`~])") or "`"
+
+      local want = lines_mode == "all" or (lines_mode == "ascii" and is_ascii)
+      local content_lines = nil
+      if want then
+        content_lines = {}
+        if content_node then
+          local csr, _, cer = content_node:range()
+          content_lines = api.nvim_buf_get_lines(bufnr, csr, cer, false)
+        end
       end
 
-      local fence_line = api.nvim_buf_get_lines(bufnr, open_row, open_row + 1, false)[1] or ''
-
       table.insert(blocks, {
-        start_line = open_row,
-        end_line = close_row,
-        lines = content_lines,
-        fence_line = fence_line,
+        open_row      = open_row,
+        close_row     = close_row,
+        content_start = open_row + 1,
+        content_end   = close_row,
+        lang          = lang,
+        fence_char    = fence_char,
+        fence_len     = seq and #seq or 3,
+        is_ascii      = is_ascii,
+        lines         = content_lines,
+        fence_line    = fence_line,
+        -- ColorMyAscii.Block aliases (backward compat):
+        start_line    = open_row,
+        end_line      = close_row,
       })
     end
   end
 
+  return blocks
+end
+
+--- Find all ASCII code blocks in the buffer using treesitter's markdown grammar.
+--- Thin filter over M.scan_blocks_ts. Callers should wrap this in pcall (same
+--- rationale as M.scan_blocks_ts).
+---@param bufnr integer Buffer number to search
+---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
+function M.find_ascii_blocks(bufnr)
+  local blocks = {}
+  for _, b in ipairs(M.scan_blocks_ts(bufnr, { lines = "ascii" })) do
+    if b.is_ascii then
+      table.insert(blocks, b)
+    end
+  end
   return blocks
 end
 

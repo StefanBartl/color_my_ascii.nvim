@@ -1,0 +1,82 @@
+-- docs/TESTS/fence_hl_spec.lua — fence delimiter line highlighting.
+---@diagnostic disable: missing-fields
+
+return function(H)
+  local eq, ok = H.eq, H.ok
+  local api = vim.api
+  local fence_hl = require("color_my_ascii.fence_hl")
+
+  local LINES = {
+    "# Title",     -- 0
+    "",            -- 1
+    "```text",     -- 2  non-ascii (unmapped lang)
+    "plain text",  -- 3
+    "```",         -- 4
+    "",            -- 5
+    "```ascii-c",  -- 6  ascii
+    "+--+",        -- 7
+    "```",         -- 8
+  }
+
+  local ns = api.nvim_create_namespace("ColorMyAsciiFenceLine")
+  local function rows(buf)
+    local set = {}
+    for _, m in ipairs(api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })) do
+      set[m[2]] = m[4].line_hl_group or true
+    end
+    return set
+  end
+
+  -- apply_to = "all"
+  require("color_my_ascii.config").setup({
+    fence_line_highlight = { enable = true, preset = "accent", apply_to = "all" },
+  })
+  fence_hl.setup_hl(require("color_my_ascii.config").get())
+  do
+    local buf = H.scratch("markdown", LINES)
+    fence_hl.apply(buf, require("color_my_ascii.config").get())
+    local r = rows(buf)
+    ok(r[2] ~= nil and r[4] ~= nil, "all: text fence open+close highlighted")
+    ok(r[6] ~= nil and r[8] ~= nil, "all: ascii fence open+close highlighted")
+    ok(r[3] == nil, "all: content line not highlighted")
+    eq(r[2], "ColorMyAsciiFenceOpen", "all: open uses open group")
+    eq(r[4], "ColorMyAsciiFenceClose", "all: close uses close group")
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
+  -- apply_to = "ascii"
+  require("color_my_ascii.config").setup({
+    fence_line_highlight = { enable = true, preset = "subtle", apply_to = "ascii" },
+  })
+  fence_hl.setup_hl(require("color_my_ascii.config").get())
+  do
+    local buf = H.scratch("markdown", LINES)
+    fence_hl.apply(buf, require("color_my_ascii.config").get())
+    local r = rows(buf)
+    ok(r[2] == nil, "ascii: non-ascii text fence not highlighted")
+    ok(r[6] ~= nil and r[8] ~= nil, "ascii: ascii fence highlighted")
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
+  -- disabled -> clears
+  do
+    local buf = H.scratch("markdown", LINES)
+    fence_hl.apply(buf, { fence_line_highlight = { enable = true, apply_to = "all" } })
+    ok(next(rows(buf)) ~= nil, "marks present before disable")
+    fence_hl.apply(buf, { fence_line_highlight = { enable = false } })
+    ok(next(rows(buf)) == nil, "marks cleared when disabled")
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
+  -- overrides: string group + attr table
+  require("color_my_ascii.config").setup({
+    fence_line_highlight = { enable = true, open = "Comment", close = { bg = "#331111" }, apply_to = "all" },
+  })
+  fence_hl.setup_hl(require("color_my_ascii.config").get())
+  do
+    local close_hl = api.nvim_get_hl(0, { name = "ColorMyAsciiFenceClose" })
+    ok(close_hl.bg ~= nil, "override: close group has custom bg")
+  end
+
+  require("color_my_ascii.config").setup({})
+end

@@ -68,6 +68,14 @@
 ---@field close? string|ColorMyAscii.CustomHighlight Override for the closing fence line (hl group name or attr table)
 ---@field apply_to? "all"|"ascii" Which blocks get the highlight: every fenced block or only ASCII ones
 
+---@class ColorMyAscii.FenceExport
+---@field default_dir? "buffer"|"cwd" Where the suggested export path lives (default "buffer")
+---@field open_after? boolean Open the exported file afterwards (default false; --open forces it)
+---@field open_cmd? string Command used to open ("edit"|"split"|"vsplit"|"tabedit", default "vsplit")
+---@field replace? boolean Replace the fenced block with a link reference (default false; --replace forces it)
+---@field replace_format? string string.format template for the reference; args are (filename, relpath)
+---@field ext_map? table<string, string> Language-tag -> file-extension overrides
+
 ---@class ColorMyAscii.TreesitterConfig
 ---@field enabled? boolean Master switch for both features below (default true; both sub-features fall back to heuristic-only behavior when no parser is installed)
 ---@field block_detection? boolean Use treesitter's markdown grammar to detect fenced code blocks instead of the heuristic line scanner (default true, only applies if enabled=true)
@@ -93,6 +101,7 @@
 ---@field enable_bracket_highlighting? boolean Enable highlighting of brackets/parentheses
 ---@field fence_language_map? table<string, string> Map of markdown fence language tags to plugin language names (e.g., { vim = "vim" })
 ---@field fence_line_highlight? ColorMyAscii.FenceLineHighlight Optional full-line highlight of fence delimiter lines
+---@field fence_export? ColorMyAscii.FenceExport Behaviour of the `:Fence export` command
 ---@field keymaps? false|table<string, string> Optional default keymaps (action name -> lhs). false (default) disables all keymaps. See lua/color_my_ascii/bindings/keymaps.lua
 ---@field cache? CacheConfig Optional override for cache_manager defaults
 ---@field debounce? DebounceConfig Optional override for debounce_manager defaults

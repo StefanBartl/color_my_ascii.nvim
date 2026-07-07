@@ -17,8 +17,11 @@ function M.enable()
     pattern = 'markdown',
     callback = function(args)
       require('color_my_ascii').setup_buffer(args.buf)
+      -- Buffer-local :Fence command (export, ...). Independent of the highlight
+      -- enable state, so fence actions work even when highlighting is toggled off.
+      require('color_my_ascii.commands.fence').register(args.buf)
     end,
-    desc = 'Setup ASCII art highlighting for markdown files',
+    desc = 'Setup ASCII art highlighting + :Fence command for markdown files',
   })
 end
 

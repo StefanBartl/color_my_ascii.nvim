@@ -191,6 +191,35 @@ function M.check()
     end
   end
 
+  -- Fenced-block syntax highlighting: report the fence languages in the current
+  -- buffer and whether a treesitter parser is available for each. This is the
+  -- usual reason a ```lang block isn't highlighted (missing parser / injection).
+  do
+    local fences_ok, fences = pcall(require, 'color_my_ascii.api.fences')
+    if fences_ok and type(fences) == 'table' then
+      local bufnr = vim.api.nvim_get_current_buf()
+      local blist_ok, blocks = pcall(fences.list_blocks, bufnr, { lines = 'none' })
+      if blist_ok and type(blocks) == 'table' and #blocks > 0 then
+        local seen, missing, present = {}, {}, {}
+        for _, b in ipairs(blocks) do
+          local lang = type(b.lang) == 'string' and vim.trim(b.lang):lower() or ''
+          if lang ~= '' and not seen[lang] then
+            seen[lang] = true
+            local has = pcall(vim.treesitter.language.add, lang)
+            if has then present[#present + 1] = lang else missing[#missing + 1] = lang end
+          end
+        end
+        if #present > 0 then
+          health.ok('Fence languages with a treesitter parser: ' .. table.concat(present, ', '))
+        end
+        if #missing > 0 then
+          health.info('Fence languages WITHOUT a treesitter parser (no injected highlighting): '
+            .. table.concat(missing, ', ') .. ' — install with :TSInstall <lang>')
+        end
+      end
+    end
+  end
+
   -- lib.nvim is an optional dependency used for keymaps/notify integration
   local lib_ok = pcall(require, 'lib.nvim.map')
   if lib_ok then

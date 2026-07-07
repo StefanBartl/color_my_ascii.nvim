@@ -81,6 +81,20 @@ return {
     close    = nil,
     apply_to = "all", -- "all" | "ascii"
   },
+  -- `:Fence export` behaviour (buffer-local command in markdown buffers).
+  -- default_dir: where the suggested export path lives ("buffer" dir or "cwd").
+  -- open_after/open_cmd: open the exported file afterwards (--open forces it).
+  -- replace/replace_format: swap the fenced block for a link reference
+  --   ("literate tangle"; --replace forces it). Format args: (filename, relpath).
+  -- ext_map: language-tag -> file-extension overrides on top of the built-ins.
+  fence_export = {
+    default_dir    = "buffer", -- "buffer" | "cwd"
+    open_after     = false,
+    open_cmd       = "vsplit", -- "edit" | "split" | "vsplit" | "tabedit"
+    replace        = false,
+    replace_format = "[%s](%s)",
+    ext_map        = {},
+  },
   -- Optional default keymaps (see lua/color_my_ascii/bindings/keymaps.lua).
   -- Deliberately off by default, unlike most other features: keymaps claim a
   -- slot in the user's global keymap namespace and can silently collide with

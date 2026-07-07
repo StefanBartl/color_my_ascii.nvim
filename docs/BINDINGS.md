@@ -27,6 +27,7 @@ Registered in `lua/color_my_ascii/bindings/usrcmds.lua`.
 | `:ColorMyAsciiListSchemes` | List available color schemes |
 | `:ColorMyAsciiSwitchScheme <name>` | Switch to a different color scheme |
 | `:ColorMyAsciiSchemes` | Pick color scheme with Telescope (live preview) |
+| `:Fence export [path] [--open] [--replace]` | Buffer-local (markdown): extract the fenced block under the cursor into a file |
 
 ---
 

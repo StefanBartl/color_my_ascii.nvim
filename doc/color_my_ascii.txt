@@ -306,6 +306,21 @@ Configuration options:~
     })
 <
 
+*color_my_ascii-config-fence_export*
+    fence_export            Behaviour of the |:Fence| export command.
+                            Type: table
+                            Fields:
+                              default_dir    "buffer" | "cwd"  (default "buffer")
+                              open_after     boolean           (default false)
+                              open_cmd       string  ("edit"|"split"|"vsplit"|
+                                             "tabedit", default "vsplit")
+                              replace        boolean           (default false)
+                              replace_format string  string.format template;
+                                             args are (filename, relpath)
+                                             (default "[%s](%s)")
+                              ext_map        table<string,string>  language-tag
+                                             -> extension overrides
+
 *color_my_ascii-config-keymaps*
     keymaps                 Optional default keymaps (action name -> key
                             sequence). false disables all keymaps.
@@ -500,6 +515,20 @@ Fence Management~
     Ensure blank lines before and after all fenced code blocks.
     Adds missing blank lines automatically.
     Reports number of changes made.
+
+*:Fence*                                        *color_my_ascii-fence-command*
+    Buffer-local (markdown) dispatcher for actions on the fenced block under
+    the cursor. Argument completion suggests subcommands, flags and file paths.
+
+    :Fence export [path] [--open] [--replace]
+        Extract the block's content into a standalone file.
+        - path: quoted or bare ("src/a.js", 'a b.py', a.lua). Omitted -> a
+          prompt with a suggested filename (extension derived from the fence
+          language) and file-path completion.
+        - --open:    open the exported file afterwards (config open_cmd).
+        - --replace: replace the fenced block with a link reference to the new
+          file (literate-tangle style; config replace_format).
+    See |color_my_ascii-config-fence_export| for the defaults.
 
 Scheme Management~                              *color_my_ascii-scheme-commands*
 

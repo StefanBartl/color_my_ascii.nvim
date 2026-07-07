@@ -93,6 +93,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 - ✅ **Default Text Color**: Dimmed representation for normal text
 - ✅ **Fence-line Highlighting**: Full-line highlight of ` ``` ` delimiter lines, on by default — `auto` preset matches your colorscheme (17 bundled themes) — see below
 - ✅ **Public Fence API**: `require("color_my_ascii").fences` — reusable fenced-block detection for other plugins (see below)
+- ✅ **`:Fence` actions**: e.g. `:Fence export` — extract a fenced block into a standalone file (`--open`, `--replace`)
 - ✅ **Health Check**: `:checkhealth color_my_ascii`
 - ✅ **Fence Validation**: `:ColorMyAsciiCheckFences` to detect unmatched blocks
 - ✅ **Vim Help**: `:h color_my_ascii`
@@ -510,6 +511,51 @@ Additional languages can be easily added (see [Contributing](#contributing)).
 |---------|-------------|
 | `:ColorMyAsciiCheckFences` | Check for unmatched fences |
 | `:ColorMyAsciiEnsureBlankLines` | Ensure blank lines around code blocks |
+
+---
+
+### Fence actions — `:Fence` (buffer-local, markdown)
+
+Actions on the fenced code block **under the cursor**, built on the fence API.
+Registered buffer-local in markdown buffers.
+
+| Command | Description |
+|---------|-------------|
+| `:Fence export [path] [--open] [--replace]` | Extract the block's content into a standalone file |
+
+- **Path** may be quoted or bare: `:Fence export "src/a.js"`, `:Fence export 'a b.py'`,
+  `:Fence export a.lua`. Omit it to get a prompt with a suggested filename and
+  file-path completion. The suggested extension is derived from the fence
+  language (`javascript → .js`, `python → .py`, …).
+- **`--open`** opens the exported file afterwards (`open_cmd`, default `vsplit`).
+- **`--replace`** replaces the fenced block with a link reference to the new file
+  (literate-tangle style; format via `fence_export.replace_format`).
+- Argument completion suggests the subcommand, the flags, and file paths.
+
+````lua
+require('color_my_ascii').setup({
+  fence_export = {
+    default_dir    = "buffer",   -- "buffer" | "cwd"
+    open_after     = false,      -- always open after export
+    open_cmd       = "vsplit",   -- "edit" | "split" | "vsplit" | "tabedit"
+    replace        = false,      -- always replace with a reference
+    replace_format = "[%s](%s)", -- (filename, relative-path)
+    ext_map        = {},         -- language-tag -> extension overrides
+  },
+})
+````
+
+### Syntax highlighting inside fences
+
+A `` ```javascript `` block is highlighted by Neovim's **native treesitter
+injections** (install the parser with `:TSInstall javascript` and enable
+`nvim-treesitter` highlight). For languages color_my_ascii knows
+(`fence_language_map`), it additionally overlays the real grammar via
+`treesitter.syntax_highlight` (on by default). `:checkhealth color_my_ascii`
+reports which fence languages in the buffer are missing a parser.
+
+Full LSP inside fences (completion/hover/diagnostics) is on the roadmap — see
+[docs/ROADMAP/lsp_integration_fence.md](docs/ROADMAP/lsp_integration_fence.md).
 
 ---
 

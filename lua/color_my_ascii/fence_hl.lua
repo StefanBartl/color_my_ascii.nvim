@@ -23,8 +23,8 @@ local ns = api.nvim_create_namespace("ColorMyAsciiFenceLine")
 local OPEN_GROUP = "ColorMyAsciiFenceOpen"
 local CLOSE_GROUP = "ColorMyAsciiFenceClose"
 
---- Theme-adaptive presets: link to widely-available built-in groups so the look
---- follows the colorscheme instead of hardcoding colors.
+--- Generic, theme-adaptive presets: link to widely-available built-in groups so
+--- the look follows the colorscheme instead of hardcoding colors.
 ---@type table<string, ColorMyAscii.CustomHighlight>
 local PRESETS = {
   subtle    = { link = "CursorLine" },
@@ -33,27 +33,50 @@ local PRESETS = {
   bar       = { link = "ColorColumn" },
 }
 
+--- Resolve a preset NAME (no per-delimiter override) to a highlight definition:
+---   "auto"          -> the current colorscheme's theme preset, else "subtle"
+---   generic name    -> subtle | accent | underline | bar
+---   theme name      -> the matching hand-tuned theme preset (see theme_presets)
+---   anything else   -> "subtle"
+---@param preset string
+---@return ColorMyAscii.CustomHighlight
+local function base_preset(preset)
+  local themes = require("color_my_ascii.theme_presets")
+  if preset == "auto" then
+    return themes.resolve_auto() or PRESETS.subtle
+  end
+  if PRESETS[preset] then
+    return PRESETS[preset]
+  end
+  if themes.is_theme(preset) then
+    return themes.presets[preset]
+  end
+  return PRESETS.subtle
+end
+
 --- Resolve a per-delimiter spec into a highlight definition.
---- string -> link to that existing group; table -> use as attrs; nil -> preset.
----@param spec string|ColorMyAscii.CustomHighlight|nil
+--- string override -> link to that existing group; table override -> attrs;
+--- nil -> fall back to the resolved preset.
+---@param override string|ColorMyAscii.CustomHighlight|nil
 ---@param preset string
 ---@return table hl A table suitable for nvim_set_hl
-local function resolve_spec(spec, preset)
-  if type(spec) == "string" then
-    return { link = spec }
-  elseif type(spec) == "table" then
-    return spec
+local function resolve_spec(override, preset)
+  if type(override) == "string" then
+    return { link = override }
+  elseif type(override) == "table" then
+    return override
   end
-  return PRESETS[preset] or PRESETS.subtle
+  return base_preset(preset)
 end
 
 --- (Re)create the ColorMyAsciiFenceOpen/Close highlight groups from config.
---- Safe to call repeatedly (e.g. on ColorScheme).
+--- Safe to call repeatedly (e.g. on ColorScheme — which is exactly how the
+--- "auto" preset re-matches the newly active theme).
 ---@param cfg ColorMyAscii.Config
 ---@return nil
 function M.setup_hl(cfg)
   local flh = (cfg and cfg.fence_line_highlight) or {}
-  local preset = flh.preset or "subtle"
+  local preset = flh.preset or "auto"
   pcall(api.nvim_set_hl, 0, OPEN_GROUP, resolve_spec(flh.open, preset))
   pcall(api.nvim_set_hl, 0, CLOSE_GROUP, resolve_spec(flh.close, preset))
 end

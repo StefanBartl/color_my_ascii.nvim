@@ -264,6 +264,48 @@ Configuration options:~
     })
 <
 
+*color_my_ascii-config-fence_line_highlight*
+    fence_line_highlight    Full-line highlight of fenced-block delimiter lines
+                            (the ```lang opening line and its closing ``` line),
+                            as a visual boundary. On by default.
+                            Type: table
+                            Fields:
+                              enable   boolean  (default true)
+                              preset   string   (default "auto") one of:
+                                       "auto" | "subtle" | "accent" |
+                                       "underline" | "bar" | <theme-name>
+                              open     string|table|nil  per-delimiter override
+                              close    string|table|nil  per-delimiter override
+                              apply_to "all" | "ascii"  (default "all")
+
+                            preset = "auto" matches vim.g.colors_name against a
+                            set of bundled theme palettes (catppuccin,
+                            tokyonight, gruvbox, gruvbox-material, nord, onedark,
+                            dracula, kanagawa, rose-pine, everforest, nightfox,
+                            material, sonokai, monokai, solarized, github,
+                            oxocarbon), re-matching on :colorscheme. It falls
+                            back to "subtle" on a light background or an unknown
+                            theme. You can also name a theme directly.
+
+                            The generic looks link to theme-adaptive built-ins:
+                            subtle -> CursorLine, accent -> Visual, underline,
+                            bar -> ColorColumn.
+
+                            open/close accept an existing highlight-group name
+                            (string, linked) or an attribute table forwarded to
+                            nvim_set_hl.
+
+                            Example:~
+>lua
+    require('color_my_ascii').setup({
+      fence_line_highlight = {
+        enable   = true,
+        preset   = 'auto',
+        apply_to = 'all',
+      },
+    })
+<
+
 *color_my_ascii-config-keymaps*
     keymaps                 Optional default keymaps (action name -> key
                             sequence). false disables all keymaps.

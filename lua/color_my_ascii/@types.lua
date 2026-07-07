@@ -34,9 +34,36 @@
 ---@field chars string Characters to highlight with this group
 ---@field hl string|ColorMyAscii.CustomHighlight Highlight specification
 
+--- Fence-line look. "auto" matches the current colorscheme (falling back to
+--- "subtle"); the generic looks are theme-adaptive links; the theme names apply
+--- a hand-tuned palette (see color_my_ascii/theme_presets.lua).
+---@alias ColorMyAscii.FencePreset
+---| "auto"
+---| "subtle"
+---| "accent"
+---| "underline"
+---| "bar"
+---| "catppuccin"
+---| "tokyonight"
+---| "gruvbox"
+---| "gruvbox-material"
+---| "nord"
+---| "onedark"
+---| "dracula"
+---| "kanagawa"
+---| "rose-pine"
+---| "everforest"
+---| "nightfox"
+---| "material"
+---| "sonokai"
+---| "monokai"
+---| "solarized"
+---| "github"
+---| "oxocarbon"
+
 ---@class ColorMyAscii.FenceLineHighlight
----@field enable? boolean Highlight the whole opening/closing fence delimiter line (default false)
----@field preset? "subtle"|"accent"|"underline"|"bar" Built-in look for the fence lines
+---@field enable? boolean Highlight the whole opening/closing fence delimiter line (default true)
+---@field preset? ColorMyAscii.FencePreset Look for the fence lines (default "auto")
 ---@field open? string|ColorMyAscii.CustomHighlight Override for the opening fence line (hl group name or attr table)
 ---@field close? string|ColorMyAscii.CustomHighlight Override for the closing fence line (hl group name or attr table)
 ---@field apply_to? "all"|"ascii" Which blocks get the highlight: every fenced block or only ASCII ones

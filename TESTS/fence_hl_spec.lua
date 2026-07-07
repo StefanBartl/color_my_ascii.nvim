@@ -78,5 +78,39 @@ return function(H)
     ok(close_hl.bg ~= nil, "override: close group has custom bg")
   end
 
+  -- preset = a theme name -> uses that theme's hand-tuned palette
+  require("color_my_ascii.config").setup({
+    fence_line_highlight = { enable = true, preset = "catppuccin", apply_to = "all" },
+  })
+  fence_hl.setup_hl(require("color_my_ascii.config").get())
+  do
+    local themes = require("color_my_ascii.theme_presets")
+    local open_hl = api.nvim_get_hl(0, { name = "ColorMyAsciiFenceOpen" })
+    eq(string.format("#%06x", open_hl.bg), themes.presets.catppuccin.bg, "theme preset applies catppuccin bg")
+  end
+
+  -- preset = "auto" -> matches the current colorscheme name by substring
+  do
+    local themes = require("color_my_ascii.theme_presets")
+    local saved_name, saved_bg = vim.g.colors_name, vim.o.background
+    vim.g.colors_name = "tokyonight-storm"
+    vim.o.background = "dark"
+    require("color_my_ascii.config").setup({
+      fence_line_highlight = { enable = true, preset = "auto", apply_to = "all" },
+    })
+    fence_hl.setup_hl(require("color_my_ascii.config").get())
+    local open_hl = api.nvim_get_hl(0, { name = "ColorMyAsciiFenceOpen" })
+    eq(string.format("#%06x", open_hl.bg), themes.presets.tokyonight.bg, "auto matches tokyonight variant")
+
+    -- auto with an unknown theme -> falls back to the generic 'subtle' link
+    vim.g.colors_name = "some-unknown-theme-xyz"
+    fence_hl.setup_hl(require("color_my_ascii.config").get())
+    local fallback = api.nvim_get_hl(0, { name = "ColorMyAsciiFenceOpen", link = true })
+    ok(fallback.link == "CursorLine", "auto falls back to subtle (CursorLine) on no match")
+
+    vim.g.colors_name = saved_name
+    vim.o.background = saved_bg
+  end
+
   require("color_my_ascii.config").setup({})
 end

@@ -91,7 +91,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 - ✅ **Inline Code Highlighting**: Keywords and symbols backticks highlighted: `` `...` ``
 - ✅ **Empty Fenced Blocks**: Optionally treat ``` without language as ASCII
 - ✅ **Default Text Color**: Dimmed representation for normal text
-- ✅ **Fence-line Highlighting**: Optional full-line highlight of ` ``` ` delimiter lines (4 presets — see below)
+- ✅ **Fence-line Highlighting**: Full-line highlight of ` ``` ` delimiter lines, on by default — `auto` preset matches your colorscheme (17 bundled themes) — see below
 - ✅ **Public Fence API**: `require("color_my_ascii").fences` — reusable fenced-block detection for other plugins (see below)
 - ✅ **Health Check**: `:checkhealth color_my_ascii`
 - ✅ **Fence Validation**: `:ColorMyAsciiCheckFences` to detect unmatched blocks
@@ -202,11 +202,11 @@ require('color_my_ascii').setup({
     syntax_highlight = true,
   },
 
-  -- Optional full-line highlight of fence delimiter lines (see "Fence-line
-  -- highlighting" below). Off by default.
+  -- Full-line highlight of fence delimiter lines (see "Fence-line highlighting"
+  -- below). On by default; preset "auto" matches the current colorscheme.
   fence_line_highlight = {
-    enable   = false,
-    preset   = 'subtle',  -- 'subtle' | 'accent' | 'underline' | 'bar'
+    enable   = true,
+    preset   = 'auto',     -- 'auto' | 'subtle' | 'accent' | 'underline' | 'bar' | <theme>
     open     = nil,        -- override: hl-group name (string) or attr table
     close    = nil,        -- override: hl-group name (string) or attr table
     apply_to = 'all',      -- 'all' fenced blocks | 'ascii' only
@@ -313,31 +313,49 @@ require('color_my_ascii').setup({
 
 ## Fence-line highlighting
 
-Optionally paint the **whole** opening (`` ```lang ``) and closing (`` ``` ``)
-line of fenced code blocks, as a visual boundary:
+Paints the **whole** opening (`` ```lang ``) and closing (`` ``` ``) line of
+fenced code blocks, as a visual boundary:
 
 ```javascript   ← this whole line
 // ...
 ```            ← and this whole line
 
-Enable and pick a look:
+**On by default** with `preset = "auto"` (matches your colorscheme). Pick a
+different look, or turn it off:
 
 ````lua
 require('color_my_ascii').setup({
   fence_line_highlight = {
     enable   = true,
-    preset   = 'accent',   -- 'subtle' | 'accent' | 'underline' | 'bar'
+    preset   = 'auto',     -- see the presets below
     apply_to = 'all',      -- 'all' fenced blocks, or 'ascii' only
   },
 })
 ````
 
-| Preset | Look (theme-adaptive) |
-|--------|-----------------------|
+### Presets
+
+| Preset | Look |
+|--------|------|
+| `auto` | **default** — match the current colorscheme (see below), fall back to `subtle` |
 | `subtle` | links to `CursorLine` (soft full-line tint) |
 | `accent` | links to `Visual` (prominent tint) |
 | `underline` | underlines the fence line |
 | `bar` | links to `ColorColumn` (bar-like block) |
+
+### Theme-matched presets
+
+`preset = "auto"` reads `vim.g.colors_name`, substring-matches it (so
+`catppuccin-mocha`, `tokyonight-storm`, `gruvbox-material` all match their base),
+and applies a hand-tuned palette; it re-matches automatically on `:colorscheme`.
+On a light background or an unknown theme it falls back to `subtle`. You can also
+name a theme directly, e.g. `preset = "tokyonight"`.
+
+Bundled themes: `catppuccin`, `tokyonight`, `gruvbox`, `gruvbox-material`,
+`nord`, `onedark`, `dracula`, `kanagawa`, `rose-pine`, `everforest`, `nightfox`,
+`material`, `sonokai`, `monokai`, `solarized`, `github`, `oxocarbon`.
+
+### Overrides
 
 For full control, `open` / `close` each accept either an existing highlight
 group name (string, linked) **or** an attribute table forwarded to
@@ -346,7 +364,7 @@ group name (string, linked) **or** an attribute table forwarded to
 ````lua
 fence_line_highlight = {
   enable = true,
-  open   = 'Title',                       -- link to an existing group
+  open   = 'Title',                           -- link to an existing group
   close  = { fg = '#5c6370', italic = true }, -- custom attributes
   apply_to = 'all',
 }
@@ -355,6 +373,12 @@ fence_line_highlight = {
 The highlight lives in its own extmark namespace (priority below the character
 highlights, so tokens stay visible), refreshes on edit, and re-resolves its
 groups on `:colorscheme` changes.
+
+> **Tip — value completion.** `preset` is a typed string enum
+> (`ColorMyAscii.FencePreset`), so `lua_ls` offers the preset names as you type
+> `preset = "…"`. It only kicks in when the plugin's types are on the LSP path —
+> e.g. via `folke/lazydev.nvim` (add `"color_my_ascii.nvim"` to its `library`)
+> or by annotating the table: `---@type ColorMyAscii.Config` above your `opts`.
 
 ---
 

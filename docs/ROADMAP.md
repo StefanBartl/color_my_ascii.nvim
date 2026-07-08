@@ -3,6 +3,21 @@
 Ideas and planned work for color_my_ascii.nvim. Nothing here is committed to a
 timeline - this is a working list of what might come next.
 
+## weitere sinnvolle `:Fence`-Features
+
+Der Dispatcher ist genau dafür gebaut. Ideen, die `:Fence` zu einem kleinen Literate-Programming-Werkzeug machen:
+
+- **`:Fence yank`** — Inhalt (ohne Marker) ins Register/Clipboard.
+- **`:Fence open`** — Fence-Inhalt in einem Split mit korrektem Filetype öffnen, optional **auf `:w` zurücksynchen** (Mini-„otter-lite" zum bequemen Editieren + volles LSP im Split).
+- **`:Fence run`** — Block mit dem Sprach-Interpreter ausführen, Output anzeigen (Code-Runner / literate execution).
+- **`:Fence format`** — Formatter der Sprache (conform/`formatprg`) auf den Block anwenden, in-place.
+- **`:Fence import <file>`** — Umkehrung von export: Datei in den Fence einlesen/ersetzen → hält Tangle synchron.
+- **`:Fence lang <neu>`** — Sprach-Tag des Fences ändern.
+- **`:Fence select`** — Fence-Inhalt visuell selektieren.
+- **`:Fence wrap` / `unwrap`** — Selektion in einen Fence wickeln / Fence auflösen.
+
+Mein Tipp für den größten Nutzen als Nächstes: **`:Fence open` mit Sync** — das gibt dir de facto volles LSP + Formatter im Fence *ohne* die große Embedded-LSP-Engine, weil du im echten Split-Buffer editierst. Sag Bescheid, dann baue ich das (oder yank/run/format) als nächsten Subcommand.
+
 ## Planned
 
 - Additional built-in color schemes

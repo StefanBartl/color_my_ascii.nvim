@@ -93,7 +93,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 - ✅ **Default Text Color**: Dimmed representation for normal text
 - ✅ **Fence-line Highlighting**: Full-line highlight of ` ``` ` delimiter lines, on by default — `auto` preset matches your colorscheme (17 bundled themes) — see below
 - ✅ **Public Fence API**: `require("color_my_ascii").fences` — reusable fenced-block detection for other plugins (see below)
-- ✅ **`:Fence` actions**: e.g. `:Fence export` — extract a fenced block into a standalone file (`--open`, `--replace`)
+- ✅ **`:Fence` actions**: literate-programming toolkit for the block under the cursor — `export`, `yank`, `open` (edit-in-split + sync), `run`, `format`, `import`, `lang`, `select`, `wrap`/`unwrap`
 - ✅ **Health Check**: `:checkhealth color_my_ascii`
 - ✅ **Fence Validation**: `:ColorMyAsciiCheckFences` to detect unmatched blocks
 - ✅ **Vim Help**: `:h color_my_ascii`
@@ -516,21 +516,33 @@ Additional languages can be easily added (see [Contributing](#contributing)).
 
 ### Fence actions — `:Fence` (buffer-local, markdown)
 
-Actions on the fenced code block **under the cursor**, built on the fence API.
-Registered buffer-local in markdown buffers.
+A small literate-programming toolkit for the fenced code block **under the
+cursor**, built on the fence API. Registered buffer-local in markdown buffers.
+Argument completion suggests subcommands, flags, file paths and language tags.
 
-| Command | Description |
-|---------|-------------|
-| `:Fence export [path] [--open] [--replace]` | Extract the block's content into a standalone file |
+| Subcommand | Description |
+|------------|-------------|
+| `:Fence export [path] [--open] [--replace]` | Extract the block into a standalone file |
+| `:Fence yank [reg]` | Copy the block content (no markers) to a register (default `"` + `+`) |
+| `:Fence open [--split\|--vsplit\|--tab\|--edit]` | Edit the block in a real split (full LSP/formatter); `:w` syncs back |
+| `:Fence run` | Run the block with its interpreter; show output in a scratch split |
+| `:Fence format` | Format the block in place with the language's formatter |
+| `:Fence import <file>` | Replace the block content with a file's content (inverse of export) |
+| `:Fence lang <language>` | Change the fence's language tag |
+| `:Fence select` | Visually select the block interior |
+| `:'<,'>Fence wrap [lang]` | Wrap the current line / visual range in a fence |
+| `:Fence unwrap` | Remove the fence around the block under the cursor |
 
-- **Path** may be quoted or bare: `:Fence export "src/a.js"`, `:Fence export 'a b.py'`,
-  `:Fence export a.lua`. Omit it to get a prompt with a suggested filename and
-  file-path completion. The suggested extension is derived from the fence
-  language (`javascript → .js`, `python → .py`, …).
-- **`--open`** opens the exported file afterwards (`open_cmd`, default `vsplit`).
-- **`--replace`** replaces the fenced block with a link reference to the new file
-  (literate-tangle style; format via `fence_export.replace_format`).
-- Argument completion suggests the subcommand, the flags, and file paths.
+**export** — path may be quoted or bare (`:Fence export "src/a.js"`,
+`:Fence export 'a b.py'`, `:Fence export a.lua`); omit it for a prompt with a
+suggested filename (extension derived from the fence language) + file completion.
+`--open` opens the file after; `--replace` swaps the block for a link reference
+(literate tangle).
+
+**open** — the "otter-lite" editor: the block is written to a temp file with the
+right extension and opened in a split, so the language server and formatters
+attach normally. The fence interior is anchored with extmarks; saving the split
+(`:w`) writes the changes back into the fence.
 
 ````lua
 require('color_my_ascii').setup({
@@ -541,6 +553,16 @@ require('color_my_ascii').setup({
     replace        = false,      -- always replace with a reference
     replace_format = "[%s](%s)", -- (filename, relative-path)
     ext_map        = {},         -- language-tag -> extension overrides
+  },
+  fence_run = {
+    -- interpreter per language tag; string or string[], temp file appended.
+    -- Merged on top of the built-ins (python3/node/lua/bash/ruby/go run/...).
+    runners = { python = "python3" },
+  },
+  fence_format = {
+    -- stdin/stdout formatter per language tag (string[]). Merged on top of the
+    -- built-ins (stylua/black/prettier/gofmt/shfmt/rustfmt).
+    formatters = { lua = { "stylua", "-" } },
   },
 })
 ````

@@ -11,46 +11,10 @@
 local M = {}
 
 local api = vim.api
-
---- Fence-language tag -> file extension. Keyed by lowercased tag (both common
---- fence tags and plugin language names). Overridable via config.ext_map.
----@type table<string, string>
-local DEFAULT_EXT = {
-  javascript = "js", js = "js", jsx = "jsx", node = "js",
-  typescript = "ts", ts = "ts", tsx = "tsx",
-  python = "py", py = "py",
-  lua = "lua",
-  c = "c", cpp = "cpp", ["c++"] = "cpp", cxx = "cpp", cc = "cpp",
-  csharp = "cs", cs = "cs", ["c#"] = "cs",
-  java = "java", kotlin = "kt", kt = "kt", scala = "scala", groovy = "groovy",
-  go = "go", golang = "go", rust = "rs", rs = "rs", zig = "zig",
-  ruby = "rb", rb = "rb", php = "php", perl = "pl", pl = "pl",
-  bash = "sh", sh = "sh", shell = "sh", zsh = "sh", fish = "fish",
-  powershell = "ps1", ps1 = "ps1",
-  html = "html", css = "css", scss = "scss", sass = "sass", less = "less",
-  json = "json", jsonc = "jsonc", yaml = "yaml", yml = "yaml", toml = "toml",
-  xml = "xml", sql = "sql", graphql = "graphql", proto = "proto",
-  markdown = "md", md = "md", mdx = "mdx", tex = "tex", rst = "rst",
-  vim = "vim", viml = "vim", vimscript = "vim",
-  haskell = "hs", hs = "hs", elixir = "ex", ex = "ex", erlang = "erl",
-  clojure = "clj", clj = "clj", elm = "elm", ocaml = "ml", fsharp = "fs",
-  swift = "swift", dart = "dart", r = "r", julia = "jl", jl = "jl",
-  dockerfile = "dockerfile", docker = "dockerfile",
-  make = "mk", makefile = "mk", cmake = "cmake",
-  mermaid = "mmd", dot = "dot", graphviz = "dot", nix = "nix",
-}
+local util = require("color_my_ascii.commands.fence.util")
 
 local function cfg()
   return require("color_my_ascii.config").get().fence_export or {}
-end
-
---- Extension for a fence language tag.
----@param lang string|nil
----@return string
-local function ext_for(lang)
-  local key = type(lang) == "string" and vim.trim(lang):lower() or ""
-  local user = cfg().ext_map or {}
-  return user[key] or DEFAULT_EXT[key] or "txt"
 end
 
 --- Suggested default export path for the block.
@@ -67,7 +31,7 @@ local function suggest_path(bufnr, block)
     dir = vim.fn.fnamemodify(bufname, ":h")
   end
   local stem = (bufname ~= "" and vim.fn.fnamemodify(bufname, ":t:r")) or "fence"
-  return dir .. "/" .. stem .. "_fence." .. ext_for(block.lang)
+  return dir .. "/" .. stem .. "_fence." .. util.ext_for(block.lang)
 end
 
 --- Best-effort path relative to `base` (falls back to absolute).

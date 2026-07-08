@@ -13,6 +13,7 @@ local specs = {
   "fences_spec.lua",
   "fence_hl_spec.lua",
   "fence_export_spec.lua",
+  "fence_actions_spec.lua",
 }
 
 local failed = 0

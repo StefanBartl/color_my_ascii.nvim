@@ -23,8 +23,10 @@ color_my_ascii-config-enable_inline_code	color_my_ascii.txt	/*color_my_ascii-con
 color_my_ascii-config-enable_keywords	color_my_ascii.txt	/*color_my_ascii-config-enable_keywords*
 color_my_ascii-config-enable_language_detection	color_my_ascii.txt	/*color_my_ascii-config-enable_language_detection*
 color_my_ascii-config-fence_export	color_my_ascii.txt	/*color_my_ascii-config-fence_export*
+color_my_ascii-config-fence_format	color_my_ascii.txt	/*color_my_ascii-config-fence_format*
 color_my_ascii-config-fence_language_map	color_my_ascii.txt	/*color_my_ascii-config-fence_language_map*
 color_my_ascii-config-fence_line_highlight	color_my_ascii.txt	/*color_my_ascii-config-fence_line_highlight*
+color_my_ascii-config-fence_run	color_my_ascii.txt	/*color_my_ascii-config-fence_run*
 color_my_ascii-config-keymaps	color_my_ascii.txt	/*color_my_ascii-config-keymaps*
 color_my_ascii-config-language_detection_threshold	color_my_ascii.txt	/*color_my_ascii-config-language_detection_threshold*
 color_my_ascii-config-overrides	color_my_ascii.txt	/*color_my_ascii-config-overrides*

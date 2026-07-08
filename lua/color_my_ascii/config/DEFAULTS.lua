@@ -95,6 +95,17 @@ return {
     replace_format = "[%s](%s)",
     ext_map        = {},
   },
+  -- `:Fence run` — interpreter per language tag (string or string[]); the temp
+  -- file with the block content is appended as the last argument. Merged on top
+  -- of the built-in runners; set a language to false semantics via omission.
+  fence_run = {
+    runners = {},
+  },
+  -- `:Fence format` — stdin/stdout formatter per language tag (string[]). Merged
+  -- on top of the built-in formatters (stylua/black/prettier/gofmt/...).
+  fence_format = {
+    formatters = {},
+  },
   -- Optional default keymaps (see lua/color_my_ascii/bindings/keymaps.lua).
   -- Deliberately off by default, unlike most other features: keymaps claim a
   -- slot in the user's global keymap namespace and can silently collide with

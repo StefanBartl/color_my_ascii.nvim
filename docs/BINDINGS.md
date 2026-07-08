@@ -28,6 +28,15 @@ Registered in `lua/color_my_ascii/bindings/usrcmds.lua`.
 | `:ColorMyAsciiSwitchScheme <name>` | Switch to a different color scheme |
 | `:ColorMyAsciiSchemes` | Pick color scheme with Telescope (live preview) |
 | `:Fence export [path] [--open] [--replace]` | Buffer-local (markdown): extract the fenced block under the cursor into a file |
+| `:Fence yank [reg]` | Copy the block content (no markers) to a register |
+| `:Fence open [--split\|--vsplit\|--tab\|--edit]` | Edit the block in a split (full LSP); `:w` syncs back |
+| `:Fence run` | Run the block with its interpreter; output in a scratch split |
+| `:Fence format` | Format the block in place with the language's formatter |
+| `:Fence import <file>` | Replace the block content with a file's content |
+| `:Fence lang <language>` | Change the fence's language tag |
+| `:Fence select` | Visually select the block interior |
+| `:[range]Fence wrap [lang]` | Wrap the current line / range in a fence |
+| `:Fence unwrap` | Remove the fence around the block under the cursor |
 
 ---
 

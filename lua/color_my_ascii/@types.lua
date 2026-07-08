@@ -68,6 +68,12 @@
 ---@field close? string|ColorMyAscii.CustomHighlight Override for the closing fence line (hl group name or attr table)
 ---@field apply_to? "all"|"ascii" Which blocks get the highlight: every fenced block or only ASCII ones
 
+---@class ColorMyAscii.FenceRun
+---@field runners? table<string, string|string[]> Interpreter per language tag (temp file appended)
+
+---@class ColorMyAscii.FenceFormat
+---@field formatters? table<string, string[]> stdin/stdout formatter command per language tag
+
 ---@class ColorMyAscii.FenceExport
 ---@field default_dir? "buffer"|"cwd" Where the suggested export path lives (default "buffer")
 ---@field open_after? boolean Open the exported file afterwards (default false; --open forces it)
@@ -102,6 +108,8 @@
 ---@field fence_language_map? table<string, string> Map of markdown fence language tags to plugin language names (e.g., { vim = "vim" })
 ---@field fence_line_highlight? ColorMyAscii.FenceLineHighlight Optional full-line highlight of fence delimiter lines
 ---@field fence_export? ColorMyAscii.FenceExport Behaviour of the `:Fence export` command
+---@field fence_run? ColorMyAscii.FenceRun Interpreter map for `:Fence run`
+---@field fence_format? ColorMyAscii.FenceFormat Formatter map for `:Fence format`
 ---@field keymaps? false|table<string, string> Optional default keymaps (action name -> lhs). false (default) disables all keymaps. See lua/color_my_ascii/bindings/keymaps.lua
 ---@field cache? CacheConfig Optional override for cache_manager defaults
 ---@field debounce? DebounceConfig Optional override for debounce_manager defaults

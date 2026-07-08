@@ -321,6 +321,26 @@ Configuration options:~
                               ext_map        table<string,string>  language-tag
                                              -> extension overrides
 
+*color_my_ascii-config-fence_run*
+    fence_run               Interpreters for |:Fence| run.
+                            Type: table
+                            Fields:
+                              runners  table<string, string|string[]>
+                                       language tag -> command (temp file with
+                                       the block content is appended). Merged on
+                                       top of the built-ins (python3, node, lua,
+                                       bash, ruby, "go run", Rscript, ...).
+
+*color_my_ascii-config-fence_format*
+    fence_format            Formatters for |:Fence| format.
+                            Type: table
+                            Fields:
+                              formatters  table<string, string[]>
+                                       language tag -> stdin/stdout formatter
+                                       command. Merged on top of the built-ins
+                                       (stylua, black, prettier, gofmt, shfmt,
+                                       rustfmt).
+
 *color_my_ascii-config-keymaps*
     keymaps                 Optional default keymaps (action name -> key
                             sequence). false disables all keymaps.
@@ -518,7 +538,8 @@ Fence Management~
 
 *:Fence*                                        *color_my_ascii-fence-command*
     Buffer-local (markdown) dispatcher for actions on the fenced block under
-    the cursor. Argument completion suggests subcommands, flags and file paths.
+    the cursor. Argument completion suggests subcommands, flags, file paths
+    and language tags.
 
     :Fence export [path] [--open] [--replace]
         Extract the block's content into a standalone file.
@@ -528,7 +549,41 @@ Fence Management~
         - --open:    open the exported file afterwards (config open_cmd).
         - --replace: replace the fenced block with a link reference to the new
           file (literate-tangle style; config replace_format).
-    See |color_my_ascii-config-fence_export| for the defaults.
+        See |color_my_ascii-config-fence_export|.
+
+    :Fence yank [register]
+        Copy the block content (without delimiters) to a register.
+        Default: unnamed " and system + .
+
+    :Fence open [--split|--vsplit|--tab|--edit]
+        Edit the block in a real split buffer with the correct filetype (so the
+        language server and formatters attach), writing changes back into the
+        fence on :w. The interior is anchored with extmarks; the temp file is
+        removed when its buffer is wiped.
+
+    :Fence run
+        Run the block with its language's interpreter and show stdout/stderr in
+        a scratch split. Interpreters via |color_my_ascii-config-fence_run|.
+
+    :Fence format
+        Format the block in place with the language's stdin/stdout formatter.
+        Formatters via |color_my_ascii-config-fence_format|.
+
+    :Fence import <file>
+        Replace the block's content with the content of <file> (inverse of
+        export).
+
+    :Fence lang <language>
+        Change the language tag of the opening fence.
+
+    :Fence select
+        Visually (linewise) select the block interior.
+
+    :[range]Fence wrap [language]
+        Wrap the current line or the [range] (e.g. :'<,'>) in a fenced block.
+
+    :Fence unwrap
+        Remove the fence delimiters around the block under the cursor.
 
 Scheme Management~                              *color_my_ascii-scheme-commands*
 

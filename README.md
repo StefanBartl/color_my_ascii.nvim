@@ -212,6 +212,18 @@ require('color_my_ascii').setup({
     close    = nil,        -- override: hl-group name (string) or attr table
     apply_to = 'all',      -- 'all' fenced blocks | 'ascii' only
   },
+
+  -- Full-width background highlight of a fenced block's interior (see
+  -- "Fence-content highlighting" below). On by default, independent of
+  -- fence_line_highlight; shades that resolved color darker/lighter.
+  fence_content_highlight = {
+    enable   = true,
+    preset   = nil,        -- nil = follow fence_line_highlight.preset
+    hl       = nil,        -- override: hl-group name (string) or attr table; skips shading
+    shade    = 'auto',     -- 'auto' | 'darken' | 'lighten' | 'none'
+    amount   = 6,          -- 0-100
+    apply_to = 'all',      -- 'all' fenced blocks | 'ascii' only
+  },
 })
 ````
 
@@ -380,6 +392,49 @@ groups on `:colorscheme` changes.
 > `preset = "…"`. It only kicks in when the plugin's types are on the LSP path —
 > e.g. via `folke/lazydev.nvim` (add `"color_my_ascii.nvim"` to its `library`)
 > or by annotating the table: `---@type ColorMyAscii.Config` above your `opts`.
+
+---
+
+## Fence-content highlighting
+
+Paints the **interior** of a fenced block - every line between the delimiters,
+full width, including trailing whitespace and blank lines (not just where
+there are characters):
+
+```javascript
+// this whole region, incl. the blank line and the line's trailing space →
+                                                                            ←
+```
+
+**On by default**, independent of fence-line highlighting above. By default it
+shades the *resolved* fence-line color darker (dark backgrounds) or lighter
+(light backgrounds), so the interior reads as a related-but-distinguishable
+tint of its own delimiter lines - no second palette to hand-tune:
+
+````lua
+require('color_my_ascii').setup({
+  fence_content_highlight = {
+    enable   = true,
+    preset   = nil,      -- nil = follow fence_line_highlight.preset
+    shade    = 'auto',   -- 'auto' | 'darken' | 'lighten' | 'none'
+    amount   = 6,         -- 0-100 blend strength toward black/white
+    apply_to = 'all',     -- 'all' fenced blocks, or 'ascii' only
+  },
+})
+````
+
+For full control, `hl` bypasses shading entirely and accepts either an
+existing highlight-group name (string, linked) or an attribute table:
+
+````lua
+fence_content_highlight = {
+  enable = true,
+  hl     = { bg = '#1e1e2e' },
+}
+````
+
+Turn it off with `enable = false` if you only want the delimiter-line
+highlight above.
 
 ---
 

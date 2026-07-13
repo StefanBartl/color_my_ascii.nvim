@@ -30,6 +30,7 @@ return function(H)
   -- apply_to = "all"
   require("color_my_ascii.config").setup({
     fence_line_highlight = { enable = true, preset = "accent", apply_to = "all" },
+    fence_content_highlight = { enable = false }, -- isolate line-highlight behavior from the default-on content highlight
   })
   fence_hl.setup_hl(require("color_my_ascii.config").get())
   do
@@ -47,6 +48,7 @@ return function(H)
   -- apply_to = "ascii"
   require("color_my_ascii.config").setup({
     fence_line_highlight = { enable = true, preset = "subtle", apply_to = "ascii" },
+    fence_content_highlight = { enable = false },
   })
   fence_hl.setup_hl(require("color_my_ascii.config").get())
   do

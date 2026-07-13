@@ -81,6 +81,24 @@ return {
     close    = nil,
     apply_to = "all", -- "all" | "ascii"
   },
+  -- Full-width background highlight of a fenced block's *interior* (the lines
+  -- between the delimiters), so the whole block reads as one visual region.
+  -- Uses `line_hl_group` extmarks, same as fence_line_highlight, so it covers
+  -- trailing whitespace and blank lines too, not just characters. On by
+  -- default; opt out with `enable = false`.
+  -- `preset` (nil by default) falls back to fence_line_highlight.preset, then
+  -- that resolved color is shaded darker/lighten by `amount`% (`shade`
+  -- controls the direction; "auto" darkens on dark backgrounds, lightens on
+  -- light ones) so the interior reads as a related-but-distinguishable tint
+  -- of the delimiter lines. `hl` bypasses shading with an explicit override.
+  fence_content_highlight = {
+    enable   = true,
+    preset   = nil,   -- nil = follow fence_line_highlight.preset; else same values as fence_line_highlight.preset
+    hl       = nil,   -- override: hl-group name (string) or attr table; skips shading
+    shade    = "auto", -- "auto" | "darken" | "lighten" | "none"
+    amount   = 6,      -- 0-100
+    apply_to = "all", -- "all" | "ascii"
+  },
   -- `:Fence export` behaviour (buffer-local command in markdown buffers).
   -- default_dir: where the suggested export path lives ("buffer" dir or "cwd").
   -- open_after/open_cmd: open the exported file afterwards (--open forces it).

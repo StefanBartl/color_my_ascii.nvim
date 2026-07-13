@@ -306,6 +306,54 @@ Configuration options:~
     })
 <
 
+*color_my_ascii-config-fence_content_highlight*
+    fence_content_highlight Full-width background highlight of a fenced
+                            block's interior (every line between the
+                            delimiters), painted via the same line_hl_group
+                            mechanism as |color_my_ascii-config-fence_line_highlight|
+                            - covers trailing whitespace and blank lines too,
+                            not just characters. On by default (opt-out).
+                            Type: table
+                            Fields:
+                              enable   boolean  (default true)
+                              preset   string|nil  (default nil) base look to
+                                       shade from; nil follows
+                                       fence_line_highlight.preset. Same
+                                       values as that field's preset.
+                              hl       string|table|nil  explicit override
+                                       (hl-group name or attr table);
+                                       bypasses shading entirely
+                              shade    "auto"|"darken"|"lighten"|"none"
+                                       (default "auto") shade direction
+                                       relative to the resolved preset color;
+                                       "auto" darkens on dark backgrounds and
+                                       lightens on light ones; "none" uses the
+                                       resolved color unshaded
+                              amount   integer 0-100  (default 6) blend
+                                       strength toward black/white
+                              apply_to "all" | "ascii"  (default "all")
+
+                            The interior color is derived by resolving the
+                            same preset/theme lookup as fence_line_highlight
+                            (see above) to a "#rrggbb" background, then
+                            blending it toward black or white by `amount`
+                            percent - so the block interior reads as a
+                            related-but-distinguishable tint of its own
+                            delimiter lines, without hand-tuning a second
+                            palette per theme. `hl` skips all of that and
+                            sets an explicit look instead.
+
+                            Example:~
+>lua
+    require('color_my_ascii').setup({
+      fence_content_highlight = {
+        enable = true,
+        shade  = 'auto',
+        amount = 6,
+      },
+    })
+<
+
 *color_my_ascii-config-fence_export*
     fence_export            Behaviour of the |:Fence| export command.
                             Type: table

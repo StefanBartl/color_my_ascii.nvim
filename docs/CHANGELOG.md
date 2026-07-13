@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `fence_content_highlight`: full-width background highlight of a fenced block's interior (blank lines and trailing whitespace included), on by default, shaded from the resolved `fence_line_highlight` color
 - State-based fence parser for accurate block detection
 - Support for tilde fences (`~~~`) in addition to backticks
 - `ColorMyAsciiCheckFences` command to detect unmatched code blocks

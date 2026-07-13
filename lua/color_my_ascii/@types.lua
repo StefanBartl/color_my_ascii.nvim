@@ -68,6 +68,20 @@
 ---@field close? string|ColorMyAscii.CustomHighlight Override for the closing fence line (hl group name or attr table)
 ---@field apply_to? "all"|"ascii" Which blocks get the highlight: every fenced block or only ASCII ones
 
+--- Background-only highlight of a fenced block's interior (between the
+--- delimiter lines), painted full-width via `line_hl_group` extmarks so it
+--- covers trailing whitespace and blank lines too, not just characters.
+--- Derived by shading the resolved fence_line_highlight color darker/lighter
+--- so the two stay visually related but distinguishable; `hl` bypasses that
+--- and sets an explicit look instead.
+---@class ColorMyAscii.FenceContentHighlight
+---@field enable? boolean Paint the interior of fenced blocks (default true)
+---@field preset? ColorMyAscii.FencePreset Base look to shade from (default: nil, i.e. follow fence_line_highlight.preset)
+---@field hl? string|ColorMyAscii.CustomHighlight Explicit override (hl group name or attr table); bypasses shading entirely
+---@field shade? "auto"|"darken"|"lighten"|"none" Shade direction relative to the resolved base color (default "auto": darken on dark backgrounds, lighten on light; "none" uses the base color unshaded)
+---@field amount? integer 0-100 blend strength toward black/white (default 6)
+---@field apply_to? "all"|"ascii" Which blocks' interior gets painted (default "all")
+
 ---@class ColorMyAscii.FenceRun
 ---@field runners? table<string, string|string[]> Interpreter per language tag (temp file appended)
 
@@ -107,6 +121,7 @@
 ---@field enable_bracket_highlighting? boolean Enable highlighting of brackets/parentheses
 ---@field fence_language_map? table<string, string> Map of markdown fence language tags to plugin language names (e.g., { vim = "vim" })
 ---@field fence_line_highlight? ColorMyAscii.FenceLineHighlight Optional full-line highlight of fence delimiter lines
+---@field fence_content_highlight? ColorMyAscii.FenceContentHighlight Optional full-width background highlight of a fenced block's interior
 ---@field fence_export? ColorMyAscii.FenceExport Behaviour of the `:Fence export` command
 ---@field fence_run? ColorMyAscii.FenceRun Interpreter map for `:Fence run`
 ---@field fence_format? ColorMyAscii.FenceFormat Formatter map for `:Fence format`

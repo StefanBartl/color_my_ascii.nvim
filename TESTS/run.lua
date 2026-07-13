@@ -12,6 +12,7 @@ local H = dofile(dir .. "harness.lua")
 local specs = {
   "fences_spec.lua",
   "fence_hl_spec.lua",
+  "fence_content_hl_spec.lua",
   "fence_export_spec.lua",
   "fence_actions_spec.lua",
 }

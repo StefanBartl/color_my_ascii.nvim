@@ -251,6 +251,18 @@ function M.check()
     end
   end
 
+  -- Fence-content highlighting (optional full-width background of a block's interior)
+  if ok then
+    local fch = config.get().fence_content_highlight
+    if fch and fch.enable then
+      health.ok(string.format('Fence-content highlight: enabled (preset "%s", shade "%s", amount %s, apply_to "%s")',
+        tostring(fch.preset or '<follows fence_line_highlight>'), tostring(fch.shade or 'auto'),
+        tostring(fch.amount or 6), tostring(fch.apply_to or 'all')))
+    else
+      health.info('Fence-content highlight: disabled (set fence_content_highlight.enable = true to turn on)')
+    end
+  end
+
   -- Summary
   if all_core_ok then
     health.ok('All core modules loaded successfully')

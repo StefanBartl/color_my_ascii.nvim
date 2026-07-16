@@ -57,23 +57,10 @@ function M.inspect_group(group_name)
   local chars = {}
 
   -- Extract individual characters from the chars string
+  local utf8_char_len = require('lib.lua.strings.utf8').char_len
   local i = 1
   while i <= #group.chars do
-    local byte = group.chars:byte(i)
-    local char_len
-
-    if byte < 128 then
-      char_len = 1
-    elseif byte < 224 then
-      char_len = 2
-    elseif byte < 240 then
-      char_len = 3
-    elseif byte < 248 then
-      char_len = 4
-    else
-      char_len = 1
-    end
-
+    local char_len = utf8_char_len(group.chars:byte(i))
     local char = group.chars:sub(i, i + char_len - 1)
     table.insert(chars, char)
     i = i + char_len
@@ -140,23 +127,10 @@ function M.inspect_inline_code(line)
     }
 
     -- Check each character
+    local utf8_char_len = require('lib.lua.strings.utf8').char_len
     local j = 1
     while j <= #content do
-      local byte = content:byte(j)
-      local char_len
-
-      if byte < 128 then
-        char_len = 1
-      elseif byte < 224 then
-        char_len = 2
-      elseif byte < 240 then
-        char_len = 3
-      elseif byte < 248 then
-        char_len = 4
-      else
-        char_len = 1
-      end
-
+      local char_len = utf8_char_len(content:byte(j))
       local char = content:sub(j, j + char_len - 1)
       local hl = config.get_char_highlight(char)
 

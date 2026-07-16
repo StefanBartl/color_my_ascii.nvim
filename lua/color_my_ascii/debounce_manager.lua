@@ -2,12 +2,20 @@
 ---@brief Adaptive debouncing system for text change events
 ---@description
 --- Implements smart debouncing with:
---- - File size-based adaptive delays
+--- - File size-based adaptive delays (tiered thresholds, configurable)
 --- - Per-buffer timer management
 --- - Automatic cleanup on buffer delete
 --- - Configurable thresholds
 ---
 --- Larger files get longer debounce delays to prevent performance issues.
+---
+--- The actual libuv timer (create/reset/stop/close) is delegated to
+--- `lib.nvim.debounce`; this module keeps only what lib.nvim's generic
+--- adaptive formula can't express — per-buffer tiered thresholds tunable via
+--- `M.configure` — by caching one lib.nvim handle per buffer and recreating
+--- it whenever the buffer's delay tier changes.
+
+local lib_debounce = require("lib.nvim.debounce")
 
 local M = {}
 
@@ -23,8 +31,10 @@ local config = {
 	max_delay = 1000,
 }
 
---- Timer storage per buffer
----@type table<integer, table>
+--- One lib.nvim.debounce handle per buffer, keyed with the delay it was
+--- built for and whether a call is currently pending. `handle` is a
+--- `require("lib.nvim.debounce").new(...)` return value (`{ call, cancel }`).
+---@type table<integer, { handle: table, delay: integer, pending: boolean }>
 local timers = {}
 
 --- Configure debounce behavior
@@ -118,26 +128,33 @@ function M.debounce(bufnr, fn, custom_delay)
 		return
 	end
 
-	if timers[bufnr] then
-		M.cancel(bufnr)
-	end
-
 	local delay = custom_delay or calculate_delay(bufnr)
 
-	timers[bufnr] = vim.defer_fn(function()
-		local safe_api = require("color_my_ascii.utils.safe_api")
-
-		if safe_api.is_valid_buffer(bufnr) then
-			local ok, err = pcall(fn)
-
-			if not ok then
-				vim.notify(string.format("color_my_ascii: Debounced function error: %s", err), vim.log.levels.WARN)
-			end
+	local entry = timers[bufnr]
+	if not entry or entry.delay ~= delay then
+		if entry then
+			entry.handle.cancel()
 		end
 
-		-- Cleanup timer reference
-		timers[bufnr] = nil
-	end, delay)
+		local handle = lib_debounce.new(function()
+			local safe_api = require("color_my_ascii.utils.safe_api")
+			entry.pending = false
+
+			if safe_api.is_valid_buffer(bufnr) then
+				local ok, err = pcall(fn)
+
+				if not ok then
+					vim.notify(string.format("color_my_ascii: Debounced function error: %s", err), vim.log.levels.WARN)
+				end
+			end
+		end, delay)
+
+		entry = { handle = handle, delay = delay, pending = false }
+		timers[bufnr] = entry
+	end
+
+	entry.pending = true
+	entry.handle.call()
 end
 
 --- Cancel pending debounced call for buffer
@@ -148,9 +165,9 @@ function M.cancel(bufnr)
 		return false
 	end
 
-	if timers[bufnr] then
-		timers[bufnr]:stop()
-		timers[bufnr]:close()
+	local entry = timers[bufnr]
+	if entry then
+		entry.handle.cancel()
 		timers[bufnr] = nil
 		return true
 	end
@@ -163,9 +180,8 @@ end
 function M.cancel_all()
 	local count = 0
 
-	for bufnr, timer in pairs(timers) do
-		timer:stop()
-		timer:close()
+	for bufnr, entry in pairs(timers) do
+		entry.handle.cancel()
 		timers[bufnr] = nil
 		count = count + 1
 	end
@@ -177,7 +193,8 @@ end
 ---@param bufnr integer Buffer number
 ---@return boolean pending True if timer is pending
 function M.is_pending(bufnr)
-	return timers[bufnr] ~= nil
+	local entry = timers[bufnr]
+	return entry ~= nil and entry.pending
 end
 
 --- Get current delay for buffer
@@ -196,8 +213,10 @@ end
 function M.get_pending_count()
 	local count = 0
 
-	for _ in pairs(timers) do
-		count = count + 1
+	for _, entry in pairs(timers) do
+		if entry.pending then
+			count = count + 1
+		end
 	end
 
 	return count
@@ -216,10 +235,9 @@ function M.cleanup()
 	local safe_api = require("color_my_ascii.utils.safe_api")
 	local cleaned = 0
 
-	for bufnr, timer in pairs(timers) do
+	for bufnr, entry in pairs(timers) do
 		if not safe_api.is_valid_buffer(bufnr) then
-			timer:stop()
-			timer:close()
+			entry.handle.cancel()
 			timers[bufnr] = nil
 			cleaned = cleaned + 1
 		end

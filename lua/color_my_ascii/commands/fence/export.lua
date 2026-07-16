@@ -71,11 +71,6 @@ local function write_and_finish(bufnr, block, content, path, flags)
   path = vim.fn.expand(path)
   path = vim.fn.fnamemodify(path, ":p")
 
-  local dir = vim.fn.fnamemodify(path, ":h")
-  if vim.fn.isdirectory(dir) == 0 then
-    pcall(vim.fn.mkdir, dir, "p")
-  end
-
   if vim.fn.filereadable(path) == 1 then
     local choice = vim.fn.confirm(("'%s' exists. Overwrite?"):format(vim.fn.fnamemodify(path, ":~")), "&Yes\n&No", 2)
     if choice ~= 1 then
@@ -84,9 +79,24 @@ local function write_and_finish(bufnr, block, content, path, flags)
     end
   end
 
-  local ok = pcall(vim.fn.writefile, content, path)
+  -- mkdir -p + write: prefer lib.nvim.fs.write.to_file (soft dependency,
+  -- matching bindings/keymaps.lua's convention) when installed; it takes a
+  -- single string, so the lines are joined first. Falls back to the
+  -- original mkdir+writefile sequence otherwise.
+  local ok_lib_write, lib_write_to_file = pcall(require, "lib.nvim.fs.write.to_file")
+  local ok, err
+  if ok_lib_write then
+    ok, err = lib_write_to_file(path, table.concat(content, "\n"))
+  else
+    local dir = vim.fn.fnamemodify(path, ":h")
+    if vim.fn.isdirectory(dir) == 0 then
+      pcall(vim.fn.mkdir, dir, "p")
+    end
+    ok = pcall(vim.fn.writefile, content, path)
+    err = ok and nil or "write failed"
+  end
   if not ok then
-    vim.notify("Fence export: failed to write " .. path, vim.log.levels.ERROR)
+    vim.notify("Fence export: failed to write " .. path .. (err and (": " .. err) or ""), vim.log.levels.ERROR)
     return
   end
   vim.notify(("Fence: exported %d line(s) to %s"):format(#content, vim.fn.fnamemodify(path, ":~:.")), vim.log.levels.INFO)

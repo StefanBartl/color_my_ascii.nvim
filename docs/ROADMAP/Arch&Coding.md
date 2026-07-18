@@ -47,7 +47,7 @@ der Window-Teil dieser Checkliste ist nicht anwendbar.
 |---|---|
 | Debounced Updates | Vorhanden (`debounce_manager.lua`, adaptiv nach Dateigröße). |
 | Caching | Vorhanden (`cache_manager.lua`, TTL + `changedtick`-Invalidierung). |
-| Wiederholte API-Zugriffe im Hot-Path vermeiden | **Gap gefunden**: `highlighter.lua`s `highlight_range()` ruft `nvim_buf_line_count` und `nvim_buf_get_lines` bei **jedem einzelnen** Highlight-Aufruf neu auf (pro Zeichen/Keyword/Funktionsname), obwohl Zeileninhalt und -anzahl pro Zeile konstant sind. Siehe [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md). |
+| Wiederholte API-Zugriffe im Hot-Path vermeiden | ✅ Erledigt: `highlighter.lua`s `highlight_range()` bekommt `line_content` vom Aufrufer durchgereicht (aus `block.lines`/`inline.content`), statt es pro Zeichen/Keyword/Funktionsname neu über die API zu holen. |
 | Lokale Variablen für häufige Zugriffe | Eingehalten (`local api = vim.api`, `local notify = vim.notify` als Modul-Header-Aliase). |
 
 ## MISC — Cross-Plattform

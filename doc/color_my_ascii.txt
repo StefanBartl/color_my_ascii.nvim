@@ -20,6 +20,7 @@ CONTENTS                                        *color_my_ascii-contents*
     10. Color Schemes ......................... |color_my_ascii-schemes|
     11. API .................................... |color_my_ascii-api|
     12. Troubleshooting ....................... |color_my_ascii-troubleshooting|
+    13. Development ........................... |color_my_ascii-development|
 
 ==============================================================================
 1. INTRODUCTION                                 *color_my_ascii-intro*
@@ -1067,6 +1068,28 @@ Treesitter integration not working~
 
 Note: syntax_highlight is best-effort - it silently does nothing on content
 that doesn't parse as valid syntax (expected for most ASCII art).
+
+==============================================================================
+13. DEVELOPMENT                                 *color_my_ascii-development*
+
+The code is formatted with stylua and linted with luacheck. Both configs live
+at the repo root (.stylua.toml, .luacheckrc) and are enforced in CI
+(.github/workflows/lint.yml) on every push and pull request.
+
+Before opening a pull request, run both locally:
+>sh
+    stylua lua/ plugin/          # format (use --check to only verify)
+    luacheck lua/ plugin/        # lint
+<
+
+Conventions:~
+  • 2-space indent, single quotes, 120-column width.
+  • stylua owns line width, so luacheck's length check is disabled to avoid
+    conflicts between the two tools.
+  • .luacheckrc declares `vim` as a writable global, so plugin code may set
+    vim.g.*, vim.bo[b].*, etc. without warnings.
+
+See docs/contributing.md for how to add a new language or character group.
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:

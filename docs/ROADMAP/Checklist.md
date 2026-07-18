@@ -38,8 +38,8 @@ Buffer-Highlighting-Plugin dieser Größe greift.
 
 | Prüfschritt | Status |
 |---|---|
-| Lua LS Settings (`diagnostics.globals=vim`, `workspace.library`) | **Gap** — kein `.luarc.json` vorhanden. Wird in diesem Durchgang ergänzt (siehe [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)). |
-| Formatter/Linter (stylua, luacheck) im CI | **Gap** — weder `.stylua.toml`/`.luacheckrc` noch `.github/workflows/` vorhanden. Empfehlung im Implementierungsplan, aber niedrige Priorität (Ein-Personen-Repo, kein aktiver CI-Bedarf bisher). |
+| Lua LS Settings (`diagnostics.globals=vim`, `workspace.library`) | ✅ Erledigt — `.luarc.json` vorhanden. |
+| Formatter/Linter (stylua, luacheck) im CI | ✅ Erledigt — `.stylua.toml`, `.luacheckrc` und `.github/workflows/lint.yml` (`stylua --check` + `luacheck` auf Push/PR). Bestand einmalig durchformatiert; beide Linter laufen grün. |
 
 ### Testbarkeit
 
@@ -108,9 +108,8 @@ Bereits umgesetzt (`ft = 'markdown'`, bedingtes Laden von `debug/`).
 
 Die meisten Punkte (Debounced Writes, Async via uv, Weak-Caches) sind für dieses
 Plugin nicht in voller Schärfe relevant, da kein Hochfrequenz-I/O stattfindet.
-Einzig relevanter offener Punkt: Mehrfach-API-Zugriffe im Hot-Path von
-`highlighter.lua` (siehe [Zentral-Prinzipien.md](Zentral-Prinzipien.md) Punkt 3
-und [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)).
+Der zuvor offene Hot-Path-Punkt (Mehrfach-API-Zugriffe in `highlighter.lua`) ist
+erledigt — `line_content` wird jetzt durchgereicht statt pro Zeichen neu geholt.
 
 ## Ausgelassene Abschnitte (nicht anwendbar)
 

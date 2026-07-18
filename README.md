@@ -83,7 +83,7 @@ installation with packer.nvim.
 - [Color Schemes](docs/schemes.md) — built-in schemes and how to create your own
 - [Bindings Cheatsheet](docs/BINDINGS.md) — compact table of all commands, keymaps, and autocommands
 - [Troubleshooting](docs/troubleshooting.md) — performance notes and common issues
-- [Contributing](docs/contributing.md) — how to add a new language or character group
+- [Contributing](docs/contributing.md) — dev setup (stylua/luacheck/CI), adding a new language or character group
 - [Custom Highlights](docs/features/custom-highlights.md) — RGB/Hex colors and styles
 - [Function Detection](docs/features/function-detection.md) — automatic function name detection
 - [Bracket Highlighting](docs/features/bracket-highlighting.md) — highlight brackets

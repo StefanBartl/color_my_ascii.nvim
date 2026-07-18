@@ -17,11 +17,10 @@ Bereits umgesetzt: Plugin lädt nur bei `ft = 'markdown'` (lazy.nvim); das
 
 ## 3. Kontext statt Mehrfach-API-Zugriffe
 
-**Gap**: `highlighter.lua`s `highlight_range()` ruft für **jeden einzelnen**
-Highlight-Aufruf (jedes Zeichen, jedes Keyword, jeder Funktionsname) erneut
-`nvim_buf_line_count` und `nvim_buf_get_lines` auf, obwohl Zeilenanzahl und
--inhalt pro Zeile in `highlight_block`/`highlight_inline_codes` bereits bekannt
-sind. Konkreter Verbesserungsvorschlag in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+✅ Erledigt: `highlighter.lua`s `highlight_range()` bekommt `line_content` vom
+Aufrufer durchgereicht (aus `block.lines`/`inline.content`), statt Zeileninhalt und
+-anzahl bei jedem einzelnen Highlight-Aufruf (pro Zeichen/Keyword/Funktionsname) neu
+über die API zu holen.
 
 ## 4. Autocommand-Gruppen sauber nutzen
 
@@ -36,11 +35,11 @@ Trigger), zusätzlich aber auch als expliziter `:ColorMyAscii`-Command verfügba
 
 ## 6. Treesitter notwendig oder nicht?
 
-Bewusst regex-/heuristikbasiert (kein Treesitter im Hot-Path) — richtige
-Entscheidung für ASCII-Art-Erkennung in Codeblöcken, die keine echte
-Syntax-Semantik braucht. **Aber**: `enable_treesitter`-Flag existiert in
-`config/DEFAULTS.lua` und wird in `health.lua` abgefragt, hat aber **keine
-tatsächliche Implementierung**. Totes/unfertiges Feature — siehe Implementierungsplan.
+Der Kern-Pfad ist bewusst regex-/heuristikbasiert (kein Treesitter-Zwang) — richtige
+Entscheidung für ASCII-Art-Erkennung in Codeblöcken, die keine echte Syntax-Semantik
+braucht. ✅ Das frühere tote `enable_treesitter`-Flag ist durch ein echtes
+`treesitter`-Config-Table ersetzt: opt-in Block-Erkennung (`parser_ts.lua`) und
+Grammar-Highlighting (`highlighter_ts.lua`), mit stillem Fallback auf die Heuristik.
 
 ## 7. Cache vorhanden und explizit?
 
@@ -69,6 +68,7 @@ adaptiv nach Dateigröße (100/200/500ms), um `TextChanged`/`TextChangedI` nicht
 
 ## Fazit
 
-Von den 10 Prinzipien sind 8 bereits erfüllt. Zwei konkrete, umsetzbare Lücken:
+Alle 10 Prinzipien sind erfüllt. Die zwei früher offenen Lücken —
 Mehrfach-API-Zugriffe im Hot-Path (Punkt 3) und das unfertige
-`enable_treesitter`-Flag (Punkt 6). Beide im [Implementierungsplan](IMPLEMENTATION_PLAN.md).
+`enable_treesitter`-Flag (Punkt 6) — sind abgearbeitet
+(siehe [Implementierungsplan](IMPLEMENTATION_PLAN.md)).

@@ -10,19 +10,41 @@ local group = {
 -- Build character string (each character only ONCE)
 local chars = {
   -- Arithmetic operators
-  '+', '-', '*', '/', '%', '=',
+  '+',
+  '-',
+  '*',
+  '/',
+  '%',
+  '=',
   -- Comparison operators
-  '<', '>',
+  '<',
+  '>',
   -- Logical operators
-  '!', '&', '|', '^', '~',
+  '!',
+  '&',
+  '|',
+  '^',
+  '~',
   -- Brackets and braces (optional, can be controlled by enable_bracket_highlighting)
-  '(', ')', '[', ']', '{', '}',
+  '(',
+  ')',
+  '[',
+  ']',
+  '{',
+  '}',
   -- Other punctuation
-  ':', ';', ',', '.', '?',
+  ':',
+  ';',
+  ',',
+  '.',
+  '?',
   -- Quotes
-  '"', "'", '`',
+  '"',
+  "'",
+  '`',
   -- Special
-  '@', '#',
+  '@',
+  '#',
   -- Backslash
   '\\',
 }

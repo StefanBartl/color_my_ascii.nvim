@@ -7,22 +7,49 @@ return {
     -- Declarations
     'function',
     -- Control flow
-    'if', 'else', 'for', 'while', 'repeat', 'break', 'next', 'return',
+    'if',
+    'else',
+    'for',
+    'while',
+    'repeat',
+    'break',
+    'next',
+    'return',
     -- Values
-    'TRUE', 'FALSE', 'NULL', 'NA', 'NaN', 'Inf',
+    'TRUE',
+    'FALSE',
+    'NULL',
+    'NA',
+    'NaN',
+    'Inf',
     -- Modules
-    'library', 'require',
+    'library',
+    'require',
     -- Output
-    'print', 'cat',
+    'print',
+    'cat',
     -- Common functions
-    'c', 'list', 'vector', 'matrix',
-    'apply', 'sapply', 'lapply', 'vapply', 'mapply',
-    'environment', 'assign', 'ifelse',
+    'c',
+    'list',
+    'vector',
+    'matrix',
+    'apply',
+    'sapply',
+    'lapply',
+    'vapply',
+    'mapply',
+    'environment',
+    'assign',
+    'ifelse',
   },
 
   -- Keywords unique to R
   unique_words = {
-    'sapply', 'lapply', 'vapply', 'mapply', 'ifelse',
+    'sapply',
+    'lapply',
+    'vapply',
+    'mapply',
+    'ifelse',
   },
 
   hl = 'Function',

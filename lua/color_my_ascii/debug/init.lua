@@ -42,7 +42,7 @@ function M.log(...)
     return
   end
 
-  local msg = table.concat(vim.tbl_map(vim.inspect, {...}), ' ')
+  local msg = table.concat(vim.tbl_map(vim.inspect, { ... }), ' ')
   print('[color_my_ascii.debug]', msg)
 
   if debug_state.log_file then

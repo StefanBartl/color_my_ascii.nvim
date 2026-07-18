@@ -12,10 +12,10 @@
 local M = {}
 
 local api = vim.api
-local util = require("color_my_ascii.commands.fence.util")
+local util = require('color_my_ascii.commands.fence.util')
 
 --- Extmark namespace for the source-buffer region anchors.
-local ns = api.nvim_create_namespace("ColorMyAsciiFenceOpen")
+local ns = api.nvim_create_namespace('ColorMyAsciiFenceOpen')
 
 --- Active edit sessions, keyed by the temp buffer number.
 ---@type table<integer, { src: integer, start_id: integer, end_id: integer, tmpfile: string }>
@@ -25,13 +25,19 @@ local sessions = {}
 ---@param tbuf integer
 function M.sync(tbuf)
   local s = sessions[tbuf]
-  if not s or not api.nvim_buf_is_valid(s.src) then return end
+  if not s or not api.nvim_buf_is_valid(s.src) then
+    return
+  end
   local new_lines = api.nvim_buf_get_lines(tbuf, 0, -1, false)
   local sp = api.nvim_buf_get_extmark_by_id(s.src, ns, s.start_id, {})
   local ep = api.nvim_buf_get_extmark_by_id(s.src, ns, s.end_id, {})
-  if not sp[1] or not ep[1] then return end
+  if not sp[1] or not ep[1] then
+    return
+  end
   local srow, erow = sp[1], ep[1]
-  if erow < srow then return end
+  if erow < srow then
+    return
+  end
   api.nvim_buf_set_lines(s.src, srow, erow, false, new_lines)
 end
 
@@ -39,7 +45,9 @@ end
 ---@param tbuf integer
 function M.cleanup(tbuf)
   local s = sessions[tbuf]
-  if not s then return end
+  if not s then
+    return
+  end
   pcall(vim.fn.delete, s.tmpfile)
   if api.nvim_buf_is_valid(s.src) then
     pcall(api.nvim_buf_del_extmark, s.src, ns, s.start_id)
@@ -52,53 +60,64 @@ end
 function M.run(argv)
   local buf, block = util.current_block()
   if not block then
-    util.notify("no fenced block under the cursor", vim.log.levels.WARN)
+    util.notify('no fenced block under the cursor', vim.log.levels.WARN)
     return
   end
 
-  local open_cmd = "vsplit"
+  local open_cmd = 'vsplit'
   for _, a in ipairs(argv or {}) do
-    if a == "--split" then open_cmd = "split"
-    elseif a == "--vsplit" then open_cmd = "vsplit"
-    elseif a == "--tab" then open_cmd = "tabedit"
-    elseif a == "--edit" then open_cmd = "edit" end
+    if a == '--split' then
+      open_cmd = 'split'
+    elseif a == '--vsplit' then
+      open_cmd = 'vsplit'
+    elseif a == '--tab' then
+      open_cmd = 'tabedit'
+    elseif a == '--edit' then
+      open_cmd = 'edit'
+    end
   end
 
   local content = util.content(buf, block)
-  local lang = block.lang or ""
+  local lang = block.lang or ''
 
   -- Anchor the interior [content_start, content_end) in the source buffer.
   local start_id = api.nvim_buf_set_extmark(buf, ns, block.content_start, 0, {})
   local end_id = api.nvim_buf_set_extmark(buf, ns, block.content_end, 0, {})
 
   -- Temp file with the language's extension so LSP/tooling attach.
-  local tmp = vim.fn.tempname() .. "." .. util.ext_for(lang)
+  local tmp = vim.fn.tempname() .. '.' .. util.ext_for(lang)
   vim.fn.writefile(content, tmp)
 
-  vim.cmd(open_cmd .. " " .. vim.fn.fnameescape(tmp))
+  vim.cmd(open_cmd .. ' ' .. vim.fn.fnameescape(tmp))
   local tbuf = api.nvim_get_current_buf()
-  if lang ~= "" then
-    pcall(function() vim.bo[tbuf].filetype = util.filetype_for(lang) end)
+  if lang ~= '' then
+    pcall(function()
+      vim.bo[tbuf].filetype = util.filetype_for(lang)
+    end)
   end
 
   sessions[tbuf] = { src = buf, start_id = start_id, end_id = end_id, tmpfile = tmp }
 
-  local grp = api.nvim_create_augroup("ColorMyAsciiFenceOpen_" .. tbuf, { clear = true })
-  api.nvim_create_autocmd("BufWritePost", {
+  local grp = api.nvim_create_augroup('ColorMyAsciiFenceOpen_' .. tbuf, { clear = true })
+  api.nvim_create_autocmd('BufWritePost', {
     group = grp,
     buffer = tbuf,
-    callback = function() M.sync(tbuf) end,
-    desc = "[color_my_ascii] Sync fence edit back to the source buffer",
+    callback = function()
+      M.sync(tbuf)
+    end,
+    desc = '[color_my_ascii] Sync fence edit back to the source buffer',
   })
-  api.nvim_create_autocmd({ "BufWipeout", "BufDelete", "BufUnload" }, {
+  api.nvim_create_autocmd({ 'BufWipeout', 'BufDelete', 'BufUnload' }, {
     group = grp,
     buffer = tbuf,
     once = true,
-    callback = function() M.cleanup(tbuf) end,
-    desc = "[color_my_ascii] Clean up fence edit session",
+    callback = function()
+      M.cleanup(tbuf)
+    end,
+    desc = '[color_my_ascii] Clean up fence edit session',
   })
 
-  util.notify("editing fence in split — :w syncs back to the block")
+  util.notify('editing fence in split — :w syncs back to the block')
 end
 
 return M

@@ -8,7 +8,9 @@
 ---@type ColorMyAscii.KeywordGroup
 return {
   words = {
-    'true', 'false', 'null',
+    'true',
+    'false',
+    'null',
   },
 
   hl = 'Constant',

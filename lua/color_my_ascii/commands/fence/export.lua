@@ -11,10 +11,10 @@
 local M = {}
 
 local api = vim.api
-local util = require("color_my_ascii.commands.fence.util")
+local util = require('color_my_ascii.commands.fence.util')
 
 local function cfg()
-  return require("color_my_ascii.config").get().fence_export or {}
+  return require('color_my_ascii.config').get().fence_export or {}
 end
 
 --- Suggested default export path for the block.
@@ -25,13 +25,13 @@ local function suggest_path(bufnr, block)
   local c = cfg()
   local bufname = api.nvim_buf_get_name(bufnr)
   local dir
-  if c.default_dir == "cwd" or bufname == "" then
+  if c.default_dir == 'cwd' or bufname == '' then
     dir = vim.fn.getcwd()
   else
-    dir = vim.fn.fnamemodify(bufname, ":h")
+    dir = vim.fn.fnamemodify(bufname, ':h')
   end
-  local stem = (bufname ~= "" and vim.fn.fnamemodify(bufname, ":t:r")) or "fence"
-  return dir .. "/" .. stem .. "_fence." .. util.ext_for(block.lang)
+  local stem = (bufname ~= '' and vim.fn.fnamemodify(bufname, ':t:r')) or 'fence'
+  return dir .. '/' .. stem .. '_fence.' .. util.ext_for(block.lang)
 end
 
 --- Best-effort path relative to `base` (falls back to absolute).
@@ -39,10 +39,10 @@ end
 ---@param base string
 ---@return string
 local function relpath(target, base)
-  target = vim.fn.fnamemodify(target, ":p"):gsub("\\", "/")
-  base = vim.fn.fnamemodify(base, ":p"):gsub("\\", "/"):gsub("/$", "")
-  if target:sub(1, #base + 1) == base .. "/" then
-    return "./" .. target:sub(#base + 2)
+  target = vim.fn.fnamemodify(target, ':p'):gsub('\\', '/')
+  base = vim.fn.fnamemodify(base, ':p'):gsub('\\', '/'):gsub('/$', '')
+  if target:sub(1, #base + 1) == base .. '/' then
+    return './' .. target:sub(#base + 2)
   end
   return target
 end
@@ -53,10 +53,10 @@ end
 ---@param path string
 local function replace_block_with_ref(bufnr, block, path)
   local bufname = api.nvim_buf_get_name(bufnr)
-  local base = bufname ~= "" and vim.fn.fnamemodify(bufname, ":h") or vim.fn.getcwd()
-  local name = vim.fn.fnamemodify(path, ":t")
+  local base = bufname ~= '' and vim.fn.fnamemodify(bufname, ':h') or vim.fn.getcwd()
+  local name = vim.fn.fnamemodify(path, ':t')
   local rel = relpath(path, base)
-  local fmt = cfg().replace_format or "[%s](%s)"
+  local fmt = cfg().replace_format or '[%s](%s)'
   local ref = fmt:format(name, rel)
   api.nvim_buf_set_lines(bufnr, block.open_row, block.close_row + 1, false, { ref })
 end
@@ -69,12 +69,12 @@ end
 ---@param flags { open?: boolean, replace?: boolean }
 local function write_and_finish(bufnr, block, content, path, flags)
   path = vim.fn.expand(path)
-  path = vim.fn.fnamemodify(path, ":p")
+  path = vim.fn.fnamemodify(path, ':p')
 
   if vim.fn.filereadable(path) == 1 then
-    local choice = vim.fn.confirm(("'%s' exists. Overwrite?"):format(vim.fn.fnamemodify(path, ":~")), "&Yes\n&No", 2)
+    local choice = vim.fn.confirm(("'%s' exists. Overwrite?"):format(vim.fn.fnamemodify(path, ':~')), '&Yes\n&No', 2)
     if choice ~= 1 then
-      vim.notify("Fence export cancelled", vim.log.levels.INFO)
+      vim.notify('Fence export cancelled', vim.log.levels.INFO)
       return
     end
   end
@@ -83,31 +83,34 @@ local function write_and_finish(bufnr, block, content, path, flags)
   -- matching bindings/keymaps.lua's convention) when installed; it takes a
   -- single string, so the lines are joined first. Falls back to the
   -- original mkdir+writefile sequence otherwise.
-  local ok_lib_write, lib_write_to_file = pcall(require, "lib.nvim.fs.write.to_file")
+  local ok_lib_write, lib_write_to_file = pcall(require, 'lib.nvim.fs.write.to_file')
   local ok, err
   if ok_lib_write then
-    ok, err = lib_write_to_file(path, table.concat(content, "\n"))
+    ok, err = lib_write_to_file(path, table.concat(content, '\n'))
   else
-    local dir = vim.fn.fnamemodify(path, ":h")
+    local dir = vim.fn.fnamemodify(path, ':h')
     if vim.fn.isdirectory(dir) == 0 then
-      pcall(vim.fn.mkdir, dir, "p")
+      pcall(vim.fn.mkdir, dir, 'p')
     end
     ok = pcall(vim.fn.writefile, content, path)
-    err = ok and nil or "write failed"
+    err = ok and nil or 'write failed'
   end
   if not ok then
-    vim.notify("Fence export: failed to write " .. path .. (err and (": " .. err) or ""), vim.log.levels.ERROR)
+    vim.notify('Fence export: failed to write ' .. path .. (err and (': ' .. err) or ''), vim.log.levels.ERROR)
     return
   end
-  vim.notify(("Fence: exported %d line(s) to %s"):format(#content, vim.fn.fnamemodify(path, ":~:.")), vim.log.levels.INFO)
+  vim.notify(
+    ('Fence: exported %d line(s) to %s'):format(#content, vim.fn.fnamemodify(path, ':~:.')),
+    vim.log.levels.INFO
+  )
 
   local c = cfg()
   if flags.replace or c.replace then
     pcall(replace_block_with_ref, bufnr, block, path)
   end
   if flags.open or c.open_after then
-    local open_cmd = c.open_cmd or "vsplit"
-    pcall(vim.cmd, open_cmd .. " " .. vim.fn.fnameescape(path))
+    local open_cmd = c.open_cmd or 'vsplit'
+    pcall(vim.cmd, open_cmd .. ' ' .. vim.fn.fnameescape(path))
   end
 end
 
@@ -117,12 +120,12 @@ function M.run(argv)
   local flags = { open = false, replace = false }
   local path = nil
   for _, a in ipairs(argv or {}) do
-    if a == "--open" then
+    if a == '--open' then
       flags.open = true
-    elseif a == "--replace" then
+    elseif a == '--replace' then
       flags.replace = true
-    elseif a:sub(1, 2) == "--" then
-      vim.notify("Fence export: unknown flag " .. a, vim.log.levels.WARN)
+    elseif a:sub(1, 2) == '--' then
+      vim.notify('Fence export: unknown flag ' .. a, vim.log.levels.WARN)
     elseif not path then
       path = a
     end
@@ -130,9 +133,9 @@ function M.run(argv)
 
   local bufnr = api.nvim_get_current_buf()
   local row = api.nvim_win_get_cursor(0)[1] - 1
-  local block = require("color_my_ascii.api.fences").block_at(bufnr, row, { include_fence = true })
+  local block = require('color_my_ascii.api.fences').block_at(bufnr, row, { include_fence = true })
   if not block then
-    vim.notify("Fence export: no fenced block under the cursor", vim.log.levels.WARN)
+    vim.notify('Fence export: no fenced block under the cursor', vim.log.levels.WARN)
     return
   end
 
@@ -145,12 +148,12 @@ function M.run(argv)
 
   -- No path given: prompt with the suggested default + file completion.
   vim.ui.input({
-    prompt = "Export fence to: ",
+    prompt = 'Export fence to: ',
     default = suggest_path(bufnr, block),
-    completion = "file",
+    completion = 'file',
   }, function(input)
-    if input == nil or vim.trim(input) == "" then
-      vim.notify("Fence export cancelled", vim.log.levels.INFO)
+    if input == nil or vim.trim(input) == '' then
+      vim.notify('Fence export cancelled', vim.log.levels.INFO)
       return
     end
     write_and_finish(bufnr, block, content, input, flags)

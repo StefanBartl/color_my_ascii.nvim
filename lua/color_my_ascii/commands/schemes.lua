@@ -34,10 +34,18 @@ function M.list_schemes()
 
     -- Show enabled features
     local features = {}
-    if scheme.enable_keywords then table.insert(features, 'keywords') end
-    if scheme.enable_function_names then table.insert(features, 'functions') end
-    if scheme.enable_bracket_highlighting then table.insert(features, 'brackets') end
-    if scheme.enable_inline_code then table.insert(features, 'inline') end
+    if scheme.enable_keywords then
+      table.insert(features, 'keywords')
+    end
+    if scheme.enable_function_names then
+      table.insert(features, 'functions')
+    end
+    if scheme.enable_bracket_highlighting then
+      table.insert(features, 'brackets')
+    end
+    if scheme.enable_inline_code then
+      table.insert(features, 'inline')
+    end
 
     if #features > 0 then
       print(string.format('  Features: %s', table.concat(features, ', ')))
@@ -112,10 +120,18 @@ function M.telescope_picker()
     local scheme = require('color_my_ascii.schemes.' .. name)
 
     local features = {}
-    if scheme.enable_keywords then table.insert(features, 'kw') end
-    if scheme.enable_function_names then table.insert(features, 'fn') end
-    if scheme.enable_bracket_highlighting then table.insert(features, 'br') end
-    if scheme.enable_inline_code then table.insert(features, 'in') end
+    if scheme.enable_keywords then
+      table.insert(features, 'kw')
+    end
+    if scheme.enable_function_names then
+      table.insert(features, 'fn')
+    end
+    if scheme.enable_bracket_highlighting then
+      table.insert(features, 'br')
+    end
+    if scheme.enable_inline_code then
+      table.insert(features, 'in')
+    end
 
     table.insert(entries, {
       value = name,
@@ -125,47 +141,49 @@ function M.telescope_picker()
     })
   end
 
-  pickers.new({}, {
-    prompt_title = 'Color Schemes',
-    finder = finders.new_table({
-      results = entries,
-      entry_maker = function(entry)
-        return entry
-      end,
-    }),
-    sorter = conf.generic_sorter({}),
-    attach_mappings = function(prompt_bufnr, _)
-      -- Preview on cursor move
-      local function preview_scheme()
-        local selection = action_state.get_selected_entry()
-        if selection then
-          require('color_my_ascii').setup(selection.scheme)
+  pickers
+    .new({}, {
+      prompt_title = 'Color Schemes',
+      finder = finders.new_table({
+        results = entries,
+        entry_maker = function(entry)
+          return entry
+        end,
+      }),
+      sorter = conf.generic_sorter({}),
+      attach_mappings = function(prompt_bufnr, _)
+        -- Preview on cursor move
+        local function preview_scheme()
+          local selection = action_state.get_selected_entry()
+          if selection then
+            require('color_my_ascii').setup(selection.scheme)
 
-          local state = require('color_my_ascii').get_state()
-          for bufnr, _ in pairs(state.buffers) do
-            require('color_my_ascii').highlight_buffer(bufnr)
+            local state = require('color_my_ascii').get_state()
+            for bufnr, _ in pairs(state.buffers) do
+              require('color_my_ascii').highlight_buffer(bufnr)
+            end
           end
         end
-      end
 
-      -- Preview on move
-      vim.api.nvim_create_autocmd('CursorMoved', {
-        buffer = prompt_bufnr,
-        callback = preview_scheme,
-      })
+        -- Preview on move
+        vim.api.nvim_create_autocmd('CursorMoved', {
+          buffer = prompt_bufnr,
+          callback = preview_scheme,
+        })
 
-      -- Apply on select
-      actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        if selection then
-          notify(string.format('Applied scheme: %s', selection.value), levels.INFO)
-        end
-      end)
+        -- Apply on select
+        actions.select_default:replace(function()
+          actions.close(prompt_bufnr)
+          local selection = action_state.get_selected_entry()
+          if selection then
+            notify(string.format('Applied scheme: %s', selection.value), levels.INFO)
+          end
+        end)
 
-      return true
-    end,
-  }):find()
+        return true
+      end,
+    })
+    :find()
 end
 
 return M

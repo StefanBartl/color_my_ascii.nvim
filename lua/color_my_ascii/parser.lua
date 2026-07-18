@@ -13,10 +13,10 @@ local api = vim.api
 ---@param lang string Fence language tag, already trimmed (e.g. "ascii-c", "vim", "")
 ---@return boolean is_ascii
 function M.is_ascii_fence(lang)
-  local cfg = require("color_my_ascii.config").get()
+  local cfg = require('color_my_ascii.config').get()
 
-  local is_ascii = lang:match("^ascii") ~= nil
-  local is_empty = lang == ""
+  local is_ascii = lang:match('^ascii') ~= nil
+  local is_empty = lang == ''
   local is_mapped = cfg.fence_language_map ~= nil and cfg.fence_language_map[lang] ~= nil
 
   return is_ascii or is_mapped or (is_empty and cfg.treat_empty_fence_as_ascii) or false
@@ -41,8 +41,8 @@ end
 ---@param opts? { lines?: "none"|"ascii"|"all" }
 ---@return ColorMyAscii.FenceBlock[] blocks Every closed fenced block, in order
 function M.scan_blocks_heuristic(bufnr, opts)
-  local cfg = require("color_my_ascii.config").get()
-  local lines_mode = (opts and opts.lines) or "none"
+  local cfg = require('color_my_ascii.config').get()
+  local lines_mode = (opts and opts.lines) or 'none'
 
   ---@type ColorMyAscii.FenceBlock[]
   local blocks = {}
@@ -58,23 +58,23 @@ function M.scan_blocks_heuristic(bufnr, opts)
   local open_fence_info = nil
 
   local function wants_lines(is_ascii)
-    return lines_mode == "all" or (lines_mode == "ascii" and is_ascii)
+    return lines_mode == 'all' or (lines_mode == 'ascii' and is_ascii)
   end
 
   for i = 1, line_count do
     local line = lines[i]
 
     -- Try to match a fence line (backtick or tilde)
-    local fence_char = "`"
-    local fence, lang = line:match("^%s*(```+)%s*(.*)$")
+    local fence_char = '`'
+    local fence, lang = line:match('^%s*(```+)%s*(.*)$')
     if not fence then
-      fence, lang = line:match("^%s*(~~~+)%s*(.*)$")
-      fence_char = "~"
+      fence, lang = line:match('^%s*(~~~+)%s*(.*)$')
+      fence_char = '~'
     end
 
     if fence then
       -- Normalize language (trim whitespace)
-      lang = vim.trim(lang or "")
+      lang = vim.trim(lang or '')
 
       if not in_block then
         -- We're OUTSIDE any block: this fence opens a new block
@@ -91,7 +91,6 @@ function M.scan_blocks_heuristic(bufnr, opts)
           is_ascii = track_as_ascii,
           block_lines = {},
         }
-
       else
         -- We're INSIDE a block: this fence closes it
         -- Check fence length (closing must be >= opening)
@@ -99,19 +98,19 @@ function M.scan_blocks_heuristic(bufnr, opts)
           -- Valid closing fence
           local of = open_fence_info
           table.insert(blocks, {
-            open_row      = of.start_line - 1, -- 0-indexed
-            close_row     = i - 1,             -- 0-indexed
-            content_start = of.start_line,     -- 0-indexed first content row (open_row + 1)
-            content_end   = i - 1,             -- 0-indexed exclusive end (== close_row)
-            lang          = of.lang,
-            fence_char    = of.fence_char,
-            fence_len     = of.fence_length,
-            is_ascii      = of.is_ascii,
-            lines         = wants_lines(of.is_ascii) and of.block_lines or nil,
-            fence_line    = of.fence_line,
+            open_row = of.start_line - 1, -- 0-indexed
+            close_row = i - 1, -- 0-indexed
+            content_start = of.start_line, -- 0-indexed first content row (open_row + 1)
+            content_end = i - 1, -- 0-indexed exclusive end (== close_row)
+            lang = of.lang,
+            fence_char = of.fence_char,
+            fence_len = of.fence_length,
+            is_ascii = of.is_ascii,
+            lines = wants_lines(of.is_ascii) and of.block_lines or nil,
+            fence_line = of.fence_line,
             -- ColorMyAscii.Block aliases (backward compat):
-            start_line    = of.start_line - 1,
-            end_line      = i - 1,
+            start_line = of.start_line - 1,
+            end_line = i - 1,
           })
 
           -- Reset state
@@ -120,7 +119,6 @@ function M.scan_blocks_heuristic(bufnr, opts)
         end
         -- else: fence too short, treat as content
       end
-
     elseif in_block and open_fence_info then
       -- Not a fence, and we're in a block: collect line if requested
       if wants_lines(open_fence_info.is_ascii) then
@@ -131,10 +129,7 @@ function M.scan_blocks_heuristic(bufnr, opts)
 
   -- If block is still open at EOF, log warning only for ASCII blocks and only in debug mode
   if in_block and open_fence_info and open_fence_info.is_ascii and cfg.debug_enabled then
-    vim.notify(
-      string.format("Unclosed ASCII block at line %d", open_fence_info.start_line),
-      vim.log.levels.WARN
-    )
+    vim.notify(string.format('Unclosed ASCII block at line %d', open_fence_info.start_line), vim.log.levels.WARN)
   end
 
   return blocks
@@ -148,7 +143,7 @@ end
 ---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
 function M.find_ascii_blocks_heuristic(bufnr)
   local blocks = {}
-  for _, b in ipairs(M.scan_blocks_heuristic(bufnr, { lines = "ascii" })) do
+  for _, b in ipairs(M.scan_blocks_heuristic(bufnr, { lines = 'ascii' })) do
     if b.is_ascii then
       table.insert(blocks, b)
     end
@@ -164,11 +159,11 @@ end
 ---@param bufnr integer Buffer number to search
 ---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
 function M.find_ascii_blocks(bufnr)
-  local cfg = require("color_my_ascii.config").get()
+  local cfg = require('color_my_ascii.config').get()
   local ts_cfg = cfg.treesitter
 
   if ts_cfg and ts_cfg.enabled and ts_cfg.block_detection then
-    local parser_ts = require("color_my_ascii.parser_ts")
+    local parser_ts = require('color_my_ascii.parser_ts')
 
     if parser_ts.markdown_available() then
       local ok, blocks = pcall(parser_ts.find_ascii_blocks, bufnr)
@@ -178,7 +173,10 @@ function M.find_ascii_blocks(bufnr)
 
       if cfg.debug_enabled then
         vim.notify(
-          string.format("color_my_ascii: Treesitter block detection failed, falling back to heuristic parser: %s", tostring(blocks)),
+          string.format(
+            'color_my_ascii: Treesitter block detection failed, falling back to heuristic parser: %s',
+            tostring(blocks)
+          ),
           vim.log.levels.WARN
         )
       end
@@ -197,11 +195,11 @@ end
 ---@param opts? { lines?: "none"|"ascii"|"all" }
 ---@return ColorMyAscii.FenceBlock[] blocks Every closed fenced block, in order
 function M.find_all_blocks(bufnr, opts)
-  local cfg = require("color_my_ascii.config").get()
+  local cfg = require('color_my_ascii.config').get()
   local ts_cfg = cfg.treesitter
 
   if ts_cfg and ts_cfg.enabled and ts_cfg.block_detection then
-    local parser_ts = require("color_my_ascii.parser_ts")
+    local parser_ts = require('color_my_ascii.parser_ts')
 
     if parser_ts.markdown_available() then
       local ok, blocks = pcall(parser_ts.scan_blocks_ts, bufnr, opts)
@@ -211,7 +209,10 @@ function M.find_all_blocks(bufnr, opts)
 
       if cfg.debug_enabled then
         vim.notify(
-          string.format("color_my_ascii: Treesitter block scan failed, falling back to heuristic parser: %s", tostring(blocks)),
+          string.format(
+            'color_my_ascii: Treesitter block scan failed, falling back to heuristic parser: %s',
+            tostring(blocks)
+          ),
           vim.log.levels.WARN
         )
       end
@@ -230,16 +231,37 @@ function M.tokenize_line(line)
   local tokens = {}
 
   -- Match sequences of alphanumeric characters and underscores
-  for word in line:gmatch("[%w_]+") do
+  for word in line:gmatch('[%w_]+') do
     table.insert(tokens, word)
   end
 
   -- Match common multi-character operators explicitly
   local operators = {
-    ":=", "==", "!=", "<=", ">=", "&&", "||",
-    "->", "<-", "++", "--", "...", "::",
-    "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
-    "<<", ">>", ">>=", "<<=",
+    ':=',
+    '==',
+    '!=',
+    '<=',
+    '>=',
+    '&&',
+    '||',
+    '->',
+    '<-',
+    '++',
+    '--',
+    '...',
+    '::',
+    '+=',
+    '-=',
+    '*=',
+    '/=',
+    '%=',
+    '&=',
+    '|=',
+    '^=',
+    '<<',
+    '>>',
+    '>>=',
+    '<<=',
   }
 
   for _, op in ipairs(operators) do
@@ -278,7 +300,7 @@ end
 ---@param bufnr integer Buffer number
 ---@return ColorMyAscii.InlineCode[] inline_codes List of inline code segments
 function M.find_inline_codes(bufnr)
-  local cfg = require("color_my_ascii.config").get()
+  local cfg = require('color_my_ascii.config').get()
 
   if not cfg.enable_inline_code then
     return {}
@@ -292,12 +314,12 @@ function M.find_inline_codes(bufnr)
   for line_num, line in ipairs(lines) do
     local i = 1
     while i <= #line do
-      local start_pos = line:find("`", i, true)
+      local start_pos = line:find('`', i, true)
       if not start_pos then
         break
       end
 
-      local end_pos = line:find("`", start_pos + 1, true)
+      local end_pos = line:find('`', start_pos + 1, true)
       if not end_pos then
         break
       end

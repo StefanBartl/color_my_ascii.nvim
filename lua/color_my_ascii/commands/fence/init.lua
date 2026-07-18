@@ -18,9 +18,13 @@ function M.tokenize(s)
   local tokens = {}
   local i, n = 1, #s
   while i <= n do
-    local ws = s:match("^%s+", i)
-    if ws then i = i + #ws end
-    if i > n then break end
+    local ws = s:match('^%s+', i)
+    if ws then
+      i = i + #ws
+    end
+    if i > n then
+      break
+    end
     local c = s:sub(i, i)
     if c == '"' or c == "'" then
       local close = s:find(c, i + 1, true)
@@ -32,7 +36,7 @@ function M.tokenize(s)
         break
       end
     else
-      local tok = s:match("^%S+", i)
+      local tok = s:match('^%S+', i)
       tokens[#tokens + 1] = tok
       i = i + #tok
     end
@@ -42,23 +46,45 @@ end
 
 --- Subcommand table: name -> fun(argv: string[], ctx: table).
 local SUBCOMMANDS = {
-  export = function(argv, ctx) require("color_my_ascii.commands.fence.export").run(argv, ctx) end,
-  yank   = function(argv, _) require("color_my_ascii.commands.fence.yank").run(argv) end,
-  open   = function(argv, _) require("color_my_ascii.commands.fence.open").run(argv) end,
-  run    = function(argv, _) require("color_my_ascii.commands.fence.run").run(argv) end,
-  format = function(argv, _) require("color_my_ascii.commands.fence.format").run(argv) end,
-  import = function(argv, _) require("color_my_ascii.commands.fence.import").run(argv) end,
-  lang   = function(argv, _) require("color_my_ascii.commands.fence.lang").run(argv) end,
-  select = function(argv, _) require("color_my_ascii.commands.fence.select").run(argv) end,
-  wrap   = function(argv, ctx) require("color_my_ascii.commands.fence.wrap").wrap(argv, ctx) end,
-  unwrap = function(argv, _) require("color_my_ascii.commands.fence.wrap").unwrap(argv) end,
+  export = function(argv, ctx)
+    require('color_my_ascii.commands.fence.export').run(argv, ctx)
+  end,
+  yank = function(argv, _)
+    require('color_my_ascii.commands.fence.yank').run(argv)
+  end,
+  open = function(argv, _)
+    require('color_my_ascii.commands.fence.open').run(argv)
+  end,
+  run = function(argv, _)
+    require('color_my_ascii.commands.fence.run').run(argv)
+  end,
+  format = function(argv, _)
+    require('color_my_ascii.commands.fence.format').run(argv)
+  end,
+  import = function(argv, _)
+    require('color_my_ascii.commands.fence.import').run(argv)
+  end,
+  lang = function(argv, _)
+    require('color_my_ascii.commands.fence.lang').run(argv)
+  end,
+  select = function(argv, _)
+    require('color_my_ascii.commands.fence.select').run(argv)
+  end,
+  wrap = function(argv, ctx)
+    require('color_my_ascii.commands.fence.wrap').wrap(argv, ctx)
+  end,
+  unwrap = function(argv, _)
+    require('color_my_ascii.commands.fence.wrap').unwrap(argv)
+  end,
 }
 
 --- The subcommand names, for usage/completion.
 ---@return string[]
 local function sub_names()
   local names = {}
-  for k in pairs(SUBCOMMANDS) do names[#names + 1] = k end
+  for k in pairs(SUBCOMMANDS) do
+    names[#names + 1] = k
+  end
   table.sort(names)
   return names
 end
@@ -67,19 +93,21 @@ end
 ---@param args string Raw argument string (everything after `:Fence`).
 ---@param ctx? table Command opts ({ range, line1, line2 }); forwarded to subcommands.
 function M.execute(args, ctx)
-  local tokens = M.tokenize(args or "")
+  local tokens = M.tokenize(args or '')
   local sub = tokens[1]
   if not sub then
-    vim.notify("Usage: :Fence " .. table.concat(sub_names(), "|") .. " [args]", vim.log.levels.INFO)
+    vim.notify('Usage: :Fence ' .. table.concat(sub_names(), '|') .. ' [args]', vim.log.levels.INFO)
     return
   end
   local handler = SUBCOMMANDS[sub]
   if not handler then
-    vim.notify("Unknown :Fence subcommand: " .. sub, vim.log.levels.WARN)
+    vim.notify('Unknown :Fence subcommand: ' .. sub, vim.log.levels.WARN)
     return
   end
   local argv = {}
-  for j = 2, #tokens do argv[#argv + 1] = tokens[j] end
+  for j = 2, #tokens do
+    argv[#argv + 1] = tokens[j]
+  end
   handler(argv, ctx)
 end
 
@@ -90,7 +118,9 @@ end
 local function filter_prefix(items, arglead)
   local out = {}
   for _, it in ipairs(items) do
-    if starts_with(it, arglead) then out[#out + 1] = it end
+    if starts_with(it, arglead) then
+      out[#out + 1] = it
+    end
   end
   return out
 end
@@ -100,25 +130,25 @@ end
 ---@param cmdline string
 ---@return string[]
 function M.complete(arglead, cmdline, _)
-  local toks = vim.split(vim.trim(cmdline), "%s+")
+  local toks = vim.split(vim.trim(cmdline), '%s+')
   -- toks[1] == "Fence"; toks[2] == subcommand (if any)
-  local on_subcommand = (#toks <= 1) or (#toks == 2 and arglead ~= "")
+  local on_subcommand = (#toks <= 1) or (#toks == 2 and arglead ~= '')
   if on_subcommand then
     return filter_prefix(sub_names(), arglead)
   end
 
   local sub = toks[2]
-  if sub == "export" then
-    if starts_with(arglead, "-") then
-      return filter_prefix({ "--open", "--replace" }, arglead)
+  if sub == 'export' then
+    if starts_with(arglead, '-') then
+      return filter_prefix({ '--open', '--replace' }, arglead)
     end
-    return vim.fn.getcompletion(arglead, "file")
-  elseif sub == "import" then
-    return vim.fn.getcompletion(arglead, "file")
-  elseif sub == "open" then
-    return filter_prefix({ "--split", "--vsplit", "--tab", "--edit" }, arglead)
-  elseif sub == "lang" or sub == "wrap" then
-    return filter_prefix(require("color_my_ascii.commands.fence.util").lang_tags(), arglead)
+    return vim.fn.getcompletion(arglead, 'file')
+  elseif sub == 'import' then
+    return vim.fn.getcompletion(arglead, 'file')
+  elseif sub == 'open' then
+    return filter_prefix({ '--split', '--vsplit', '--tab', '--edit' }, arglead)
+  elseif sub == 'lang' or sub == 'wrap' then
+    return filter_prefix(require('color_my_ascii.commands.fence.util').lang_tags(), arglead)
   end
   return {}
 end
@@ -127,19 +157,23 @@ end
 ---@param bufnr integer
 ---@return nil
 function M.register(bufnr)
-  if type(bufnr) ~= "number" or not api.nvim_buf_is_valid(bufnr) then return end
+  if type(bufnr) ~= 'number' or not api.nvim_buf_is_valid(bufnr) then
+    return
+  end
   local ok, cmds = pcall(api.nvim_buf_get_commands, bufnr, {})
-  if ok and cmds and cmds["Fence"] then return end
+  if ok and cmds and cmds['Fence'] then
+    return
+  end
 
-  api.nvim_buf_create_user_command(bufnr, "Fence", function(o)
+  api.nvim_buf_create_user_command(bufnr, 'Fence', function(o)
     M.execute(o.args, { range = o.range, line1 = o.line1, line2 = o.line2 })
   end, {
-    nargs = "*",
+    nargs = '*',
     range = true,
     complete = function(arglead, cmdline, cursorpos)
       return M.complete(arglead, cmdline, cursorpos)
     end,
-    desc = "[color_my_ascii] Fence actions (export, yank, open, run, format, import, lang, select, wrap, unwrap)",
+    desc = '[color_my_ascii] Fence actions (export, yank, open, run, format, import, lang, select, wrap, unwrap)',
   })
 end
 

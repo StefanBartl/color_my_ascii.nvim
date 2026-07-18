@@ -107,11 +107,12 @@ function M.check()
     health.info(string.format('  Keywords: %s', cfg.enable_keywords and 'enabled' or 'disabled'))
     health.info(string.format('  Language detection: %s', cfg.enable_language_detection and 'enabled' or 'disabled'))
     health.info(string.format('  Function names: %s', cfg.enable_function_names and 'enabled' or 'disabled'))
-    health.info(string.format('  Bracket highlighting: %s', cfg.enable_bracket_highlighting and 'enabled' or 'disabled'))
+    health.info(
+      string.format('  Bracket highlighting: %s', cfg.enable_bracket_highlighting and 'enabled' or 'disabled')
+    )
     health.info(string.format('  Inline code: %s', cfg.enable_inline_code and 'enabled' or 'disabled'))
     health.info(string.format('  Empty fence as ASCII: %s', cfg.treat_empty_fence_as_ascii and 'enabled' or 'disabled'))
     health.info(string.format('  Default text highlight: %s', cfg.default_text_hl or 'none'))
-
   else
     health.error('Failed to load configuration module')
   end
@@ -119,8 +120,8 @@ function M.check()
   -- Check file structure
   health.info('Checking file structure...')
 
-  local source = debug.getinfo(1, "S").source:sub(2)
-  local dir = fn.fnamemodify(source, ":h")
+  local source = debug.getinfo(1, 'S').source:sub(2)
+  local dir = fn.fnamemodify(source, ':h')
 
   -- Check languages directory
   local lang_path = dir .. '/languages'
@@ -182,12 +183,16 @@ function M.check()
       if parser_ts_ok and parser_ts.markdown_available() then
         health.ok('Treesitter block detection: markdown parser available')
       else
-        health.info('Treesitter block detection enabled, but no markdown parser found - falling back to the heuristic parser (:TSInstall markdown to enable)')
+        health.info(
+          'Treesitter block detection enabled, but no markdown parser found - falling back to the heuristic parser (:TSInstall markdown to enable)'
+        )
       end
     end
 
     if ts_cfg.syntax_highlight then
-      health.info('Treesitter syntax highlighting enabled - availability is checked per block based on the detected language (:TSInstall <language> as needed); silently falls back to heuristic-only highlighting where unavailable')
+      health.info(
+        'Treesitter syntax highlighting enabled - availability is checked per block based on the detected language (:TSInstall <language> as needed); silently falls back to heuristic-only highlighting where unavailable'
+      )
     end
   end
 
@@ -197,7 +202,6 @@ function M.check()
   do
     local fences_ok, fences = pcall(require, 'color_my_ascii.api.fences')
     if fences_ok and type(fences) == 'table' then
-      local bufnr = vim.api.nvim_get_current_buf()
       local blist_ok, blocks = pcall(fences.list_blocks, bufnr, { lines = 'none' })
       if blist_ok and type(blocks) == 'table' and #blocks > 0 then
         local seen, missing, present = {}, {}, {}
@@ -206,15 +210,22 @@ function M.check()
           if lang ~= '' and not seen[lang] then
             seen[lang] = true
             local has = pcall(vim.treesitter.language.add, lang)
-            if has then present[#present + 1] = lang else missing[#missing + 1] = lang end
+            if has then
+              present[#present + 1] = lang
+            else
+              missing[#missing + 1] = lang
+            end
           end
         end
         if #present > 0 then
           health.ok('Fence languages with a treesitter parser: ' .. table.concat(present, ', '))
         end
         if #missing > 0 then
-          health.info('Fence languages WITHOUT a treesitter parser (no injected highlighting): '
-            .. table.concat(missing, ', ') .. ' — install with :TSInstall <lang>')
+          health.info(
+            'Fence languages WITHOUT a treesitter parser (no injected highlighting): '
+              .. table.concat(missing, ', ')
+              .. ' — install with :TSInstall <lang>'
+          )
         end
       end
     end
@@ -231,10 +242,13 @@ function M.check()
   -- Public fence API (consumed by other plugins, e.g. markdown.nvim's fenced_scope)
   health.info('Checking public fence API...')
   local fences_ok, fences = pcall(require, 'color_my_ascii.api.fences')
-  if fences_ok and type(fences) == 'table'
+  if
+    fences_ok
+    and type(fences) == 'table'
     and type(fences.list_blocks) == 'function'
     and type(fences.block_at) == 'function'
-    and type(fences.is_markdown_lang) == 'function' then
+    and type(fences.is_markdown_lang) == 'function'
+  then
     health.ok('Fence API available at require("color_my_ascii").fences (list_blocks/block_at/is_markdown_lang)')
   else
     health.error('Fence API failed to load - consumers like markdown.nvim will fall back to their own scanner')
@@ -244,8 +258,13 @@ function M.check()
   if ok then
     local flh = config.get().fence_line_highlight
     if flh and flh.enable then
-      health.ok(string.format('Fence-line highlight: enabled (preset "%s", apply_to "%s")',
-        tostring(flh.preset or 'subtle'), tostring(flh.apply_to or 'all')))
+      health.ok(
+        string.format(
+          'Fence-line highlight: enabled (preset "%s", apply_to "%s")',
+          tostring(flh.preset or 'subtle'),
+          tostring(flh.apply_to or 'all')
+        )
+      )
     else
       health.info('Fence-line highlight: disabled (set fence_line_highlight.enable = true to turn on)')
     end
@@ -255,9 +274,15 @@ function M.check()
   if ok then
     local fch = config.get().fence_content_highlight
     if fch and fch.enable then
-      health.ok(string.format('Fence-content highlight: enabled (preset "%s", shade "%s", amount %s, apply_to "%s")',
-        tostring(fch.preset or '<follows fence_line_highlight>'), tostring(fch.shade or 'auto'),
-        tostring(fch.amount or 6), tostring(fch.apply_to or 'all')))
+      health.ok(
+        string.format(
+          'Fence-content highlight: enabled (preset "%s", shade "%s", amount %s, apply_to "%s")',
+          tostring(fch.preset or '<follows fence_line_highlight>'),
+          tostring(fch.shade or 'auto'),
+          tostring(fch.amount or 6),
+          tostring(fch.apply_to or 'all')
+        )
+      )
     else
       health.info('Fence-content highlight: disabled (set fence_content_highlight.enable = true to turn on)')
     end

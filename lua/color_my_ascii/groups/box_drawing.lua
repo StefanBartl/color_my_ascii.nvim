@@ -3,72 +3,72 @@
 
 ---@type ColorMyAscii.CharGroup
 local group = {
-	-- Unicode box drawing characters (light, heavy, double, rounded)
-	chars = "",
-	hl = "Keyword",
+  -- Unicode box drawing characters (light, heavy, double, rounded)
+  chars = '',
+  hl = 'Keyword',
 }
 
 -- Build character string
 local chars = {
-	-- Light box drawing
-	"─",
-	"│",
-	"┌",
-	"┐",
-	"└",
-	"┘",
-	"├",
-	"┤",
-	"┬",
-	"┴",
-	"┼",
-	-- Heavy box drawing
-	"═",
-	"║",
-	"╔",
-	"╗",
-	"╚",
-	"╝",
-	"╠",
-	"╣",
-	"╦",
-	"╩",
-	"╬",
-	-- Light and heavy combinations
-	"╒",
-	"╓",
-	"╕",
-	"╖",
-	"╘",
-	"╙",
-	"╛",
-	"╜",
-	"╞",
-	"╟",
-	"╡",
-	"╢",
-	"╤",
-	"╥",
-	"╧",
-	"╨",
-	"╪",
-	"╫",
-	-- Rounded corners
-	"╭",
-	"╮",
-	"╯",
-	"╰",
-	-- Diagonal lines
-	"╱",
-	"╲",
-	"╳",
-	-- Arc corners
-	"╴",
-	"╵",
-	"╶",
-	"╷",
+  -- Light box drawing
+  '─',
+  '│',
+  '┌',
+  '┐',
+  '└',
+  '┘',
+  '├',
+  '┤',
+  '┬',
+  '┴',
+  '┼',
+  -- Heavy box drawing
+  '═',
+  '║',
+  '╔',
+  '╗',
+  '╚',
+  '╝',
+  '╠',
+  '╣',
+  '╦',
+  '╩',
+  '╬',
+  -- Light and heavy combinations
+  '╒',
+  '╓',
+  '╕',
+  '╖',
+  '╘',
+  '╙',
+  '╛',
+  '╜',
+  '╞',
+  '╟',
+  '╡',
+  '╢',
+  '╤',
+  '╥',
+  '╧',
+  '╨',
+  '╪',
+  '╫',
+  -- Rounded corners
+  '╭',
+  '╮',
+  '╯',
+  '╰',
+  -- Diagonal lines
+  '╱',
+  '╲',
+  '╳',
+  -- Arc corners
+  '╴',
+  '╵',
+  '╶',
+  '╷',
 }
 
-group.chars = table.concat(chars, "")
+group.chars = table.concat(chars, '')
 
 return group

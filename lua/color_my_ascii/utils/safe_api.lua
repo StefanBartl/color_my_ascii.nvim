@@ -6,4 +6,4 @@
 --- boolean and either result or error message.
 --- Format: (success: boolean, result: any|nil, error: string|nil)
 
-return require("lib.nvim.safe_api")
+return require('lib.nvim.safe_api')

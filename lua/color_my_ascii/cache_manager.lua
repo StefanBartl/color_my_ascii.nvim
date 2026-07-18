@@ -19,9 +19,9 @@ local cache = setmetatable({}, { __mode = 'k' })
 --- Cache configuration
 ---@type CacheConfig
 local config = {
-  timeout = 5000,        -- 5 seconds
-  max_size = 50,         -- Maximum 50 buffers
-  enable_stats = false,  -- Disabled by default
+  timeout = 5000, -- 5 seconds
+  max_size = 50, -- Maximum 50 buffers
+  enable_stats = false, -- Disabled by default
 }
 
 --- Cache statistics
@@ -326,7 +326,7 @@ end
 ---@param interval integer|nil Cleanup interval in milliseconds
 ---@return uv.uv_timer_t|nil timer Timer handle or nil on failure
 function M.setup_auto_cleanup(interval)
-  interval = interval or 30000  -- Default 30 seconds
+  interval = interval or 30000 -- Default 30 seconds
 
   local timer = vim.loop.new_timer()
   if timer == nil then
@@ -335,9 +335,13 @@ function M.setup_auto_cleanup(interval)
 
   ---@cast timer uv.uv_timer_t
 
-  timer:start(interval, interval, vim.schedule_wrap(function()
-    M.cleanup()
-  end))
+  timer:start(
+    interval,
+    interval,
+    vim.schedule_wrap(function()
+      M.cleanup()
+    end)
+  )
 
   return timer
 end

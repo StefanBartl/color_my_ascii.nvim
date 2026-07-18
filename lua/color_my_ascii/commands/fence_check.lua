@@ -19,8 +19,8 @@ local M = {}
 --- Pattern that matches a fenced code line.
 --- Captures fence sequence and optional language specifier.
 ---@type string
-local FENCE_PATTERN = "^%s*(```+)%s*(.*)$"
-local TILDE_FENCE_PATTERN = "^%s*(~~~+)%s*(.*)$"
+local FENCE_PATTERN = '^%s*(```+)%s*(.*)$'
+local TILDE_FENCE_PATTERN = '^%s*(~~~+)%s*(.*)$'
 
 --- Information about an open fence.
 ---@class OpenFence
@@ -58,17 +58,16 @@ function M.check_current_buffer()
 
     if fence then
       -- Normalize language (trim whitespace)
-      lang = vim.trim(lang or "")
+      lang = vim.trim(lang or '')
 
       if not in_block then
         -- We're OUTSIDE a block: this fence MUST be opening
         in_block = true
         open_fence = {
           line = i,
-          lang = lang == "" and "(empty)" or lang,
+          lang = lang == '' and '(empty)' or lang,
           fence = fence,
         }
-
       else
         -- We're INSIDE a block: this fence MUST be closing
         -- Check if fence length matches (closing must be >= opening)
@@ -80,7 +79,7 @@ function M.check_current_buffer()
           -- Fence too short to close the block
           if open_fence then
             problems[#problems + 1] = string.format(
-              "Line %d: fence %s too short to close block opened at line %d with %s",
+              'Line %d: fence %s too short to close block opened at line %d with %s',
               i,
               fence,
               open_fence.line,
@@ -95,19 +94,19 @@ function M.check_current_buffer()
   -- Check if block is still open at EOF
   if in_block and open_fence then
     problems[#problems + 1] = string.format(
-      "Line %d: opening fence ```%s without matching closing fence (EOF reached)",
+      'Line %d: opening fence ```%s without matching closing fence (EOF reached)',
       open_fence.line,
-      open_fence.lang ~= "(empty)" and open_fence.lang or ""
+      open_fence.lang ~= '(empty)' and open_fence.lang or ''
     )
   end
 
   -- Report results
   if #problems == 0 then
-    notify("No unmatched fenced code blocks found", levels.INFO)
+    notify('No unmatched fenced code blocks found', levels.INFO)
     return
   end
 
-  notify("Unmatched fenced code blocks detected:", levels.WARN)
+  notify('Unmatched fenced code blocks detected:', levels.WARN)
   for _, msg in ipairs(problems) do
     notify(msg, levels.WARN)
   end

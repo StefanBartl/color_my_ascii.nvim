@@ -9,26 +9,62 @@
 return {
   words = {
     -- Layout properties
-    'display', 'position', 'flex', 'grid', 'float', 'clear',
-    'width', 'height', 'margin', 'padding', 'border',
+    'display',
+    'position',
+    'flex',
+    'grid',
+    'float',
+    'clear',
+    'width',
+    'height',
+    'margin',
+    'padding',
+    'border',
     -- Typography
-    'color', 'background', 'font', 'text', 'align',
+    'color',
+    'background',
+    'font',
+    'text',
+    'align',
     -- Values
-    'block', 'inline', 'absolute', 'relative', 'fixed', 'sticky',
-    'none', 'auto', 'inherit', 'initial',
+    'block',
+    'inline',
+    'absolute',
+    'relative',
+    'fixed',
+    'sticky',
+    'none',
+    'auto',
+    'inherit',
+    'initial',
     -- At-rules
-    'media', 'import', 'keyframes', 'supports',
+    'media',
+    'import',
+    'keyframes',
+    'supports',
     -- Pseudo-classes/elements
-    'hover', 'focus', 'active', 'before', 'after', 'nth', 'child',
+    'hover',
+    'focus',
+    'active',
+    'before',
+    'after',
+    'nth',
+    'child',
     -- Units/functions
-    'calc', 'var', 'rgba', 'rgb', 'url',
+    'calc',
+    'var',
+    'rgba',
+    'rgb',
+    'url',
     -- Important
     'important',
   },
 
   -- Keywords unique to CSS
   unique_words = {
-    'keyframes', 'rgba', 'important',
+    'keyframes',
+    'rgba',
+    'important',
   },
 
   hl = 'Type',

@@ -87,7 +87,7 @@ end
 ---@return ColorMyAscii.FenceBlock[] blocks Every closed fenced block, in order
 function M.scan_blocks_ts(bufnr, opts)
   local is_ascii_fence = require('color_my_ascii.parser').is_ascii_fence
-  local lines_mode = (opts and opts.lines) or "none"
+  local lines_mode = (opts and opts.lines) or 'none'
 
   local ts_parser = vim.treesitter.get_parser(bufnr, 'markdown')
   local root = ts_parser:parse()[1]:root()
@@ -107,10 +107,10 @@ function M.scan_blocks_ts(bufnr, opts)
     if delimiter_count == 2 and open_row and close_row then
       local is_ascii = is_ascii_fence(lang)
       local fence_line = api.nvim_buf_get_lines(bufnr, open_row, open_row + 1, false)[1] or ''
-      local seq = fence_line:match("^%s*([`~]+)")
-      local fence_char = fence_line:match("^%s*([`~])") or "`"
+      local seq = fence_line:match('^%s*([`~]+)')
+      local fence_char = fence_line:match('^%s*([`~])') or '`'
 
-      local want = lines_mode == "all" or (lines_mode == "ascii" and is_ascii)
+      local want = lines_mode == 'all' or (lines_mode == 'ascii' and is_ascii)
       local content_lines = nil
       if want then
         content_lines = {}
@@ -121,19 +121,19 @@ function M.scan_blocks_ts(bufnr, opts)
       end
 
       table.insert(blocks, {
-        open_row      = open_row,
-        close_row     = close_row,
+        open_row = open_row,
+        close_row = close_row,
         content_start = open_row + 1,
-        content_end   = close_row,
-        lang          = lang,
-        fence_char    = fence_char,
-        fence_len     = seq and #seq or 3,
-        is_ascii      = is_ascii,
-        lines         = content_lines,
-        fence_line    = fence_line,
+        content_end = close_row,
+        lang = lang,
+        fence_char = fence_char,
+        fence_len = seq and #seq or 3,
+        is_ascii = is_ascii,
+        lines = content_lines,
+        fence_line = fence_line,
         -- ColorMyAscii.Block aliases (backward compat):
-        start_line    = open_row,
-        end_line      = close_row,
+        start_line = open_row,
+        end_line = close_row,
       })
     end
   end
@@ -148,7 +148,7 @@ end
 ---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
 function M.find_ascii_blocks(bufnr)
   local blocks = {}
-  for _, b in ipairs(M.scan_blocks_ts(bufnr, { lines = "ascii" })) do
+  for _, b in ipairs(M.scan_blocks_ts(bufnr, { lines = 'ascii' })) do
     if b.is_ascii then
       table.insert(blocks, b)
     end

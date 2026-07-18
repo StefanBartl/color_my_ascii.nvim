@@ -15,20 +15,20 @@
 --- `M.configure` — by caching one lib.nvim handle per buffer and recreating
 --- it whenever the buffer's delay tier changes.
 
-local lib_debounce = require("lib.nvim.debounce")
+local lib_debounce = require('lib.nvim.debounce')
 
 local M = {}
 
 --- Debounce configuration thresholds
 ---@type DebounceConfig
 local config = {
-	small_file_threshold = 500,
-	medium_file_threshold = 2000,
-	small_delay = 100,
-	medium_delay = 200,
-	large_delay = 500,
-	min_delay = 50,
-	max_delay = 1000,
+  small_file_threshold = 500,
+  medium_file_threshold = 2000,
+  small_delay = 100,
+  medium_delay = 200,
+  large_delay = 500,
+  min_delay = 50,
+  max_delay = 1000,
 }
 
 --- One lib.nvim.debounce handle per buffer, keyed with the delay it was
@@ -41,77 +41,77 @@ local timers = {}
 ---@param opts DebounceConfig Configuration options
 ---@return nil
 function M.configure(opts)
-	if type(opts) ~= "table" then
-		return
-	end
+  if type(opts) ~= 'table' then
+    return
+  end
 
-	-- Update thresholds
-	if type(opts.small_file_threshold) == "number" and opts.small_file_threshold > 0 then
-		config.small_file_threshold = opts.small_file_threshold
-	end
+  -- Update thresholds
+  if type(opts.small_file_threshold) == 'number' and opts.small_file_threshold > 0 then
+    config.small_file_threshold = opts.small_file_threshold
+  end
 
-	if type(opts.medium_file_threshold) == "number" and opts.medium_file_threshold > 0 then
-		config.medium_file_threshold = opts.medium_file_threshold
-	end
+  if type(opts.medium_file_threshold) == 'number' and opts.medium_file_threshold > 0 then
+    config.medium_file_threshold = opts.medium_file_threshold
+  end
 
-	-- Update delays
-	if type(opts.small_delay) == "number" and opts.small_delay > 0 then
-		config.small_delay = opts.small_delay
-	end
+  -- Update delays
+  if type(opts.small_delay) == 'number' and opts.small_delay > 0 then
+    config.small_delay = opts.small_delay
+  end
 
-	if type(opts.medium_delay) == "number" and opts.medium_delay > 0 then
-		config.medium_delay = opts.medium_delay
-	end
+  if type(opts.medium_delay) == 'number' and opts.medium_delay > 0 then
+    config.medium_delay = opts.medium_delay
+  end
 
-	if type(opts.large_delay) == "number" and opts.large_delay > 0 then
-		config.large_delay = opts.large_delay
-	end
+  if type(opts.large_delay) == 'number' and opts.large_delay > 0 then
+    config.large_delay = opts.large_delay
+  end
 
-	-- Update bounds
-	if type(opts.min_delay) == "number" and opts.min_delay > 0 then
-		config.min_delay = opts.min_delay
-	end
+  -- Update bounds
+  if type(opts.min_delay) == 'number' and opts.min_delay > 0 then
+    config.min_delay = opts.min_delay
+  end
 
-	if type(opts.max_delay) == "number" and opts.max_delay > 0 then
-		config.max_delay = opts.max_delay
-	end
+  if type(opts.max_delay) == 'number' and opts.max_delay > 0 then
+    config.max_delay = opts.max_delay
+  end
 end
 
 --- Calculate adaptive delay based on buffer size
 ---@param bufnr integer Buffer number
 ---@return integer delay Debounce delay in milliseconds
 local function calculate_delay(bufnr)
-	local safe_api = require("color_my_ascii.utils.safe_api")
+  local safe_api = require('color_my_ascii.utils.safe_api')
 
-	-- Get line count
-	local success, line_count = safe_api.buf_line_count(bufnr)
+  -- Get line count
+  local success, line_count = safe_api.buf_line_count(bufnr)
 
-	if not success or not line_count then
-		-- Default to medium delay on error
-		return config.medium_delay
-	end
+  if not success or not line_count then
+    -- Default to medium delay on error
+    return config.medium_delay
+  end
 
-	-- Calculate delay based on file size
-	local delay
+  -- Calculate delay based on file size
+  local delay
 
-	if line_count < config.small_file_threshold then
-		delay = config.small_delay
-	elseif line_count < config.medium_file_threshold then
-		delay = config.medium_delay
-	else
-		-- For very large files, scale delay linearly
-		local scale_factor = line_count / config.medium_file_threshold
-		delay = math.floor(config.large_delay * math.min(scale_factor, 3))
-	end
+  if line_count < config.small_file_threshold then
+    delay = config.small_delay
+  elseif line_count < config.medium_file_threshold then
+    delay = config.medium_delay
+  else
+    -- For very large files, scale delay linearly
+    local scale_factor = line_count / config.medium_file_threshold
+    delay = math.floor(config.large_delay * math.min(scale_factor, 3))
+  end
 
-	-- Clamp to configured bounds
-	delay = math.max(config.min_delay, math.min(config.max_delay, delay))
+  -- Clamp to configured bounds
+  delay = math.max(config.min_delay, math.min(config.max_delay, delay))
 
-	if not delay then
-		delay = 250
-	end
+  if not delay then
+    delay = 250
+  end
 
-	return delay
+  return delay
 end
 
 --- Debounce a function call for a specific buffer
@@ -120,130 +120,130 @@ end
 ---@param custom_delay integer|nil Optional custom delay (overrides adaptive)
 ---@return nil
 function M.debounce(bufnr, fn, custom_delay)
-	if type(bufnr) ~= "number" or bufnr < 0 then
-		return
-	end
+  if type(bufnr) ~= 'number' or bufnr < 0 then
+    return
+  end
 
-	if type(fn) ~= "function" then
-		return
-	end
+  if type(fn) ~= 'function' then
+    return
+  end
 
-	local delay = custom_delay or calculate_delay(bufnr)
+  local delay = custom_delay or calculate_delay(bufnr)
 
-	local entry = timers[bufnr]
-	if not entry or entry.delay ~= delay then
-		if entry then
-			entry.handle.cancel()
-		end
+  local entry = timers[bufnr]
+  if not entry or entry.delay ~= delay then
+    if entry then
+      entry.handle.cancel()
+    end
 
-		local handle = lib_debounce.new(function()
-			local safe_api = require("color_my_ascii.utils.safe_api")
-			entry.pending = false
+    local handle = lib_debounce.new(function()
+      local safe_api = require('color_my_ascii.utils.safe_api')
+      entry.pending = false
 
-			if safe_api.is_valid_buffer(bufnr) then
-				local ok, err = pcall(fn)
+      if safe_api.is_valid_buffer(bufnr) then
+        local ok, err = pcall(fn)
 
-				if not ok then
-					vim.notify(string.format("color_my_ascii: Debounced function error: %s", err), vim.log.levels.WARN)
-				end
-			end
-		end, delay)
+        if not ok then
+          vim.notify(string.format('color_my_ascii: Debounced function error: %s', err), vim.log.levels.WARN)
+        end
+      end
+    end, delay)
 
-		entry = { handle = handle, delay = delay, pending = false }
-		timers[bufnr] = entry
-	end
+    entry = { handle = handle, delay = delay, pending = false }
+    timers[bufnr] = entry
+  end
 
-	entry.pending = true
-	entry.handle.call()
+  entry.pending = true
+  entry.handle.call()
 end
 
 --- Cancel pending debounced call for buffer
 ---@param bufnr integer Buffer number
 ---@return boolean cancelled True if timer was cancelled
 function M.cancel(bufnr)
-	if type(bufnr) ~= "number" or bufnr < 0 then
-		return false
-	end
+  if type(bufnr) ~= 'number' or bufnr < 0 then
+    return false
+  end
 
-	local entry = timers[bufnr]
-	if entry then
-		entry.handle.cancel()
-		timers[bufnr] = nil
-		return true
-	end
+  local entry = timers[bufnr]
+  if entry then
+    entry.handle.cancel()
+    timers[bufnr] = nil
+    return true
+  end
 
-	return false
+  return false
 end
 
 --- Cancel all pending debounced calls
 ---@return integer count Number of cancelled timers
 function M.cancel_all()
-	local count = 0
+  local count = 0
 
-	for bufnr, entry in pairs(timers) do
-		entry.handle.cancel()
-		timers[bufnr] = nil
-		count = count + 1
-	end
+  for bufnr, entry in pairs(timers) do
+    entry.handle.cancel()
+    timers[bufnr] = nil
+    count = count + 1
+  end
 
-	return count
+  return count
 end
 
 --- Check if buffer has pending debounced call
 ---@param bufnr integer Buffer number
 ---@return boolean pending True if timer is pending
 function M.is_pending(bufnr)
-	local entry = timers[bufnr]
-	return entry ~= nil and entry.pending
+  local entry = timers[bufnr]
+  return entry ~= nil and entry.pending
 end
 
 --- Get current delay for buffer
 ---@param bufnr integer Buffer number
 ---@return integer|nil delay Current calculated delay or nil
 function M.get_delay(bufnr)
-	if type(bufnr) ~= "number" or bufnr < 0 then
-		return nil
-	end
+  if type(bufnr) ~= 'number' or bufnr < 0 then
+    return nil
+  end
 
-	return calculate_delay(bufnr)
+  return calculate_delay(bufnr)
 end
 
 --- Get number of pending timers
 ---@return integer count Number of active timers
 function M.get_pending_count()
-	local count = 0
+  local count = 0
 
-	for _, entry in pairs(timers) do
-		if entry.pending then
-			count = count + 1
-		end
-	end
+  for _, entry in pairs(timers) do
+    if entry.pending then
+      count = count + 1
+    end
+  end
 
-	return count
+  return count
 end
 
 --- Get debounce configuration
 ---@return DebounceConfig config Current configuration
 function M.get_config()
-	return vim.deepcopy(config)
+  return vim.deepcopy(config)
 end
 
 --- Cleanup timers for deleted buffers
 --- Should be called periodically or on BufDelete
 ---@return integer cleaned Number of cleaned timers
 function M.cleanup()
-	local safe_api = require("color_my_ascii.utils.safe_api")
-	local cleaned = 0
+  local safe_api = require('color_my_ascii.utils.safe_api')
+  local cleaned = 0
 
-	for bufnr, entry in pairs(timers) do
-		if not safe_api.is_valid_buffer(bufnr) then
-			entry.handle.cancel()
-			timers[bufnr] = nil
-			cleaned = cleaned + 1
-		end
-	end
+  for bufnr, entry in pairs(timers) do
+    if not safe_api.is_valid_buffer(bufnr) then
+      entry.handle.cancel()
+      timers[bufnr] = nil
+      cleaned = cleaned + 1
+    end
+  end
 
-	return cleaned
+  return cleaned
 end
 
 --- Create debounced version of function
@@ -252,27 +252,27 @@ end
 ---@param custom_delay integer|nil Optional fixed delay
 ---@return function debounced Debounced function
 function M.create_debounced(fn, custom_delay)
-	return function(bufnr, ...)
-		local args = { ... }
+  return function(bufnr, ...)
+    local args = { ... }
 
-		M.debounce(bufnr, function()
-			fn(bufnr, unpack(args))
-		end, custom_delay)
-	end
+    M.debounce(bufnr, function()
+      fn(bufnr, unpack(args))
+    end, custom_delay)
+  end
 end
 
 --- Setup automatic cleanup on buffer delete
 ---@return nil
 function M.setup_auto_cleanup()
-	local group = vim.api.nvim_create_augroup("ColorMyAsciiDebounce", { clear = true })
+  local group = vim.api.nvim_create_augroup('ColorMyAsciiDebounce', { clear = true })
 
-	vim.api.nvim_create_autocmd("BufDelete", {
-		group = group,
-		callback = function(args)
-			M.cancel(args.buf)
-		end,
-		desc = "Cleanup debounce timers on buffer delete",
-	})
+  vim.api.nvim_create_autocmd('BufDelete', {
+    group = group,
+    callback = function(args)
+      M.cancel(args.buf)
+    end,
+    desc = 'Cleanup debounce timers on buffer delete',
+  })
 end
 
 return M

@@ -11,13 +11,13 @@ vim.g.loaded_color_my_ascii = 1
 
 -- Register documentation
 local function register_help()
-  local doc_path = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h") .. '/doc'
+  local doc_path = vim.fn.fnamemodify(debug.getinfo(1, 'S').source:sub(2), ':h:h') .. '/doc'
 
   -- Check if doc directory exists
   if vim.fn.isdirectory(doc_path) == 1 then
     -- Add to runtimepath if not already there
     local rtp = vim.opt.runtimepath:get()
-    local plugin_root = vim.fn.fnamemodify(doc_path, ":h")
+    local plugin_root = vim.fn.fnamemodify(doc_path, ':h')
 
     local already_in_rtp = false
     for _, path in ipairs(rtp) do

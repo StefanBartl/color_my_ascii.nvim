@@ -25,7 +25,7 @@ local function load_languages()
 
   -- Safe path resolution
   local ok1, source = pcall(function()
-    return debug.getinfo(1, "S").source:sub(2)
+    return debug.getinfo(1, 'S').source:sub(2)
   end)
 
   if not ok1 then
@@ -33,16 +33,13 @@ local function load_languages()
     return languages, errors
   end
 
-  local dir = fn.fnamemodify(source, ":h:h")
+  local dir = fn.fnamemodify(source, ':h:h')
   local lang_path = dir .. '/languages'
 
   -- Check directory existence
   if fn.isdirectory(lang_path) == 0 then
     table.insert(errors, string.format('Languages directory not found: %s', lang_path))
-    notify(
-      'color_my_ascii: CRITICAL - languages/ directory not found at: ' .. lang_path,
-      vim.log.levels.ERROR
-    )
+    notify('color_my_ascii: CRITICAL - languages/ directory not found at: ' .. lang_path, vim.log.levels.ERROR)
     return languages, errors
   end
 
@@ -55,10 +52,7 @@ local function load_languages()
 
   if #files == 0 then
     table.insert(errors, 'No language files found')
-    notify(
-      'color_my_ascii: WARNING - No language files found in: ' .. lang_path,
-      vim.log.levels.WARN
-    )
+    notify('color_my_ascii: WARNING - No language files found in: ' .. lang_path, vim.log.levels.WARN)
     return languages, errors
   end
 
@@ -96,7 +90,7 @@ local function load_groups()
 
   -- Safe path resolution
   local ok3, source = pcall(function()
-    return debug.getinfo(1, "S").source:sub(2)
+    return debug.getinfo(1, 'S').source:sub(2)
   end)
 
   if not ok3 then
@@ -104,16 +98,13 @@ local function load_groups()
     return groups, errors
   end
 
-  local dir = fn.fnamemodify(source, ":h:h")
+  local dir = fn.fnamemodify(source, ':h:h')
   local group_path = dir .. '/groups'
 
   -- Check directory existence
   if fn.isdirectory(group_path) == 0 then
     table.insert(errors, string.format('Groups directory not found: %s', group_path))
-    notify(
-      'color_my_ascii: CRITICAL - groups/ directory not found at: ' .. group_path,
-      vim.log.levels.ERROR
-    )
+    notify('color_my_ascii: CRITICAL - groups/ directory not found at: ' .. group_path, vim.log.levels.ERROR)
     return groups, errors
   end
 
@@ -126,10 +117,7 @@ local function load_groups()
 
   if #files == 0 then
     table.insert(errors, 'No group files found')
-    notify(
-      'color_my_ascii: WARNING - No group files found in: ' .. group_path,
-      vim.log.levels.WARN
-    )
+    notify('color_my_ascii: WARNING - No group files found in: ' .. group_path, vim.log.levels.WARN)
     return groups, errors
   end
 
@@ -174,16 +162,18 @@ local function resolve_highlight(spec)
   end
 
   local hl_def = spec
-  local name = string.format(
-    'ColorMyAsciiCustom_%s_%s_%s_%s_%s_%s_%s',
-    hl_def.fg or 'none',
-    hl_def.bg or 'none',
-    hl_def.bold and 'b' or '',
-    hl_def.italic and 'i' or '',
-    hl_def.underline and 'u' or '',
-    hl_def.undercurl and 'c' or '',
-    hl_def.strikethrough and 's' or ''
-  ):gsub('#', '')  -- Remove # from hex colors for group name
+  local name = string
+    .format(
+      'ColorMyAsciiCustom_%s_%s_%s_%s_%s_%s_%s',
+      hl_def.fg or 'none',
+      hl_def.bg or 'none',
+      hl_def.bold and 'b' or '',
+      hl_def.italic and 'i' or '',
+      hl_def.underline and 'u' or '',
+      hl_def.undercurl and 'c' or '',
+      hl_def.strikethrough and 's' or ''
+    )
+    :gsub('#', '') -- Remove # from hex colors for group name
 
   if not created_highlight_groups[name] then
     vim.api.nvim_set_hl(0, name, {
@@ -295,16 +285,13 @@ function M.setup(opts)
     local scheme_config, err = scheme_loader.load_scheme(opts.scheme)
 
     if not scheme_config then
-      notify(
-        string.format('color_my_ascii: %s', err),
-        vim.log.levels.ERROR
-      )
+      notify(string.format('color_my_ascii: %s', err), vim.log.levels.ERROR)
       config_to_merge = vim.tbl_extend('force', {}, opts)
-      config_to_merge.scheme = nil  -- Remove invalid scheme parameter
+      config_to_merge.scheme = nil -- Remove invalid scheme parameter
     else
       -- Merge user opts with scheme config (user opts take precedence)
       local user_opts = vim.tbl_extend('force', {}, opts)
-      user_opts.scheme = nil  -- Remove scheme key from merge
+      user_opts.scheme = nil -- Remove scheme key from merge
       config_to_merge = vim.tbl_deep_extend('force', scheme_config, user_opts)
     end
   end

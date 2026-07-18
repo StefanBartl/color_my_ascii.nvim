@@ -25,21 +25,21 @@ local DEFAULT_MARKDOWN_LANGS = {
   markdown = true,
   md = true,
   mdx = true,
-  ["ascii-markdown"] = true,
-  ["ascii-md"] = true,
+  ['ascii-markdown'] = true,
+  ['ascii-md'] = true,
 }
 
 --- Range-only block cache: bufnr -> { tick = changedtick, blocks = FenceBlock[] }.
 ---@type table<integer, { tick: integer, blocks: ColorMyAscii.FenceBlock[] }>
 local cache = {}
 
-local cache_augroup = api.nvim_create_augroup("ColorMyAsciiFenceApiCache", { clear = true })
-api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
+local cache_augroup = api.nvim_create_augroup('ColorMyAsciiFenceApiCache', { clear = true })
+api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
   group = cache_augroup,
   callback = function(ev)
     cache[ev.buf] = nil
   end,
-  desc = "Invalidate color_my_ascii fence API cache on buffer delete",
+  desc = 'Invalidate color_my_ascii fence API cache on buffer delete',
 })
 
 --- Classify a fence language tag as markdown-family (case-insensitive).
@@ -47,11 +47,19 @@ api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
 ---@param extra? table<string, boolean> Extra lowercase tags to also treat as markdown
 ---@return boolean
 function M.is_markdown_lang(lang, extra)
-  if type(lang) ~= "string" then return false end
+  if type(lang) ~= 'string' then
+    return false
+  end
   local key = vim.trim(lang):lower()
-  if key == "" then return false end
-  if DEFAULT_MARKDOWN_LANGS[key] then return true end
-  if extra and extra[key] then return true end
+  if key == '' then
+    return false
+  end
+  if DEFAULT_MARKDOWN_LANGS[key] then
+    return true
+  end
+  if extra and extra[key] then
+    return true
+  end
   return false
 end
 
@@ -59,13 +67,17 @@ end
 ---@param lang string|string[]|nil
 ---@return table<string, boolean>|nil set nil = no language filtering
 local function build_lang_set(lang)
-  if lang == nil then return nil end
+  if lang == nil then
+    return nil
+  end
   local set = {}
-  if type(lang) == "string" then
+  if type(lang) == 'string' then
     set[lang:lower()] = true
-  elseif type(lang) == "table" then
+  elseif type(lang) == 'table' then
     for _, l in ipairs(lang) do
-      if type(l) == "string" then set[l:lower()] = true end
+      if type(l) == 'string' then
+        set[l:lower()] = true
+      end
     end
   end
   return set
@@ -81,7 +93,7 @@ local function scan_cached(bufnr)
   if entry and entry.tick == tick then
     return entry.blocks
   end
-  local blocks = require("color_my_ascii.parser").find_all_blocks(bufnr, { lines = "none" })
+  local blocks = require('color_my_ascii.parser').find_all_blocks(bufnr, { lines = 'none' })
   cache[bufnr] = { tick = tick, blocks = blocks }
   return blocks
 end
@@ -97,12 +109,12 @@ function M.list_blocks(bufnr, opts)
   bufnr = bufnr or api.nvim_get_current_buf()
   opts = opts or {}
 
-  local lines_mode = opts.lines or "none"
+  local lines_mode = opts.lines or 'none'
   local source
-  if lines_mode == "none" then
+  if lines_mode == 'none' then
     source = scan_cached(bufnr)
   else
-    source = require("color_my_ascii.parser").find_all_blocks(bufnr, { lines = lines_mode })
+    source = require('color_my_ascii.parser').find_all_blocks(bufnr, { lines = lines_mode })
   end
 
   local lang_set = build_lang_set(opts.lang)
@@ -117,7 +129,7 @@ function M.list_blocks(bufnr, opts)
   local out = {}
   for _, b in ipairs(source) do
     local keep = true
-    if lang_set and not lang_set[(b.lang or ""):lower()] then
+    if lang_set and not lang_set[(b.lang or ''):lower()] then
       keep = false
     end
     if keep and want_md and not M.is_markdown_lang(b.lang, md_extra) then
@@ -152,7 +164,7 @@ function M.block_at(bufnr, row, opts)
 
   local include_fence = opts.include_fence == true
   local blocks = M.list_blocks(bufnr, {
-    lines = "none",
+    lines = 'none',
     lang = opts.lang,
     markdown = opts.markdown,
     markdown_extra = opts.markdown_extra,

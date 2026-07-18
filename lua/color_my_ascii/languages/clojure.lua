@@ -5,26 +5,54 @@
 return {
   words = {
     -- Declarations
-    'defn', 'def', 'defmacro', 'ns',
+    'defn',
+    'def',
+    'defmacro',
+    'ns',
     -- Control flow
-    'let', 'if', 'when', 'cond', 'case', 'do', 'loop', 'recur',
+    'let',
+    'if',
+    'when',
+    'cond',
+    'case',
+    'do',
+    'loop',
+    'recur',
     -- Functions
     'fn',
     -- Modules
-    'require', 'import',
+    'require',
+    'import',
     -- Values
-    'true', 'false', 'nil',
+    'true',
+    'false',
+    'nil',
     -- Logical operators
-    'and', 'or', 'not',
+    'and',
+    'or',
+    'not',
     -- State (tokenizer strips trailing ! from swap!/reset!, so listed without it)
-    'atom', 'swap', 'reset', 'deref',
+    'atom',
+    'swap',
+    'reset',
+    'deref',
     -- Common functions
-    'map', 'filter', 'reduce', 'conj', 'cons', 'first', 'rest', 'quote',
+    'map',
+    'filter',
+    'reduce',
+    'conj',
+    'cons',
+    'first',
+    'rest',
+    'quote',
   },
 
   -- Keywords unique to Clojure
   unique_words = {
-    'defn', 'recur', 'deref', 'conj',
+    'defn',
+    'recur',
+    'deref',
+    'conj',
   },
 
   hl = 'Function',

@@ -5,25 +5,54 @@
 return {
   words = {
     -- Declarations
-    'def', 'val', 'var', 'class', 'object', 'trait', 'extends', 'with',
-    'private', 'protected', 'override', 'abstract', 'final', 'implicit', 'lazy',
+    'def',
+    'val',
+    'var',
+    'class',
+    'object',
+    'trait',
+    'extends',
+    'with',
+    'private',
+    'protected',
+    'override',
+    'abstract',
+    'final',
+    'implicit',
+    'lazy',
     -- Control flow
-    'if', 'else', 'for', 'while', 'do',
-    'match', 'case', 'return',
-    'try', 'catch', 'finally', 'throw',
+    'if',
+    'else',
+    'for',
+    'while',
+    'do',
+    'match',
+    'case',
+    'return',
+    'try',
+    'catch',
+    'finally',
+    'throw',
     -- Objects
-    'this', 'super', 'new',
+    'this',
+    'super',
+    'new',
     -- Functional
     'yield',
     -- Values
-    'null', 'true', 'false',
+    'null',
+    'true',
+    'false',
     -- Modules
-    'import', 'package',
+    'import',
+    'package',
   },
 
   -- Keywords unique to Scala
   unique_words = {
-    'trait', 'implicit', 'object',
+    'trait',
+    'implicit',
+    'object',
   },
 
   hl = 'Function',

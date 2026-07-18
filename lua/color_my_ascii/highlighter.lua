@@ -49,10 +49,7 @@ local function highlight_range(bufnr, line, col_start, col_end, hl_group, contex
     buffer_extmarks[bufnr] = buffer_extmarks[bufnr] or {}
     table.insert(buffer_extmarks[bufnr], id)
   elseif cfg.debug_enabled then
-    notify(
-      string.format("line %d %s: Failed to set extmark: %s", line + 1, context, tostring(err)),
-      levels.WARN
-    )
+    notify(string.format('line %d %s: Failed to set extmark: %s', line + 1, context, tostring(err)), levels.WARN)
   end
 end
 
@@ -162,8 +159,15 @@ local function highlight_characters(bufnr, line_num, line_content)
 
     if hl_group then
       local char_len = #char
-      highlight_range(bufnr, line_num, byte_pos, byte_pos + char_len, hl_group,
-        string.format('chars: char "%s" at pos %d', char, byte_pos), line_content)
+      highlight_range(
+        bufnr,
+        line_num,
+        byte_pos,
+        byte_pos + char_len,
+        hl_group,
+        string.format('chars: char "%s" at pos %d', char, byte_pos),
+        line_content
+      )
     end
 
     byte_pos = byte_pos + #char
@@ -205,7 +209,7 @@ function M.highlight_block(bufnr, block)
   if ts_cfg and ts_cfg.enabled and ts_cfg.syntax_highlight then
     local ok, err = pcall(highlighter_ts.highlight_block, bufnr, block, detected_language, namespace)
     if not ok and user_config.debug_enabled then
-      notify(string.format("color_my_ascii: Treesitter syntax highlighting error: %s", err), levels.WARN)
+      notify(string.format('color_my_ascii: Treesitter syntax highlighting error: %s', err), levels.WARN)
     end
   end
 end
@@ -232,12 +236,20 @@ function M.highlight_inline_codes(bufnr)
 
   for _, inline in ipairs(inline_codes) do
     local line_content = inline.content
-    local content_start_col = inline.start_col + 1  -- After opening backtick
+    local content_start_col = inline.start_col + 1 -- After opening backtick
     local full_line = get_full_line(inline.line)
 
     -- Pass 1: Apply default text highlight if configured
     if user_config.default_text_hl then
-      highlight_range(bufnr, inline.line, content_start_col, inline.end_col, user_config.default_text_hl, 'default', full_line)
+      highlight_range(
+        bufnr,
+        inline.line,
+        content_start_col,
+        inline.end_col,
+        user_config.default_text_hl,
+        'default',
+        full_line
+      )
     end
 
     -- Pass 2: Highlight special characters in inline code
@@ -251,8 +263,15 @@ function M.highlight_inline_codes(bufnr)
         local char_len = #char
         local abs_start = content_start_col + rel_byte_pos
         local abs_end = abs_start + char_len
-        highlight_range(bufnr, inline.line, abs_start, abs_end, hl_group,
-          string.format('chars: char "%s" at pos %d', char, rel_byte_pos), full_line)
+        highlight_range(
+          bufnr,
+          inline.line,
+          abs_start,
+          abs_end,
+          hl_group,
+          string.format('chars: char "%s" at pos %d', char, rel_byte_pos),
+          full_line
+        )
       end
 
       rel_byte_pos = rel_byte_pos + #char

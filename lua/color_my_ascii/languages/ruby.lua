@@ -5,32 +5,68 @@
 return {
   words = {
     -- Declarations
-    'def', 'end', 'class', 'module',
+    'def',
+    'end',
+    'class',
+    'module',
     -- Control flow
-    'if', 'elsif', 'else', 'unless', 'while', 'until', 'for', 'in', 'do',
-    'begin', 'rescue', 'ensure', 'raise', 'retry', 'redo',
-    'case', 'when', 'then', 'break', 'next', 'return',
+    'if',
+    'elsif',
+    'else',
+    'unless',
+    'while',
+    'until',
+    'for',
+    'in',
+    'do',
+    'begin',
+    'rescue',
+    'ensure',
+    'raise',
+    'retry',
+    'redo',
+    'case',
+    'when',
+    'then',
+    'break',
+    'next',
+    'return',
     -- Objects
-    'self', 'super', 'yield',
+    'self',
+    'super',
+    'yield',
     -- Modules
-    'require', 'require_relative',
+    'require',
+    'require_relative',
     -- Attributes
-    'attr_accessor', 'attr_reader', 'attr_writer',
+    'attr_accessor',
+    'attr_reader',
+    'attr_writer',
     -- Output
-    'puts', 'print', 'p',
+    'puts',
+    'print',
+    'p',
     -- Values
-    'nil', 'true', 'false',
+    'nil',
+    'true',
+    'false',
     -- Logical operators
-    'and', 'or', 'not',
+    'and',
+    'or',
+    'not',
     -- Blocks
-    'lambda', 'proc',
+    'lambda',
+    'proc',
   },
 
   -- Keywords unique to Ruby
   unique_words = {
-    'elsif', 'unless',
-    'attr_accessor', 'attr_reader',
-    'retry', 'redo',
+    'elsif',
+    'unless',
+    'attr_accessor',
+    'attr_reader',
+    'retry',
+    'redo',
   },
 
   hl = 'Function',

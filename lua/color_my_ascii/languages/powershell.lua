@@ -9,18 +9,40 @@
 return {
   words = {
     -- Declarations
-    'function', 'param', 'class', 'enum', 'begin', 'process', 'end',
+    'function',
+    'param',
+    'class',
+    'enum',
+    'begin',
+    'process',
+    'end',
     -- Control flow
-    'if', 'elseif', 'else', 'foreach', 'while', 'do',
-    'switch', 'default', 'break', 'continue', 'return',
-    'try', 'catch', 'finally', 'throw', 'trap',
+    'if',
+    'elseif',
+    'else',
+    'foreach',
+    'while',
+    'do',
+    'switch',
+    'default',
+    'break',
+    'continue',
+    'return',
+    'try',
+    'catch',
+    'finally',
+    'throw',
+    'trap',
     -- Values (tokenizer strips the leading $ from $true/$false/$null)
-    'true', 'false', 'null',
+    'true',
+    'false',
+    'null',
   },
 
   -- Keywords unique to PowerShell
   unique_words = {
-    'param', 'trap',
+    'param',
+    'trap',
   },
 
   hl = 'Function',

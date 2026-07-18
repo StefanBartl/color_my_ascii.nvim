@@ -34,36 +34,56 @@ return {
   -- with the corresponding language definition - not just ```ascii-prefixed ones.
   -- Covers every language in languages/*.lua under its common fence tag(s).
   fence_language_map = {
-    vim = 'vim', vimscript = 'vim', viml = 'vim',
-    bash = 'bash', sh = 'bash', shell = 'bash', zsh = 'bash',
+    vim = 'vim',
+    vimscript = 'vim',
+    viml = 'vim',
+    bash = 'bash',
+    sh = 'bash',
+    shell = 'bash',
+    zsh = 'bash',
     c = 'c',
-    cpp = 'cpp', ['c++'] = 'cpp',
-    csharp = 'csharp', ['c#'] = 'csharp', cs = 'csharp',
+    cpp = 'cpp',
+    ['c++'] = 'cpp',
+    csharp = 'csharp',
+    ['c#'] = 'csharp',
+    cs = 'csharp',
     lua = 'lua',
-    python = 'python', py = 'python',
-    ruby = 'ruby', rb = 'ruby',
+    python = 'python',
+    py = 'python',
+    ruby = 'ruby',
+    rb = 'ruby',
     php = 'php',
-    perl = 'perl', pl = 'perl',
+    perl = 'perl',
+    pl = 'perl',
     java = 'java',
-    kotlin = 'kotlin', kt = 'kotlin',
+    kotlin = 'kotlin',
+    kt = 'kotlin',
     scala = 'scala',
     groovy = 'groovy',
-    clojure = 'clojure', clj = 'clojure',
-    javascript = 'javascript', js = 'javascript',
-    typescript = 'typescript', ts = 'typescript',
+    clojure = 'clojure',
+    clj = 'clojure',
+    javascript = 'javascript',
+    js = 'javascript',
+    typescript = 'typescript',
+    ts = 'typescript',
     html = 'html',
     css = 'css',
     json = 'json',
-    go = 'go', golang = 'go',
-    rust = 'rust', rs = 'rust',
+    go = 'go',
+    golang = 'go',
+    rust = 'rust',
+    rs = 'rust',
     zig = 'zig',
     swift = 'swift',
     dart = 'dart',
-    elixir = 'elixir', ex = 'elixir',
-    haskell = 'haskell', hs = 'haskell',
+    elixir = 'elixir',
+    ex = 'elixir',
+    haskell = 'haskell',
+    hs = 'haskell',
     r = 'r',
     sql = 'sql',
-    powershell = 'powershell', ps1 = 'powershell',
+    powershell = 'powershell',
+    ps1 = 'powershell',
     llvm = 'llvm',
   },
   -- Full-line highlight of fenced-block delimiter lines (the ```lang opening
@@ -75,11 +95,11 @@ return {
   -- highlight-group name (string) or an attribute table
   -- (ColorMyAscii.CustomHighlight, forwarded to nvim_set_hl).
   fence_line_highlight = {
-    enable   = true,
-    preset   = "auto", -- "auto" | "subtle" | "accent" | "underline" | "bar" | <theme>
-    open     = nil,
-    close    = nil,
-    apply_to = "all", -- "all" | "ascii"
+    enable = true,
+    preset = 'auto', -- "auto" | "subtle" | "accent" | "underline" | "bar" | <theme>
+    open = nil,
+    close = nil,
+    apply_to = 'all', -- "all" | "ascii"
   },
   -- Full-width background highlight of a fenced block's *interior* (the lines
   -- between the delimiters), so the whole block reads as one visual region.
@@ -92,12 +112,12 @@ return {
   -- light ones) so the interior reads as a related-but-distinguishable tint
   -- of the delimiter lines. `hl` bypasses shading with an explicit override.
   fence_content_highlight = {
-    enable   = true,
-    preset   = nil,   -- nil = follow fence_line_highlight.preset; else same values as fence_line_highlight.preset
-    hl       = nil,   -- override: hl-group name (string) or attr table; skips shading
-    shade    = "auto", -- "auto" | "darken" | "lighten" | "none"
-    amount   = 6,      -- 0-100
-    apply_to = "all", -- "all" | "ascii"
+    enable = true,
+    preset = nil, -- nil = follow fence_line_highlight.preset; else same values as fence_line_highlight.preset
+    hl = nil, -- override: hl-group name (string) or attr table; skips shading
+    shade = 'auto', -- "auto" | "darken" | "lighten" | "none"
+    amount = 6, -- 0-100
+    apply_to = 'all', -- "all" | "ascii"
   },
   -- `:Fence export` behaviour (buffer-local command in markdown buffers).
   -- default_dir: where the suggested export path lives ("buffer" dir or "cwd").
@@ -106,12 +126,12 @@ return {
   --   ("literate tangle"; --replace forces it). Format args: (filename, relpath).
   -- ext_map: language-tag -> file-extension overrides on top of the built-ins.
   fence_export = {
-    default_dir    = "buffer", -- "buffer" | "cwd"
-    open_after     = false,
-    open_cmd       = "vsplit", -- "edit" | "split" | "vsplit" | "tabedit"
-    replace        = false,
-    replace_format = "[%s](%s)",
-    ext_map        = {},
+    default_dir = 'buffer', -- "buffer" | "cwd"
+    open_after = false,
+    open_cmd = 'vsplit', -- "edit" | "split" | "vsplit" | "tabedit"
+    replace = false,
+    replace_format = '[%s](%s)',
+    ext_map = {},
   },
   -- `:Fence run` — interpreter per language tag (string or string[]); the temp
   -- file with the block content is appended as the last argument. Merged on top

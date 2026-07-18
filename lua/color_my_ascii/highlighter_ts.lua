@@ -103,7 +103,9 @@ function M.highlight_block(bufnr, block, detected_language, namespace)
     return false
   end
 
-  local ok_parse, trees = pcall(function() return str_parser:parse() end)
+  local ok_parse, trees = pcall(function()
+    return str_parser:parse()
+  end)
   if not ok_parse or not trees or not trees[1] then
     return false
   end

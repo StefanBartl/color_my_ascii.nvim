@@ -44,11 +44,7 @@ function M.load_scheme(scheme_name_or_table)
   if not scheme_path then
     local available = vim.tbl_keys(AVAILABLE_SCHEMES)
     table.sort(available)
-    return nil, string.format(
-      'Unknown scheme "%s". Available schemes: %s',
-      scheme_name,
-      table.concat(available, ', ')
-    )
+    return nil, string.format('Unknown scheme "%s". Available schemes: %s', scheme_name, table.concat(available, ', '))
   end
 
   -- Try to load the scheme module

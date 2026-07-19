@@ -168,6 +168,20 @@ function M.inspect_inline_code(line)
   return results
 end
 
+---Turn a group's `hl` into a string usable as a table key / for display.
+---Group highlights can be a plain highlight-group name or a
+---ColorMyAscii.CustomHighlight spec table (see @types.lua); tables can't be
+---concatenated or safely relied upon as stable map keys, so custom specs are
+---rendered to their `vim.inspect` form instead.
+---@param hl string|ColorMyAscii.CustomHighlight
+---@return string
+local function highlight_label(hl)
+  if type(hl) == 'string' then
+    return hl
+  end
+  return vim.inspect(hl, { newline = '', indent = '' })
+end
+
 ---Get comprehensive statistics about current configuration
 ---@return table
 function M.get_statistics()
@@ -195,7 +209,7 @@ function M.get_statistics()
   -- Group statistics
   for group_name, group_data in pairs(cfg.groups) do
     stats.groups.count = stats.groups.count + 1
-    local hl = group_data.hl
+    local hl = highlight_label(group_data.hl)
     stats.groups.by_highlight[hl] = stats.groups.by_highlight[hl] or {}
     table.insert(stats.groups.by_highlight[hl], group_name)
   end

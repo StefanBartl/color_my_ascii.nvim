@@ -62,6 +62,7 @@ local specs = {
   "fence_export_spec.lua",
   "fence_actions_spec.lua",
   "debounce_manager_spec.lua",
+  "debug_inspect_spec.lua",
 }
 
 local failed = 0

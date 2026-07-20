@@ -16,14 +16,19 @@ command, keymap, and autocommand, see [Bindings Cheatsheet](BINDINGS.md).
 
 ---
 
+One command, `:ColorMyAscii <subcommand>` (built via
+[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
+`<Tab>` completion) — distinct from the separate buffer-local `:Fence`
+toolkit below.
+
 ## Core Commands
 
 | Command | Description |
 |---------|-------------|
 | `:ColorMyAscii` | Manually update highlighting |
-| `:ColorMyAsciiToggle` | Enable/disable plugin |
-| `:ColorMyAsciiDebug` | Show debug information (basic) |
-| `:ColorMyAsciiShowConfig` | Show detailed configuration |
+| `:ColorMyAscii toggle` | Enable/disable plugin |
+| `:ColorMyAscii debug` | Show debug information (basic) |
+| `:ColorMyAscii show-config` | Show detailed configuration |
 | `:checkhealth color_my_ascii` | Run health check |
 | `:h color_my_ascii` | Open Vim help |
 
@@ -33,8 +38,8 @@ command, keymap, and autocommand, see [Bindings Cheatsheet](BINDINGS.md).
 
 | Command | Description |
 |---------|-------------|
-| `:ColorMyAsciiCheckFences` | Check for unmatched fences |
-| `:ColorMyAsciiEnsureBlankLines` | Ensure blank lines around code blocks |
+| `:ColorMyAscii check-fences` | Check for unmatched fences |
+| `:ColorMyAscii ensure-blank-lines` | Ensure blank lines around code blocks |
 
 ---
 
@@ -110,9 +115,9 @@ Full LSP inside fences (completion/hover/diagnostics) is on the roadmap — see
 
 | Command | Description |
 |---------|-------------|
-| `:ColorMyAsciiListSchemes` | List available color schemes |
-| `:ColorMyAsciiSwitchScheme <name>` | Switch to a different scheme |
-| `:ColorMyAsciiSchemes` | Pick scheme with Telescope (live preview) |
+| `:ColorMyAscii schemes list` | List available color schemes |
+| `:ColorMyAscii schemes switch <name>` | Switch to a different scheme |
+| `:ColorMyAscii schemes pick` | Pick scheme with Telescope (live preview) |
 
 ### Available Schemes
 
@@ -152,9 +157,11 @@ require('color_my_ascii').setup({
 ```
 
 Each mapping is set with a `desc`, so [which-key.nvim](https://github.com/folke/which-key.nvim)
-picks them up automatically without extra configuration. If
-[lib.nvim](https://github.com/StefanBartl/lib.nvim) is installed, it is used for the
-underlying keymap registration; otherwise the plugin falls back to `vim.keymap.set`.
+picks them up automatically without extra configuration.
+[lib.nvim](https://github.com/StefanBartl/lib.nvim) is a required dependency
+(the `:ColorMyAscii` command itself is built on it); `lib.nvim.map`
+specifically stays soft-guarded for keymap registration, falling back to
+`vim.keymap.set` if that particular submodule isn't resolvable.
 
 See [Bindings Cheatsheet](BINDINGS.md) for the full cheatsheet of user commands,
 keymap actions, and autocommands.

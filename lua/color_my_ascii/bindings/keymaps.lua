@@ -4,8 +4,9 @@
 --- action names to key sequences via setup({ keymaps = { ... } }).
 --- See docs/BINDINGS.md for the full list of action names.
 ---
---- Uses lib.nvim.map when available (https://github.com/StefanBartl/lib.nvim) and
---- falls back to vim.keymap.set otherwise, so lib.nvim remains an optional dependency.
+--- lib.nvim is a required dependency (the :ColorMyAscii command itself is
+--- built on lib.nvim.usercmd.composer, see bindings/usrcmds.lua); lib.nvim.map
+--- specifically stays soft-guarded here, falling back to vim.keymap.set.
 
 local M = {}
 
@@ -22,16 +23,17 @@ local function resolve_set()
   end
 end
 
---- Action name -> { command, description }
+--- Action name -> { command, description }. `cmd` is the full :ColorMyAscii
+--- invocation (subcommand included where applicable).
 ---@type table<string, {cmd: string, desc: string}>
 local ACTIONS = {
   highlight = { cmd = 'ColorMyAscii', desc = 'color_my_ascii: highlight buffer' },
-  toggle = { cmd = 'ColorMyAsciiToggle', desc = 'color_my_ascii: toggle highlighting' },
-  schemes = { cmd = 'ColorMyAsciiSchemes', desc = 'color_my_ascii: switch color scheme' },
-  ensure_blank_lines = { cmd = 'ColorMyAsciiEnsureBlankLines', desc = 'color_my_ascii: format code blocks' },
-  show_config = { cmd = 'ColorMyAsciiShowConfig', desc = 'color_my_ascii: show config' },
-  debug = { cmd = 'ColorMyAsciiDebug', desc = 'color_my_ascii: show debug info' },
-  check_fences = { cmd = 'ColorMyAsciiCheckFences', desc = 'color_my_ascii: check fences' },
+  toggle = { cmd = 'ColorMyAscii toggle', desc = 'color_my_ascii: toggle highlighting' },
+  schemes = { cmd = 'ColorMyAscii schemes pick', desc = 'color_my_ascii: switch color scheme' },
+  ensure_blank_lines = { cmd = 'ColorMyAscii ensure-blank-lines', desc = 'color_my_ascii: format code blocks' },
+  show_config = { cmd = 'ColorMyAscii show-config', desc = 'color_my_ascii: show config' },
+  debug = { cmd = 'ColorMyAscii debug', desc = 'color_my_ascii: show debug info' },
+  check_fences = { cmd = 'ColorMyAscii check-fences', desc = 'color_my_ascii: check fences' },
 }
 
 --- Attach user-configured keymaps

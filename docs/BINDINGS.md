@@ -14,19 +14,27 @@ Machine-readable overview of every user command, keymap, and autocommand defined
 
 ## User Commands
 
-Registered in `lua/color_my_ascii/bindings/usrcmds.lua`.
+One command, `:ColorMyAscii <subcommand>` (built via
+[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
+`<Tab>` completion), registered in `lua/color_my_ascii/bindings/usrcmds.lua` —
+distinct from the separate buffer-local `:Fence` toolkit below.
 
 | command | desc |
 | --- | --- |
 | `:ColorMyAscii` | Highlight ASCII art in current buffer |
-| `:ColorMyAsciiToggle` | Toggle ASCII art highlighting |
-| `:ColorMyAsciiDebug` | Show debug information |
-| `:ColorMyAsciiShowConfig` | Show current configuration |
-| `:ColorMyAsciiCheckFences` | Check current buffer for unmatched fenced code blocks |
-| `:ColorMyAsciiEnsureBlankLines` | Ensure blank lines before and after fenced code blocks |
-| `:ColorMyAsciiListSchemes` | List available color schemes |
-| `:ColorMyAsciiSwitchScheme <name>` | Switch to a different color scheme |
-| `:ColorMyAsciiSchemes` | Pick color scheme with Telescope (live preview) |
+| `:ColorMyAscii toggle` | Toggle ASCII art highlighting |
+| `:ColorMyAscii debug` | Show debug information |
+| `:ColorMyAscii show-config` | Show current configuration |
+| `:ColorMyAscii check-fences` | Check current buffer for unmatched fenced code blocks |
+| `:ColorMyAscii ensure-blank-lines` | Ensure blank lines before and after fenced code blocks |
+| `:ColorMyAscii schemes list` | List available color schemes |
+| `:ColorMyAscii schemes switch <name>` | Switch to a different color scheme |
+| `:ColorMyAscii schemes pick` | Pick color scheme with Telescope (live preview) |
+| `:ColorMyAscii inspect char <char>` | (debug mode only) inspect a character's groups/highlight |
+| `:ColorMyAscii inspect group <group>` | (debug mode only) inspect a group's characters |
+| `:ColorMyAscii inspect inline` | (debug mode only) inspect inline code on the current line |
+| `:ColorMyAscii inspect highlight <hl>` | (debug mode only) list groups using a highlight |
+| `:ColorMyAscii stats` | (debug mode only) show comprehensive plugin statistics |
 | `:Fence export [path] [--open] [--replace]` | Buffer-local (markdown): extract the fenced block under the cursor into a file |
 | `:Fence yank [reg]` | Copy the block content (no markers) to a register |
 | `:Fence open [--split\|--vsplit\|--tab\|--edit]` | Edit the block in a split (full LSP); `:w` syncs back |
@@ -44,20 +52,21 @@ Registered in `lua/color_my_ascii/bindings/usrcmds.lua`.
 
 All opt-in, disabled by default. Registered in
 `lua/color_my_ascii/bindings/keymaps.lua` via `setup({ keymaps = {...} })`.
-Uses `lib.nvim.map` when [lib.nvim](https://github.com/StefanBartl/lib.nvim)
-is installed, falls back to `vim.keymap.set` otherwise. Every mapping sets
-`desc`, so which-key.nvim picks them up automatically — no separate
-which-key registration needed.
+[lib.nvim](https://github.com/StefanBartl/lib.nvim) is a required dependency
+(the `:ColorMyAscii` command itself is built on it); `lib.nvim.map`
+specifically stays soft-guarded here, falling back to `vim.keymap.set`. Every
+mapping sets `desc`, so which-key.nvim picks them up automatically — no
+separate which-key registration needed.
 
 | action key | maps to command | example lhs |
 | --- | --- | --- |
 | `highlight` | `:ColorMyAscii` | `<leader>ah` |
-| `toggle` | `:ColorMyAsciiToggle` | `<leader>at` |
-| `schemes` | `:ColorMyAsciiSchemes` | `<leader>as` |
-| `ensure_blank_lines` | `:ColorMyAsciiEnsureBlankLines` | `<leader>af` |
-| `show_config` | `:ColorMyAsciiShowConfig` | `<leader>ac` |
-| `debug` | `:ColorMyAsciiDebug` | `<leader>ad` |
-| `check_fences` | `:ColorMyAsciiCheckFences` | `<leader>ax` |
+| `toggle` | `:ColorMyAscii toggle` | `<leader>at` |
+| `schemes` | `:ColorMyAscii schemes pick` | `<leader>as` |
+| `ensure_blank_lines` | `:ColorMyAscii ensure-blank-lines` | `<leader>af` |
+| `show_config` | `:ColorMyAscii show-config` | `<leader>ac` |
+| `debug` | `:ColorMyAscii debug` | `<leader>ad` |
+| `check_fences` | `:ColorMyAscii check-fences` | `<leader>ax` |
 
 Example setup enabling a subset of the available actions:
 

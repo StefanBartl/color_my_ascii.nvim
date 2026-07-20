@@ -72,7 +72,7 @@ Using lazy.nvim:~
     {
       'StefanBartl/color_my_ascii.nvim',
       ft = 'markdown',
-      dependencies = { 'StefanBartl/lib.nvim' }, -- optional
+      dependencies = { 'StefanBartl/lib.nvim' }, -- required
       opts = {}
     }
 <
@@ -82,7 +82,7 @@ Using packer.nvim:~
     use {
       'StefanBartl/color_my_ascii.nvim',
       ft = 'markdown',
-      requires = { 'StefanBartl/lib.nvim' }, -- optional
+      requires = { 'StefanBartl/lib.nvim' }, -- required
       config = function()
         require('color_my_ascii').setup()
       end
@@ -556,31 +556,52 @@ installed.
 ==============================================================================
 8. COMMANDS                                     *color_my_ascii-commands*
 
+One command, :ColorMyAscii <subcommand> (built via lib.nvim.usercmd.composer,
+with <Tab> completion) — distinct from the separate buffer-local |:Fence|
+toolkit below.
+
 Core Commands~
 
 *:ColorMyAscii*
-    Manually trigger highlighting for the current buffer.
+    Manually trigger highlighting for the current buffer (bare form).
 
-*:ColorMyAsciiToggle*
+:ColorMyAscii toggle                                  *:ColorMyAscii-toggle*
     Toggle the plugin on/off.
 
-*:ColorMyAsciiDebug*
+:ColorMyAscii debug                                    *:ColorMyAscii-debug*
     Show basic debug information (languages, groups, features).
 
-*:ColorMyAsciiShowConfig*
+:ColorMyAscii show-config                        *:ColorMyAscii-show-config*
     Show detailed configuration information including:
       • All feature flags
       • Loaded languages and groups
       • Lookup table statistics
       • Highlight configuration
 
+Debug Commands (only when config.debug_enabled is true)~
+
+:ColorMyAscii inspect char {char}          *:ColorMyAscii-inspect-char*
+    Show which groups and highlights {char} belongs to.
+
+:ColorMyAscii inspect group {group}       *:ColorMyAscii-inspect-group*
+    List every character in {group} (tab-completed from config.groups).
+
+:ColorMyAscii inspect inline           *:ColorMyAscii-inspect-inline*
+    Inspect inline code segments on the current line.
+
+:ColorMyAscii inspect highlight {hl}   *:ColorMyAscii-inspect-highlight*
+    Show every group using highlight {hl}.
+
+:ColorMyAscii stats                                    *:ColorMyAscii-stats*
+    Show comprehensive plugin statistics (groups, languages, lookups).
+
 Fence Management~
 
-*:ColorMyAsciiCheckFences*
+:ColorMyAscii check-fences                      *:ColorMyAscii-check-fences*
     Check current buffer for unmatched fenced code blocks.
     Reports opening fences without closing, and vice versa.
 
-*:ColorMyAsciiEnsureBlankLines*
+:ColorMyAscii ensure-blank-lines          *:ColorMyAscii-ensure-blank-lines*
     Ensure blank lines before and after all fenced code blocks.
     Adds missing blank lines automatically.
     Reports number of changes made.
@@ -636,21 +657,21 @@ Fence Management~
 
 Scheme Management~                              *color_my_ascii-scheme-commands*
 
-*:ColorMyAsciiListSchemes*
+:ColorMyAscii schemes list                      *:ColorMyAscii-schemes-list*
     List all available color schemes with their enabled features.
     Output shows scheme names and feature flags.
 
-*:ColorMyAsciiSwitchScheme* {name}
+:ColorMyAscii schemes switch {name}           *:ColorMyAscii-schemes-switch*
     Switch to a different color scheme.
     Tab completion available for scheme names.
     Automatically re-highlights all active buffers.
 
     Example:~
 >vim
-        :ColorMyAsciiSwitchScheme matrix
+        :ColorMyAscii schemes switch matrix
 <
 
-*:ColorMyAsciiSchemes*
+:ColorMyAscii schemes pick                      *:ColorMyAscii-schemes-pick*
     Open Telescope picker for interactive scheme selection.
     Features live preview - scheme applies as you navigate.
     Press <CR> to confirm selection.
@@ -676,20 +697,21 @@ Available actions:~
     require('color_my_ascii').setup({
       keymaps = {
         highlight           = '<leader>ah',  -- :ColorMyAscii
-        toggle              = '<leader>at',  -- :ColorMyAsciiToggle
-        schemes             = '<leader>as',  -- :ColorMyAsciiSchemes
-        ensure_blank_lines  = '<leader>af',  -- :ColorMyAsciiEnsureBlankLines
-        show_config         = '<leader>ac',  -- :ColorMyAsciiShowConfig
-        debug               = '<leader>ad',  -- :ColorMyAsciiDebug
-        check_fences        = '<leader>ax',  -- :ColorMyAsciiCheckFences
+        toggle              = '<leader>at',  -- :ColorMyAscii toggle
+        schemes             = '<leader>as',  -- :ColorMyAscii schemes pick
+        ensure_blank_lines  = '<leader>af',  -- :ColorMyAscii ensure-blank-lines
+        show_config         = '<leader>ac',  -- :ColorMyAscii show-config
+        debug               = '<leader>ad',  -- :ColorMyAscii debug
+        check_fences        = '<leader>ax',  -- :ColorMyAscii check-fences
       },
     })
 <
 
 Each mapping is set with a `desc`, so which-key.nvim picks them up
-automatically without extra configuration. If lib.nvim
-(github.com/StefanBartl/lib.nvim) is installed, its keymap helper is used for
-registration; otherwise the plugin falls back to vim.keymap.set.
+automatically without extra configuration. lib.nvim
+(github.com/StefanBartl/lib.nvim) is a required dependency (the
+|:ColorMyAscii| command itself is built on it); lib.nvim.map specifically
+stays soft-guarded for keymap registration, falling back to vim.keymap.set.
 
 See the plugin's docs/BINDINGS.md for the full cheatsheet of user commands,
 keymap actions, and autocommands.
@@ -756,12 +778,12 @@ Switching schemes:~
 
 Via command:
 >vim
-    :ColorMyAsciiSwitchScheme nord
+    :ColorMyAscii schemes switch nord
 <
 
 Via Telescope (with live preview):
 >vim
-    :ColorMyAsciiSchemes
+    :ColorMyAscii schemes pick
 <
 
 Via API:
@@ -896,7 +918,7 @@ No highlighting visible~
 
 1. Check if plugin is loaded:
    >vim
-       :ColorMyAsciiDebug
+       :ColorMyAscii debug
 <
 
 2. Verify buffer is markdown:
@@ -964,7 +986,7 @@ Keywords not highlighting~
 
 Check if language is loaded:
 >vim
-    :ColorMyAsciiDebug
+    :ColorMyAscii debug
 <
 
 Verify keywords are enabled:
@@ -978,7 +1000,7 @@ Unmatched fences~
 
 Check for mismatched code blocks:
 >vim
-    :ColorMyAsciiCheckFences
+    :ColorMyAscii check-fences
 <
 
 The command will report:
@@ -1031,13 +1053,13 @@ Scheme not applying~
 
 1. Verify scheme name:
 >vim
-    :ColorMyAsciiListSchemes
+    :ColorMyAscii schemes list
 <
 
 2. Check for typos in command:
 >vim
-    :ColorMyAsciiSwitchScheme matrix  " Correct
-    :ColorMyAsciiSwitchScheme Matrix  " Wrong (case-sensitive)
+    :ColorMyAscii schemes switch matrix  " Correct
+    :ColorMyAscii schemes switch Matrix  " Wrong (case-sensitive)
 <
 
 Blank lines command issues~
@@ -1049,7 +1071,7 @@ Blank lines command issues~
 
 2. Verify changes with undo:
 >vim
-    :ColorMyAsciiEnsureBlankLines
+    :ColorMyAscii ensure-blank-lines
     :undo  " Revert if needed
 <
 

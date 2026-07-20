@@ -89,7 +89,7 @@ Ein Neovim-Plugin zum farblichen Hervorheben von ASCII-Art in Markdown-Codeblöc
 - ✅ **Leere Fenced Blocks**: Optional ``` ohne Sprache als ASCII behandeln
 - ✅ **Standard-Textfarbe**: Gedämpfte Darstellung für normalen Text
 - ✅ **Health Check**: `:checkhealth color_my_ascii`
-- ✅ **Fence-Validierung**: `:ColorMyAsciiCheckFences` zur Erkennung nicht geschlossener Blöcke
+- ✅ **Fence-Validierung**: `:ColorMyAscii check-fences` zur Erkennung nicht geschlossener Blöcke
 - ✅ **Vim Help**: `:h color_my_ascii`
 - ✅ **Optionale Treesitter-Integration**: Block-Erkennung und echtes Syntax-Highlighting
 - ✅ **Optionale, deaktivierbare Default-Keymaps** mit which-key-Unterstützung
@@ -108,7 +108,7 @@ gibt, bevor tatsächlich eine Markdown-Datei bearbeitet wird.
 {
   'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
-  dependencies = { 'StefanBartl/lib.nvim' }, -- optional, ermöglicht Keymap-/Notify-Integration
+  dependencies = { 'StefanBartl/lib.nvim' }, -- erforderlich: :ColorMyAscii baut darauf auf
   opts = {
     -- Optional: Konfiguration hier
   }
@@ -122,7 +122,7 @@ gibt, bevor tatsächlich eine Markdown-Datei bearbeitet wird.
 use {
   'StefanBartl/color_my_ascii.nvim',
   ft = 'markdown',
-  requires = { 'StefanBartl/lib.nvim' }, -- optional, ermöglicht Keymap-/Notify-Integration
+  requires = { 'StefanBartl/lib.nvim' }, -- erforderlich: :ColorMyAscii baut darauf auf
   config = function()
     require('color_my_ascii').setup({
       -- Optional: Konfiguration hier
@@ -379,9 +379,9 @@ Weitere Sprachen können einfach hinzugefügt werden (siehe [Contributing](#cont
 | Befehl | Beschreibung |
 |--------|--------------|
 | `:ColorMyAscii` | Manuelles Aktualisieren der Hervorhebung |
-| `:ColorMyAsciiToggle` | Plugin aktivieren/deaktivieren |
-| `:ColorMyAsciiDebug` | Debug-Informationen anzeigen (einfach) |
-| `:ColorMyAsciiShowConfig` | Detaillierte Konfiguration anzeigen |
+| `:ColorMyAscii toggle` | Plugin aktivieren/deaktivieren |
+| `:ColorMyAscii debug` | Debug-Informationen anzeigen (einfach) |
+| `:ColorMyAscii show-config` | Detaillierte Konfiguration anzeigen |
 | `:checkhealth color_my_ascii` | Health-Check durchführen |
 | `:h color_my_ascii` | Vim-Help öffnen |
 
@@ -391,8 +391,8 @@ Weitere Sprachen können einfach hinzugefügt werden (siehe [Contributing](#cont
 
 | Befehl | Beschreibung |
 |--------|--------------|
-| `:ColorMyAsciiCheckFences` | Nicht geschlossene Fences prüfen |
-| `:ColorMyAsciiEnsureBlankLines` | Leerzeilen um Codeblöcke sicherstellen |
+| `:ColorMyAscii check-fences` | Nicht geschlossene Fences prüfen |
+| `:ColorMyAscii ensure-blank-lines` | Leerzeilen um Codeblöcke sicherstellen |
 
 ---
 
@@ -400,9 +400,9 @@ Weitere Sprachen können einfach hinzugefügt werden (siehe [Contributing](#cont
 
 | Befehl | Beschreibung |
 |--------|--------------|
-| `:ColorMyAsciiListSchemes` | Verfügbare Schemes auflisten |
-| `:ColorMyAsciiSwitchScheme <name>` | Zu anderem Scheme wechseln |
-| `:ColorMyAsciiSchemes` | Scheme mit Telescope auswählen (Live-Vorschau) |
+| `:ColorMyAscii schemes list` | Verfügbare Schemes auflisten |
+| `:ColorMyAscii schemes switch <name>` | Zu anderem Scheme wechseln |
+| `:ColorMyAscii schemes pick` | Scheme mit Telescope auswählen (Live-Vorschau) |
 
 ---
 
@@ -555,7 +555,7 @@ Selbst große Dokumente (>1000 Zeilen) sollten keine Performance-Probleme verurs
 
 1. Plugin geladen?
 ````vim
-:ColorMyAsciiDebug
+:ColorMyAscii debug
 ````
 
 2. Buffer ist Markdown?

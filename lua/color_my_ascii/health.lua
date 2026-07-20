@@ -231,12 +231,14 @@ function M.check()
     end
   end
 
-  -- lib.nvim is an optional dependency used for keymaps/notify integration
-  local lib_ok = pcall(require, 'lib.nvim.map')
-  if lib_ok then
-    health.ok('lib.nvim found - keymap/notify integration available')
+  -- lib.nvim is required (the :ColorMyAscii command is built on
+  -- lib.nvim.usercmd.composer); lib.nvim.map specifically stays soft-guarded
+  -- for keymap/notify integration, falling back to vim.keymap.set/vim.notify.
+  local composer_ok = pcall(require, 'lib.nvim.usercmd.composer')
+  if composer_ok then
+    health.ok('lib.nvim found - :ColorMyAscii command + keymap/notify integration available')
   else
-    health.info('lib.nvim not found (optional) - falling back to vim.keymap.set/vim.notify')
+    health.error('lib.nvim not found - :ColorMyAscii will fail to load; install "StefanBartl/lib.nvim"')
   end
 
   -- Public fence API (consumed by other plugins, e.g. markdown.nvim's fenced_scope)

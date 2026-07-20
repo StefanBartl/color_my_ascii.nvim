@@ -53,15 +53,15 @@ function M.list_schemes()
   end
 
   print('')
-  print('Usage: :ColorMyAsciiSwitchScheme <name>')
-  print('   or: :ColorMyAsciiSchemes (Telescope)')
+  print('Usage: :ColorMyAscii schemes switch <name>')
+  print('   or: :ColorMyAscii schemes pick (Telescope)')
 end
 
 --- Switch to a different scheme
 ---@param name string Scheme name
 function M.switch_scheme(name)
   if name == '' then
-    notify('Usage: :ColorMyAsciiSwitchScheme <name>', levels.ERROR)
+    notify('Usage: :ColorMyAscii schemes switch <name>', levels.ERROR)
     return
   end
 

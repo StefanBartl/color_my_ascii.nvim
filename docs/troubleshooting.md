@@ -27,7 +27,7 @@ Even large documents (>1000 lines) should not cause performance issues.
 
 1. Plugin loaded?
 ````vim
-:ColorMyAsciiDebug
+:ColorMyAscii debug
 ````
 
 2. Buffer is Markdown?

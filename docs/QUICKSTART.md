@@ -304,19 +304,19 @@ require('color_my_ascii').setup(scheme)
 
 ```vim
 " Show debug info
-:ColorMyAsciiDebug
+:ColorMyAscii debug
 
 " Manually highlight
 :ColorMyAscii
 
 " Toggle plugin on/off
-:ColorMyAsciiToggle
+:ColorMyAscii toggle
 
 " Health check
 :checkhealth color_my_ascii
 
 " Check fence matching
-:ColorMyAsciiCheckFences
+:ColorMyAscii check-fences
 
 " Help
 :h color_my_ascii
@@ -386,7 +386,7 @@ require('color_my_ascii').setup({
 1. Plugin loaded?
 
 ```vim
-:ColorMyAsciiDebug
+:ColorMyAscii debug
 ```
 
 2. Filetype correct?
@@ -457,8 +457,8 @@ require('color_my_ascii').setup({
 
 1. **Vim Help**: `:h color_my_ascii`
 2. **Health Check**: `:checkhealth color_my_ascii`
-3. **Debug Info**: `:ColorMyAsciiDebug`
-4. **Fence Check**: `:ColorMyAsciiCheckFences`
+3. **Debug Info**: `:ColorMyAscii debug`
+4. **Fence Check**: `:ColorMyAscii check-fences`
 5. **GitHub Issues**: Open issue with details
 
 ---

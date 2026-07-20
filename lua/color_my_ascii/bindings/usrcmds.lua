@@ -1,113 +1,59 @@
 ---@module 'color_my_ascii.bindings.usrcmds'
---- User command registration for color_my_ascii.nvim.
---- See docs/BINDINGS.md for a full cheatsheet of all registered commands.
+--- Registers :ColorMyAscii <subcommand>, one verb built via lib.nvim's
+--- composer (:Verb sub … + <Tab> completion + Markdown docgen).
+--- See docs/BINDINGS.md for a full cheatsheet of all registered subcommands.
+---
+--- Re-callable: the `inspect …`/`stats` routes only exist while
+--- config.debug_enabled is true. Since composer.verb() rebuilds the whole
+--- command on each call (force=true under the hood), debug/init.lua simply
+--- calls M.enable() again when debug mode turns on at runtime (it is off by
+--- default at plugin-load time, before the user's own setup() has run) —
+--- there is no separate self-registration path to keep in sync.
+
+local composer = require('lib.nvim.usercmd.composer')
 
 local M = {}
 
-local create_usercommand = vim.api.nvim_create_user_command
-
---- Register :ColorMyAscii command
-local function register_highlight()
-  create_usercommand('ColorMyAscii', function()
-    require('color_my_ascii').highlight_buffer()
-  end, {
-    desc = 'Highlight ASCII art in current buffer',
-  })
-end
-
---- Register :ColorMyAsciiToggle command
-local function register_toggle()
-  create_usercommand('ColorMyAsciiToggle', function()
-    require('color_my_ascii').toggle()
-  end, {
-    desc = 'Toggle ASCII art highlighting',
-  })
-end
-
---- Register :ColorMyAsciiDebug command
-local function register_debug()
-  create_usercommand('ColorMyAsciiDebug', function()
-    require('color_my_ascii.commands.debug').show_debug_info()
-  end, {
-    desc = 'Show debug information',
-  })
-end
-
---- Register :ColorMyAsciiCheckFences command
-local function register_fence_check()
-  create_usercommand('ColorMyAsciiCheckFences', function()
-    require('color_my_ascii.commands.fence_check').check_current_buffer()
-  end, {
-    desc = 'Check current buffer for unmatched fenced code blocks',
-  })
-end
-
---- Register :ColorMyAsciiShowConfig command
-local function register_show_config()
-  create_usercommand('ColorMyAsciiShowConfig', function()
-    require('color_my_ascii.commands.config').show_config()
-  end, {
-    desc = 'Show current configuration',
-  })
-end
-
---- Register scheme management commands
-local function register_scheme_commands()
+--- Register all plugin user commands. Safe to call more than once (e.g. once
+--- at plugin load, again from debug/init.lua once debug_enabled flips true).
+function M.enable()
   local schemes = require('color_my_ascii.commands.schemes')
 
-  -- List schemes
-  create_usercommand('ColorMyAsciiListSchemes', function()
-    schemes.list_schemes()
-  end, {
-    desc = 'List available color schemes',
+  local routes = {
+    { path = { 'toggle' }, desc = 'Toggle ASCII art highlighting',
+      run = function() require('color_my_ascii').toggle() end },
+
+    { path = { 'debug' }, desc = 'Show debug information',
+      run = function() require('color_my_ascii.commands.debug').show_debug_info() end },
+
+    { path = { 'check-fences' }, desc = 'Check current buffer for unmatched fenced code blocks',
+      run = function() require('color_my_ascii.commands.fence_check').check_current_buffer() end },
+
+    { path = { 'show-config' }, desc = 'Show current configuration',
+      run = function() require('color_my_ascii.commands.config').show_config() end },
+
+    { path = { 'ensure-blank-lines' }, desc = 'Ensure blank lines before and after fenced code blocks',
+      run = function() require('color_my_ascii.commands.format').ensure_blank_lines() end },
+
+    { path = { 'schemes', 'list' }, desc = 'List available color schemes',
+      run = function() schemes.list_schemes() end },
+    { path = { 'schemes', 'switch' },
+      args = { { name = 'name', type = 'STRING', values = schemes.get_scheme_names() } },
+      desc = 'Switch to a different color scheme',
+      run = function(ctx) schemes.switch_scheme(ctx.args.name) end },
+    { path = { 'schemes', 'pick' }, desc = 'Pick a color scheme with Telescope',
+      run = function() schemes.telescope_picker() end },
+  }
+
+  if require('color_my_ascii.config').get().debug_enabled then
+    vim.list_extend(routes, require('color_my_ascii.debug.commands').routes())
+  end
+
+  composer.verb('ColorMyAscii', {
+    desc = 'ASCII art syntax highlighting',
+    default = function() require('color_my_ascii').highlight_buffer() end,
+    routes = routes,
   })
-
-  -- Switch scheme
-  create_usercommand('ColorMyAsciiSwitchScheme', function(opts)
-    schemes.switch_scheme(opts.args)
-  end, {
-    nargs = 1,
-    complete = function(_, _, _)
-      return schemes.get_scheme_names()
-    end,
-    desc = 'Switch to a different color scheme',
-  })
-
-  -- Telescope picker
-  create_usercommand('ColorMyAsciiSchemes', function()
-    schemes.telescope_picker()
-  end, {
-    desc = 'Pick color scheme with Telescope',
-  })
-end
-
---- Register :ColorMyAsciiEnsureBlankLines command
-local function register_ensure_blank_lines()
-  create_usercommand('ColorMyAsciiEnsureBlankLines', function()
-    require('color_my_ascii.commands.format').ensure_blank_lines()
-  end, {
-    desc = 'Ensure blank lines before and after fenced code blocks',
-  })
-end
-
---- Register all plugin user commands
-function M.enable()
-  -- Core commands
-  register_highlight()
-  register_toggle()
-  register_debug()
-
-  -- Fence checking
-  register_fence_check()
-
-  -- Configuration
-  register_show_config()
-
-  -- Scheme management
-  register_scheme_commands()
-
-  -- Formatting
-  register_ensure_blank_lines()
 end
 
 return M

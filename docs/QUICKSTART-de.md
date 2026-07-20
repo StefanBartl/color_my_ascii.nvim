@@ -222,13 +222,13 @@ require('color_my_ascii').setup(scheme)
 
 ```vim
 " Debug-Info anzeigen
-:ColorMyAsciiDebug
+:ColorMyAscii debug
 
 " Manuell highlighten
 :ColorMyAscii
 
 " Plugin an/aus
-:ColorMyAsciiToggle
+:ColorMyAscii toggle
 
 " Health-Check
 :checkhealth color_my_ascii
@@ -290,7 +290,7 @@ require('color_my_ascii').setup({
 
 1. Plugin geladen?
 ```vim
-:ColorMyAsciiDebug
+:ColorMyAscii debug
 ```
 
 2. Filetype richtig?
@@ -351,7 +351,7 @@ require('color_my_ascii').setup({
 
 1. **Vim-Help**: `:h color_my_ascii`
 2. **Health-Check**: `:checkhealth color_my_ascii`
-3. **Debug-Info**: `:ColorMyAsciiDebug`
+3. **Debug-Info**: `:ColorMyAscii debug`
 4. **GitHub Issues**: Öffne ein Issue mit Details
 
 ## Siehe auch

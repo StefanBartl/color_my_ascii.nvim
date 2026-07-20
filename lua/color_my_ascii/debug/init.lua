@@ -30,8 +30,10 @@ function M.setup(config)
     log_file = nil,
   }, config or {})
 
-  -- Register commands only if enabled
-  require('color_my_ascii.debug.commands').register()
+  -- Rebuild the :ColorMyAscii verb so it now includes the inspect/stats
+  -- debug routes (bindings.usrcmds.enable() checks debug_enabled itself and
+  -- is safe to call again — see its docstring).
+  require('color_my_ascii.bindings.usrcmds').enable()
 end
 
 ---Print debug message if verbose mode enabled

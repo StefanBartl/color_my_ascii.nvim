@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Development tooling: `.stylua.toml` (formatter config matching the existing style), `.luacheckrc` (linter config), and a `.github/workflows/lint.yml` CI workflow that runs `stylua --check` and `luacheck` on pushes and pull requests. See [Contributing](contributing.md#development).
 - `fence_content_highlight`: full-width background highlight of a fenced block's interior (blank lines and trailing whitespace included), on by default, shaded from the resolved `fence_line_highlight` color
+- `fence_jump` keymap action / `:ColorMyAscii fence-jump`: `%`-style jump between a fence's opening and closing delimiter, falling back to the built-in `%` elsewhere
 - State-based fence parser for accurate block detection
 - Support for tilde fences (`~~~`) in addition to backticks
 - `ColorMyAsciiCheckFences` command to detect unmatched code blocks

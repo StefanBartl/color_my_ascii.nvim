@@ -703,9 +703,17 @@ Available actions:~
         show_config         = '<leader>ac',  -- :ColorMyAscii show-config
         debug               = '<leader>ad',  -- :ColorMyAscii debug
         check_fences        = '<leader>ax',  -- :ColorMyAscii check-fences
+        fence_jump          = '%',           -- :ColorMyAscii fence-jump
       },
     })
 <
+
+`fence_jump` is the odd one out: unlike the other actions it's meant to be
+bound to `%` itself. On a fence delimiter line (the ```lang opening line or
+its closing ```) it jumps to the matching delimiter, the same mental model
+`%` already applies to ()/{}/[] pairs - elsewhere on the line it falls back
+to Neovim's built-in `%` (bracket-pair matching), so binding it to `%` only
+adds behavior, it doesn't take anything away.
 
 Each mapping is set with a `desc`, so which-key.nvim picks them up
 automatically without extra configuration. lib.nvim

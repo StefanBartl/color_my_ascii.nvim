@@ -34,6 +34,7 @@ local ACTIONS = {
   show_config = { cmd = 'ColorMyAscii show-config', desc = 'color_my_ascii: show config' },
   debug = { cmd = 'ColorMyAscii debug', desc = 'color_my_ascii: show debug info' },
   check_fences = { cmd = 'ColorMyAscii check-fences', desc = 'color_my_ascii: check fences' },
+  fence_jump = { cmd = 'ColorMyAscii fence-jump', desc = 'color_my_ascii: jump between fence markers (%-style)' },
 }
 
 --- Attach user-configured keymaps

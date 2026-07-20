@@ -27,6 +27,7 @@ distinct from the separate buffer-local `:Fence` toolkit below.
 | `:ColorMyAscii show-config` | Show current configuration |
 | `:ColorMyAscii check-fences` | Check current buffer for unmatched fenced code blocks |
 | `:ColorMyAscii ensure-blank-lines` | Ensure blank lines before and after fenced code blocks |
+| `:ColorMyAscii fence-jump` | Jump between a fence's opening/closing delimiter (%-style); falls back to the built-in `%` elsewhere |
 | `:ColorMyAscii schemes list` | List available color schemes |
 | `:ColorMyAscii schemes switch <name>` | Switch to a different color scheme |
 | `:ColorMyAscii schemes pick` | Pick color scheme with Telescope (live preview) |
@@ -67,6 +68,7 @@ separate which-key registration needed.
 | `show_config` | `:ColorMyAscii show-config` | `<leader>ac` |
 | `debug` | `:ColorMyAscii debug` | `<leader>ad` |
 | `check_fences` | `:ColorMyAscii check-fences` | `<leader>ax` |
+| `fence_jump` | `:ColorMyAscii fence-jump` | `%` |
 
 Example setup enabling a subset of the available actions:
 
@@ -80,6 +82,7 @@ require('color_my_ascii').setup({
     show_config         = '<leader>ac',
     debug               = '<leader>ad',
     check_fences        = '<leader>ax',
+    fence_jump          = '%',
   },
 })
 ```

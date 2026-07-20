@@ -40,6 +40,7 @@ toolkit below.
 |---------|-------------|
 | `:ColorMyAscii check-fences` | Check for unmatched fences |
 | `:ColorMyAscii ensure-blank-lines` | Ensure blank lines around code blocks |
+| `:ColorMyAscii fence-jump` | Jump between a fence's opening/closing delimiter (%-style); falls back to the built-in `%` elsewhere |
 
 ---
 
@@ -152,9 +153,15 @@ require('color_my_ascii').setup({
     show_config         = '<leader>ac',
     debug               = '<leader>ad',
     check_fences        = '<leader>ax',
+    fence_jump          = '%',
   },
 })
 ```
+
+`fence_jump` is meant to be bound to `%` itself: on a fence delimiter line it
+jumps to the matching delimiter (the same mental model `%` already applies to
+`()`/`{}`/`[]` pairs), and falls back to the built-in `%` everywhere else, so
+it only adds behavior.
 
 Each mapping is set with a `desc`, so [which-key.nvim](https://github.com/folke/which-key.nvim)
 picks them up automatically without extra configuration.

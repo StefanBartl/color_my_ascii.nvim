@@ -20,29 +20,76 @@ function M.enable()
   local schemes = require('color_my_ascii.commands.schemes')
 
   local routes = {
-    { path = { 'toggle' }, desc = 'Toggle ASCII art highlighting',
-      run = function() require('color_my_ascii').toggle() end },
+    {
+      path = { 'toggle' },
+      desc = 'Toggle ASCII art highlighting',
+      run = function()
+        require('color_my_ascii').toggle()
+      end,
+    },
 
-    { path = { 'debug' }, desc = 'Show debug information',
-      run = function() require('color_my_ascii.commands.debug').show_debug_info() end },
+    {
+      path = { 'debug' },
+      desc = 'Show debug information',
+      run = function()
+        require('color_my_ascii.commands.debug').show_debug_info()
+      end,
+    },
 
-    { path = { 'check-fences' }, desc = 'Check current buffer for unmatched fenced code blocks',
-      run = function() require('color_my_ascii.commands.fence_check').check_current_buffer() end },
+    {
+      path = { 'check-fences' },
+      desc = 'Check current buffer for unmatched fenced code blocks',
+      run = function()
+        require('color_my_ascii.commands.fence_check').check_current_buffer()
+      end,
+    },
 
-    { path = { 'show-config' }, desc = 'Show current configuration',
-      run = function() require('color_my_ascii.commands.config').show_config() end },
+    {
+      path = { 'show-config' },
+      desc = 'Show current configuration',
+      run = function()
+        require('color_my_ascii.commands.config').show_config()
+      end,
+    },
 
-    { path = { 'ensure-blank-lines' }, desc = 'Ensure blank lines before and after fenced code blocks',
-      run = function() require('color_my_ascii.commands.format').ensure_blank_lines() end },
+    {
+      path = { 'ensure-blank-lines' },
+      desc = 'Ensure blank lines before and after fenced code blocks',
+      run = function()
+        require('color_my_ascii.commands.format').ensure_blank_lines()
+      end,
+    },
 
-    { path = { 'schemes', 'list' }, desc = 'List available color schemes',
-      run = function() schemes.list_schemes() end },
-    { path = { 'schemes', 'switch' },
+    {
+      path = { 'fence-jump' },
+      desc = "Jump between a fence's opening/closing delimiter (%-style); falls back to the built-in % elsewhere",
+      run = function()
+        require('color_my_ascii.fence_jump').percent()
+      end,
+    },
+
+    {
+      path = { 'schemes', 'list' },
+      desc = 'List available color schemes',
+      run = function()
+        schemes.list_schemes()
+      end,
+    },
+    {
+      path = { 'schemes', 'switch' },
       args = { { name = 'name', type = 'STRING', values = schemes.get_scheme_names() } },
       desc = 'Switch to a different color scheme',
-      run = function(ctx) schemes.switch_scheme(ctx.args.name) end },
-    { path = { 'schemes', 'pick' }, desc = 'Pick a color scheme with Telescope',
-      run = function() schemes.telescope_picker() end },
+      run = function(ctx)
+        schemes.switch_scheme(ctx.args.name)
+      end,
+    },
+    {
+      path = { 'schemes', 'pick' },
+      desc = 'Pick a color scheme with Telescope',
+      run = function()
+        schemes.telescope_picker()
+      end,
+    },
   }
 
   if require('color_my_ascii.config').get().debug_enabled then
@@ -51,7 +98,9 @@ function M.enable()
 
   composer.verb('ColorMyAscii', {
     desc = 'ASCII art syntax highlighting',
-    default = function() require('color_my_ascii').highlight_buffer() end,
+    default = function()
+      require('color_my_ascii').highlight_buffer()
+    end,
     routes = routes,
   })
 end

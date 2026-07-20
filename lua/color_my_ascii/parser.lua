@@ -5,6 +5,7 @@
 local M = {}
 
 local api = vim.api
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
 --- Decide whether a fence's language tag should be treated as an ASCII block.
 --- Shared classification rule used by both the heuristic line-scanner below and
@@ -129,7 +130,7 @@ function M.scan_blocks_heuristic(bufnr, opts)
 
   -- If block is still open at EOF, log warning only for ASCII blocks and only in debug mode
   if in_block and open_fence_info and open_fence_info.is_ascii and cfg.debug_enabled then
-    vim.notify(string.format('Unclosed ASCII block at line %d', open_fence_info.start_line), vim.log.levels.WARN)
+    notify.warn(string.format('Unclosed ASCII block at line %d', open_fence_info.start_line))
   end
 
   return blocks
@@ -172,12 +173,11 @@ function M.find_ascii_blocks(bufnr)
       end
 
       if cfg.debug_enabled then
-        vim.notify(
+        notify.warn(
           string.format(
-            'color_my_ascii: Treesitter block detection failed, falling back to heuristic parser: %s',
+            'Treesitter block detection failed, falling back to heuristic parser: %s',
             tostring(blocks)
-          ),
-          vim.log.levels.WARN
+          )
         )
       end
     end
@@ -208,12 +208,11 @@ function M.find_all_blocks(bufnr, opts)
       end
 
       if cfg.debug_enabled then
-        vim.notify(
+        notify.warn(
           string.format(
-            'color_my_ascii: Treesitter block scan failed, falling back to heuristic parser: %s',
+            'Treesitter block scan failed, falling back to heuristic parser: %s',
             tostring(blocks)
-          ),
-          vim.log.levels.WARN
+          )
         )
       end
     end

@@ -6,21 +6,20 @@
 
 local M = {}
 
-local api = vim.api
+local autocmd = require('lib.nvim.autocmd')
 
 --- Register the plugin's static autocommands
 function M.enable()
-  local group = api.nvim_create_augroup('ColorMyAscii', { clear = true })
+  local group = autocmd.augroup.create.clear('ColorMyAscii')
 
-  api.nvim_create_autocmd({ 'FileType' }, {
+  autocmd.create({ 'FileType' }, function(args)
+    require('color_my_ascii').setup_buffer(args.buf)
+    -- Buffer-local :Fence command (export, ...). Independent of the highlight
+    -- enable state, so fence actions work even when highlighting is toggled off.
+    require('color_my_ascii.commands.fence').register(args.buf)
+  end, {
     group = group,
     pattern = 'markdown',
-    callback = function(args)
-      require('color_my_ascii').setup_buffer(args.buf)
-      -- Buffer-local :Fence command (export, ...). Independent of the highlight
-      -- enable state, so fence actions work even when highlighting is toggled off.
-      require('color_my_ascii.commands.fence').register(args.buf)
-    end,
     desc = 'Setup ASCII art highlighting + :Fence command for markdown files',
   })
 end

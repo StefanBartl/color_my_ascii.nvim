@@ -18,6 +18,7 @@
 local M = {}
 
 local api = vim.api
+local autocmd = require('lib.nvim.autocmd')
 
 --- Default markdown-family fence tags treated as "a markdown sub-document".
 ---@type table<string, boolean>
@@ -33,12 +34,11 @@ local DEFAULT_MARKDOWN_LANGS = {
 ---@type table<integer, { tick: integer, blocks: ColorMyAscii.FenceBlock[] }>
 local cache = {}
 
-local cache_augroup = api.nvim_create_augroup('ColorMyAsciiFenceApiCache', { clear = true })
-api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
+local cache_augroup = autocmd.augroup.create.clear('ColorMyAsciiFenceApiCache')
+autocmd.create({ 'BufDelete', 'BufWipeout' }, function(ev)
+  cache[ev.buf] = nil
+end, {
   group = cache_augroup,
-  callback = function(ev)
-    cache[ev.buf] = nil
-  end,
   desc = 'Invalidate color_my_ascii fence API cache on buffer delete',
 })
 

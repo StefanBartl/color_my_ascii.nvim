@@ -16,6 +16,8 @@
 --- it whenever the buffer's delay tier changes.
 
 local lib_debounce = require('lib.nvim.debounce')
+local autocmd = require('lib.nvim.autocmd')
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
 local M = {}
 
@@ -144,7 +146,7 @@ function M.debounce(bufnr, fn, custom_delay)
         local ok, err = pcall(fn)
 
         if not ok then
-          vim.notify(string.format('color_my_ascii: Debounced function error: %s', err), vim.log.levels.WARN)
+          notify.warn(string.format('Debounced function error: %s', err))
         end
       end
     end, delay)
@@ -264,13 +266,12 @@ end
 --- Setup automatic cleanup on buffer delete
 ---@return nil
 function M.setup_auto_cleanup()
-  local group = vim.api.nvim_create_augroup('ColorMyAsciiDebounce', { clear = true })
+  local group = autocmd.augroup.create.clear('ColorMyAsciiDebounce')
 
-  vim.api.nvim_create_autocmd('BufDelete', {
+  autocmd.create('BufDelete', function(args)
+    M.cancel(args.buf)
+  end, {
     group = group,
-    callback = function(args)
-      M.cancel(args.buf)
-    end,
     desc = 'Cleanup debounce timers on buffer delete',
   })
 end

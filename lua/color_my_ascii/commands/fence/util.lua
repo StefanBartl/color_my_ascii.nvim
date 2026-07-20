@@ -4,6 +4,7 @@
 local M = {}
 
 local api = vim.api
+local notify = require('lib.nvim.notify').create('[color_my_ascii.fence]')
 
 --- The fenced block under the cursor (interior + fence lines count as "under").
 ---@param opts? table Extra opts forwarded to fences.block_at
@@ -29,7 +30,7 @@ end
 ---@param msg string
 ---@param level? integer
 function M.notify(msg, level)
-  vim.notify('Fence: ' .. msg, level or vim.log.levels.INFO)
+  notify.notify(msg, level or vim.log.levels.INFO)
 end
 
 --- Fence-language tag -> file extension. Shared by export/open/run.

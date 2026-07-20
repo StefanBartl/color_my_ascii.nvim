@@ -13,6 +13,7 @@ local M = {}
 
 local api = vim.api
 local util = require('color_my_ascii.commands.fence.util')
+local autocmd = require('lib.nvim.autocmd')
 
 --- Extmark namespace for the source-buffer region anchors.
 local ns = api.nvim_create_namespace('ColorMyAsciiFenceOpen')
@@ -98,7 +99,10 @@ function M.run(argv)
 
   sessions[tbuf] = { src = buf, start_id = start_id, end_id = end_id, tmpfile = tmp }
 
-  local grp = api.nvim_create_augroup('ColorMyAsciiFenceOpen_' .. tbuf, { clear = true })
+  -- These two autocmds are buffer-scoped (opts.buffer), which
+  -- lib.nvim.autocmd.create does not support, so they stay on the raw API;
+  -- only augroup creation is routed through the lib.nvim wrapper.
+  local grp = autocmd.augroup.create.clear('ColorMyAsciiFenceOpen_' .. tbuf)
   api.nvim_create_autocmd('BufWritePost', {
     group = grp,
     buffer = tbuf,

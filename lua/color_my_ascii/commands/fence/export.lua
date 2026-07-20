@@ -74,7 +74,7 @@ local function write_and_finish(bufnr, block, content, path, flags)
   if vim.fn.filereadable(path) == 1 then
     local choice = vim.fn.confirm(("'%s' exists. Overwrite?"):format(vim.fn.fnamemodify(path, ':~')), '&Yes\n&No', 2)
     if choice ~= 1 then
-      vim.notify('Fence export cancelled', vim.log.levels.INFO)
+      util.notify('export cancelled')
       return
     end
   end
@@ -96,13 +96,10 @@ local function write_and_finish(bufnr, block, content, path, flags)
     err = ok and nil or 'write failed'
   end
   if not ok then
-    vim.notify('Fence export: failed to write ' .. path .. (err and (': ' .. err) or ''), vim.log.levels.ERROR)
+    util.notify('export: failed to write ' .. path .. (err and (': ' .. err) or ''), vim.log.levels.ERROR)
     return
   end
-  vim.notify(
-    ('Fence: exported %d line(s) to %s'):format(#content, vim.fn.fnamemodify(path, ':~:.')),
-    vim.log.levels.INFO
-  )
+  util.notify(('exported %d line(s) to %s'):format(#content, vim.fn.fnamemodify(path, ':~:.')))
 
   local c = cfg()
   if flags.replace or c.replace then
@@ -125,7 +122,7 @@ function M.run(argv)
     elseif a == '--replace' then
       flags.replace = true
     elseif a:sub(1, 2) == '--' then
-      vim.notify('Fence export: unknown flag ' .. a, vim.log.levels.WARN)
+      util.notify('export: unknown flag ' .. a, vim.log.levels.WARN)
     elseif not path then
       path = a
     end
@@ -135,7 +132,7 @@ function M.run(argv)
   local row = api.nvim_win_get_cursor(0)[1] - 1
   local block = require('color_my_ascii.api.fences').block_at(bufnr, row, { include_fence = true })
   if not block then
-    vim.notify('Fence export: no fenced block under the cursor', vim.log.levels.WARN)
+    util.notify('no fenced block under the cursor', vim.log.levels.WARN)
     return
   end
 
@@ -153,7 +150,7 @@ function M.run(argv)
     completion = 'file',
   }, function(input)
     if input == nil or vim.trim(input) == '' then
-      vim.notify('Fence export cancelled', vim.log.levels.INFO)
+      util.notify('export cancelled')
       return
     end
     write_and_finish(bufnr, block, content, input, flags)

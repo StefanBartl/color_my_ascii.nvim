@@ -64,6 +64,9 @@ function M.run(_argv)
 
   vim.system(vim.deepcopy(cmd), { stdin = input, text = true }, function(res)
     vim.schedule(function()
+      if not api.nvim_buf_is_valid(buf) then
+        return
+      end
       local sp = api.nvim_buf_get_extmark_by_id(buf, ns, start_id, {})
       local ep = api.nvim_buf_get_extmark_by_id(buf, ns, end_id, {})
       pcall(api.nvim_buf_del_extmark, buf, ns, start_id)

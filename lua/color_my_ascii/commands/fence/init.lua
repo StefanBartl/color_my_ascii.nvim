@@ -9,6 +9,8 @@
 local M = {}
 
 local api = vim.api
+local usercmd = require('lib.nvim.usercmd')
+local notify = require('lib.nvim.notify').create('[color_my_ascii.fence]')
 
 --- Split a raw argument string into tokens, honouring single/double quotes so
 --- paths with spaces survive (`:Fence export "my dir/a.js"`).
@@ -96,12 +98,12 @@ function M.execute(args, ctx)
   local tokens = M.tokenize(args or '')
   local sub = tokens[1]
   if not sub then
-    vim.notify('Usage: :Fence ' .. table.concat(sub_names(), '|') .. ' [args]', vim.log.levels.INFO)
+    notify.info('Usage: :Fence ' .. table.concat(sub_names(), '|') .. ' [args]')
     return
   end
   local handler = SUBCOMMANDS[sub]
   if not handler then
-    vim.notify('Unknown :Fence subcommand: ' .. sub, vim.log.levels.WARN)
+    notify.warn('Unknown :Fence subcommand: ' .. sub)
     return
   end
   local argv = {}
@@ -165,9 +167,10 @@ function M.register(bufnr)
     return
   end
 
-  api.nvim_buf_create_user_command(bufnr, 'Fence', function(o)
+  usercmd.create('Fence', function(o)
     M.execute(o.args, { range = o.range, line1 = o.line1, line2 = o.line2 })
   end, {
+    buffer = bufnr,
     nargs = '*',
     range = true,
     complete = function(arglead, cmdline, cursorpos)

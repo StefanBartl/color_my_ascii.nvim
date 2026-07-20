@@ -6,8 +6,8 @@
 local M = {}
 
 local api = vim.api
-local notify = vim.notify
-local levels = vim.log.levels
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
+local autocmd = require('lib.nvim.autocmd')
 
 ---@type ColorMyAscii.State
 local state = {
@@ -38,7 +38,7 @@ function M.setup(opts)
   local cfg = require('color_my_ascii.config').get()
 
   if not ok and cfg.debug_enabled then
-    notify(string.format('color_my_ascii: Failed to initialize configuration: %s', err), levels.ERROR)
+    notify.error(string.format('Failed to initialize configuration: %s', err))
     return false, tostring(err)
   end
 
@@ -72,11 +72,10 @@ function M.setup(opts)
   -- Optional fence-line highlighting: resolve its highlight groups now and keep
   -- them in sync with colorscheme changes.
   fence_hl.setup_hl(cfg)
-  api.nvim_create_autocmd('ColorScheme', {
-    group = api.nvim_create_augroup('ColorMyAsciiFenceLineHl', { clear = true }),
-    callback = function()
-      fence_hl.setup_hl(require('color_my_ascii.config').get())
-    end,
+  autocmd.create('ColorScheme', function()
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+  end, {
+    group = autocmd.augroup.create.clear('ColorMyAsciiFenceLineHl'),
     desc = 'Re-resolve color_my_ascii fence-line highlight groups after colorscheme change',
   })
 
@@ -105,11 +104,14 @@ function M.setup_buffer(bufnr)
   -- Initial highlight
   local success, err = pcall(M.highlight_buffer, bufnr)
   if not success and cfg.debug_enabled then
-    notify(string.format('color_my_ascii: Initial highlighting failed: %s', err), levels.WARN)
+    notify.warn(string.format('Initial highlighting failed: %s', err))
   end
 
   -- Setup autocommands for this buffer
-  local group = api.nvim_create_augroup('ColorMyAsciiBuffer_' .. bufnr, { clear = true })
+  -- NOTE: these two autocmds are buffer-scoped (opts.buffer), which
+  -- lib.nvim.autocmd.create does not support, so they stay on the raw API;
+  -- only augroup creation is routed through the lib.nvim wrapper.
+  local group = autocmd.augroup.create.clear('ColorMyAsciiBuffer_' .. bufnr)
 
   -- Re-highlight on text change with adaptive debouncing
   api.nvim_create_autocmd({ 'TextChanged', 'TextChangedI' }, {
@@ -169,17 +171,17 @@ function M.highlight_buffer(bufnr)
 
     -- Check if cached_blocks is valid
     if type(cached_blocks) ~= 'table' or vim.tbl_isempty(cached_blocks) and cfg.debug_enabled then
-      notify(string.format('Cache for buffer %d is empty or invalid, skipping block highlighting', bufnr), levels.WARN)
+      notify.warn(string.format('Cache for buffer %d is empty or invalid, skipping block highlighting', bufnr))
     else
       -- Highlight cached blocks safely
       for _, block in ipairs(cached_blocks) do
         if type(block) == 'table' then
           success, err = pcall(highlighter.highlight_block, bufnr, block)
           if not success then
-            notify(string.format('Failed to highlight block: %s', err), levels.ERROR)
+            notify.error(string.format('Failed to highlight block: %s', err))
           end
         else
-          notify('Skipped invalid block in cache (not a table)', levels.WARN)
+          notify.warn('Skipped invalid block in cache (not a table)')
         end
       end
     end
@@ -220,14 +222,14 @@ function M.highlight_buffer(bufnr)
     success, err = pcall(highlighter.highlight_block, bufnr, block)
     if not success and cfg.debug_enabled then
       -- Log error but continue with other blocks
-      notify(string.format('color_my_ascii: Block highlighting error: %s', err), levels.WARN)
+      notify.warn(string.format('Block highlighting error: %s', err))
     end
   end
 
   -- Highlight inline codes
   success, err = pcall(highlighter.highlight_inline_codes, bufnr)
   if not success and cfg.debug_enabled then
-    notify(string.format(('color_my_ascii: Inline code highlighting error: %s'):format(), err), levels.WARN)
+    notify.warn(string.format(('Inline code highlighting error: %s'):format(), err))
   end
 
   pcall(fence_hl.apply, bufnr, cfg)
@@ -246,7 +248,7 @@ function M.toggle()
         M.highlight_buffer(bufnr)
       end
     end
-    notify('color_my_ascii.nvim enabled', levels.INFO)
+    notify.info('enabled')
   else
     -- Disable: clear all highlights
     for bufnr, _ in pairs(state.buffers) do
@@ -255,7 +257,7 @@ function M.toggle()
         fence_hl.clear(bufnr)
       end
     end
-    notify('color_my_ascii.nvim disabled', levels.INFO)
+    notify.info('disabled')
   end
 
   return state.enabled

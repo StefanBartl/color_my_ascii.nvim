@@ -3,8 +3,7 @@
 
 local M = {}
 
-local notify = vim.notify
-local levels = vim.log.levels
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
 --- Available schemes
 ---@type string[]
@@ -24,13 +23,14 @@ end
 
 --- List all available schemes
 function M.list_schemes()
-  print('=== Available Color Schemes ===')
-  print('')
+  local lines = {}
+  table.insert(lines, '=== Available Color Schemes ===')
+  table.insert(lines, '')
 
   for _, name in ipairs(SCHEME_NAMES) do
     local scheme = require('color_my_ascii.schemes.' .. name)
 
-    print(string.format('• %s', name))
+    table.insert(lines, string.format('• %s', name))
 
     -- Show enabled features
     local features = {}
@@ -48,20 +48,22 @@ function M.list_schemes()
     end
 
     if #features > 0 then
-      print(string.format('  Features: %s', table.concat(features, ', ')))
+      table.insert(lines, string.format('  Features: %s', table.concat(features, ', ')))
     end
   end
 
-  print('')
-  print('Usage: :ColorMyAscii schemes switch <name>')
-  print('   or: :ColorMyAscii schemes pick (Telescope)')
+  table.insert(lines, '')
+  table.insert(lines, 'Usage: :ColorMyAscii schemes switch <name>')
+  table.insert(lines, '   or: :ColorMyAscii schemes pick (Telescope)')
+
+  notify.info(table.concat(lines, '\n'))
 end
 
 --- Switch to a different scheme
 ---@param name string Scheme name
 function M.switch_scheme(name)
   if name == '' then
-    notify('Usage: :ColorMyAscii schemes switch <name>', levels.ERROR)
+    notify.error('Usage: :ColorMyAscii schemes switch <name>')
     return
   end
 
@@ -75,15 +77,15 @@ function M.switch_scheme(name)
   end
 
   if not found then
-    notify(string.format('Unknown scheme: %s', name), levels.ERROR)
-    notify('Available: ' .. table.concat(SCHEME_NAMES, ', '), levels.INFO)
+    notify.error(string.format('Unknown scheme: %s', name))
+    notify.info('Available: ' .. table.concat(SCHEME_NAMES, ', '))
     return
   end
 
   -- Load scheme
   local ok, scheme = pcall(require, 'color_my_ascii.schemes.' .. name)
   if not ok then
-    notify(string.format('Failed to load scheme: %s', name), levels.ERROR)
+    notify.error(string.format('Failed to load scheme: %s', name))
     return
   end
 
@@ -96,7 +98,7 @@ function M.switch_scheme(name)
     require('color_my_ascii').highlight_buffer(bufnr)
   end
 
-  notify(string.format('Switched to scheme: %s', name), levels.INFO)
+  notify.info(string.format('Switched to scheme: %s', name))
 end
 
 --- Telescope picker for schemes
@@ -104,7 +106,7 @@ function M.telescope_picker()
   local has_telescope, _ = pcall(require, 'telescope')
 
   if not has_telescope then
-    notify('Telescope not installed', levels.ERROR)
+    notify.error('Telescope not installed')
     return
   end
 
@@ -176,7 +178,7 @@ function M.telescope_picker()
           actions.close(prompt_bufnr)
           local selection = action_state.get_selected_entry()
           if selection then
-            notify(string.format('Applied scheme: %s', selection.value), levels.INFO)
+            notify.info(string.format('Applied scheme: %s', selection.value))
           end
         end)
 

@@ -5,6 +5,7 @@ local M = {}
 
 local tbl_insert = table.insert
 local str_format = string.format
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
 --- Show detailed configuration information
 function M.show_config()
@@ -79,8 +80,8 @@ function M.show_config()
     tbl_insert(lines, str_format('  Threshold: %d unique keywords', cfg.language_detection_threshold))
   end
 
-  -- Print
-  print(table.concat(lines, '\n'))
+  -- Notify
+  notify.info(table.concat(lines, '\n'))
 end
 
 return M

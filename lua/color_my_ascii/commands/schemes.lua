@@ -167,7 +167,11 @@ function M.telescope_picker()
           end
         end
 
-        -- Preview on move
+        -- Preview on move. Stays on the raw API deliberately --
+        -- lib.nvim.autocmd.create's opts only forward group/pattern/desc/
+        -- once/nested (no `buffer`), so routing this through it would
+        -- silently turn a picker-local preview hook into a global (every
+        -- buffer) CursorMoved listener.
         vim.api.nvim_create_autocmd('CursorMoved', {
           buffer = prompt_bufnr,
           callback = preview_scheme,

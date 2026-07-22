@@ -83,7 +83,7 @@ end
 ---@return string|nil reason Reason for invalidation
 local function is_valid(bufnr, entry)
   -- Check timestamp
-  local now = vim.loop.now()
+  local now = vim.uv.now()
   if (now - entry.timestamp) > config.timeout then
     return false, 'timeout'
   end
@@ -203,7 +203,7 @@ function M.set(bufnr, blocks, inline_codes)
   cache[bufnr] = {
     blocks = blocks,
     inline_codes = inline_codes,
-    timestamp = vim.loop.now(),
+    timestamp = vim.uv.now(),
     changedtick = changedtick,
     line_count = line_count or 0,
   }
@@ -296,7 +296,7 @@ end
 ---@return integer cleaned Number of entries cleaned
 function M.cleanup()
   local cleaned = 0
-  local now = vim.loop.now()
+  local now = vim.uv.now()
 
   for bufnr, entry in pairs(cache) do
     -- Check if buffer is still valid
@@ -328,7 +328,7 @@ end
 function M.setup_auto_cleanup(interval)
   interval = interval or 30000 -- Default 30 seconds
 
-  local timer = vim.loop.new_timer()
+  local timer = vim.uv.new_timer()
   if timer == nil then
     return nil
   end

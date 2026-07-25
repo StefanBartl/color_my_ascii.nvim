@@ -69,6 +69,18 @@ separate which-key registration needed.
 | `debug` | `:ColorMyAscii debug` | `<leader>ad` |
 | `check_fences` | `:ColorMyAscii check-fences` | `<leader>ax` |
 | `fence_jump` | `:ColorMyAscii fence-jump` | `%` |
+| `fence_yank` | `:Fence yank` | `<leader>fy` |
+| `fence_open` | `:Fence open` | `<leader>fo` |
+| `fence_run` | `:Fence run` | `<leader>fr` |
+| `fence_format` | `:Fence format` | `<leader>fi` |
+| `fence_select` | `:Fence select` | `<leader>fv` |
+| `fence_wrap` | `:Fence wrap` | `<leader>fw` |
+| `fence_unwrap` | `:Fence unwrap` | `<leader>fu` |
+
+The `fence_*` actions call the argument-less `:Fence` sub-commands (see
+[User Commands](#user-commands) above); like `check_fences`/`fence_jump` they
+only do anything useful in a markdown buffer, since `:Fence` itself is
+registered buffer-local there.
 
 Example setup enabling a subset of the available actions:
 
@@ -83,6 +95,13 @@ require('color_my_ascii').setup({
     debug               = '<leader>ad',
     check_fences        = '<leader>ax',
     fence_jump          = '%',
+    fence_yank          = '<leader>fy',
+    fence_open          = '<leader>fo',
+    fence_run           = '<leader>fr',
+    fence_format        = '<leader>fi',
+    fence_select        = '<leader>fv',
+    fence_wrap          = '<leader>fw',
+    fence_unwrap        = '<leader>fu',
   },
 })
 ```
@@ -101,6 +120,15 @@ Augroup: `ColorMyAscii`.
 | event | pattern | desc |
 | --- | --- | --- |
 | `FileType` | `markdown` | Setup ASCII art highlighting for markdown files |
+
+Two further `ColorScheme` autocommands are registered directly in `setup()`
+(`lua/color_my_ascii/init.lua`), since they only make sense once the plugin
+is configured:
+
+| event | augroup | desc |
+| --- | --- | --- |
+| `ColorScheme` | `ColorMyAsciiFenceLineHl` | Re-resolve fence-line highlight groups after a colorscheme change |
+| `ColorScheme` | `ColorMyAsciiHl` | Re-apply dynamically created (fixed-hex) ASCII-art highlight groups after a colorscheme change, so highlighting doesn't go stale after Neovim's implicit `hi clear` |
 
 ---
 

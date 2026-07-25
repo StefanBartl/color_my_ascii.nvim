@@ -35,6 +35,13 @@ local ACTIONS = {
   debug = { cmd = 'ColorMyAscii debug', desc = 'color_my_ascii: show debug info' },
   check_fences = { cmd = 'ColorMyAscii check-fences', desc = 'color_my_ascii: check fences' },
   fence_jump = { cmd = 'ColorMyAscii fence-jump', desc = 'color_my_ascii: jump between fence markers (%-style)' },
+  fence_yank = { cmd = 'Fence yank', desc = 'color_my_ascii: yank fence content' },
+  fence_open = { cmd = 'Fence open', desc = 'color_my_ascii: open fence content in a split' },
+  fence_run = { cmd = 'Fence run', desc = 'color_my_ascii: run fence content' },
+  fence_format = { cmd = 'Fence format', desc = 'color_my_ascii: format fence content' },
+  fence_select = { cmd = 'Fence select', desc = 'color_my_ascii: select fence content' },
+  fence_wrap = { cmd = 'Fence wrap', desc = 'color_my_ascii: wrap line in a fence' },
+  fence_unwrap = { cmd = 'Fence unwrap', desc = 'color_my_ascii: unwrap fence under cursor' },
 }
 
 --- Attach user-configured keymaps

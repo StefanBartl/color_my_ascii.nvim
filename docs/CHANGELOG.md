@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `ColorScheme` autocommand that re-applies color_my_ascii's dynamically created (fixed-hex) ASCII-art highlight groups, so highlighting no longer goes stale after a `:colorscheme` switch (Neovim's implicit `hi clear` used to wipe them silently).
+- Default keymap actions for the argument-less `:Fence` sub-commands: `fence_yank`, `fence_open`, `fence_run`, `fence_format`, `fence_select`, `fence_wrap`, `fence_unwrap`. Opt-in via `setup({ keymaps = {...} })` like the existing actions. See [BINDINGS.md](BINDINGS.md#keymaps).
 - Development tooling: `.stylua.toml` (formatter config matching the existing style), `.luacheckrc` (linter config), and a `.github/workflows/lint.yml` CI workflow that runs `stylua --check` and `luacheck` on pushes and pull requests. See [Contributing](contributing.md#development).
 - `fence_content_highlight`: full-width background highlight of a fenced block's interior (blank lines and trailing whitespace included), on by default, shaded from the resolved `fence_line_highlight` color
 - `fence_jump` keymap action / `:ColorMyAscii fence-jump`: `%`-style jump between a fence's opening and closing delimiter, falling back to the built-in `%` elsewhere

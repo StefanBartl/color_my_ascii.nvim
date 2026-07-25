@@ -704,9 +704,20 @@ Available actions:~
         debug               = '<leader>ad',  -- :ColorMyAscii debug
         check_fences        = '<leader>ax',  -- :ColorMyAscii check-fences
         fence_jump          = '%',           -- :ColorMyAscii fence-jump
+        fence_yank          = '<leader>fy',  -- :Fence yank
+        fence_open          = '<leader>fo',  -- :Fence open
+        fence_run           = '<leader>fr',  -- :Fence run
+        fence_format        = '<leader>fi',  -- :Fence format
+        fence_select        = '<leader>fv',  -- :Fence select
+        fence_wrap          = '<leader>fw',  -- :Fence wrap
+        fence_unwrap        = '<leader>fu',  -- :Fence unwrap
       },
     })
 <
+
+The `fence_*` actions bind the argument-less |:Fence| sub-commands; like
+`check_fences`/`fence_jump` they only do anything in a markdown buffer, since
+|:Fence| itself is registered buffer-local there.
 
 `fence_jump` is the odd one out: unlike the other actions it's meant to be
 bound to `%` itself. On a fence delimiter line (the ```lang opening line or
@@ -1028,7 +1039,10 @@ Colors not displaying~
 
 Wrong colors after colorscheme change~
 
-Reload plugin after changing colorscheme:
+color_my_ascii's own dynamically created (fixed-hex) highlight groups are
+automatically re-applied on the `ColorScheme` autocommand event, so a plain
+`:colorscheme <name>` switch no longer requires a manual reload. If colors
+still look wrong afterwards, force a manual refresh:
 >vim
     :ColorMyAscii
 <

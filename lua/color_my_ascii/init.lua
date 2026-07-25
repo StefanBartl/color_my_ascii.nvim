@@ -79,6 +79,16 @@ function M.setup(opts)
     desc = 'Re-resolve color_my_ascii fence-line highlight groups after colorscheme change',
   })
 
+  -- ASCII-art highlight groups (fixed-hex scheme colors) get wiped by
+  -- :colorscheme's implicit `hi clear` too; re-apply them so highlighting
+  -- doesn't go stale after a colorscheme switch.
+  autocmd.create('ColorScheme', function()
+    require('color_my_ascii.config').reapply_custom_highlights()
+  end, {
+    group = autocmd.augroup.create.clear('ColorMyAsciiHl'),
+    desc = 'Re-apply color_my_ascii ASCII-art highlight groups after colorscheme change',
+  })
+
   return true, nil
 end
 

@@ -11,8 +11,10 @@ local fn = vim.fn
 
 local DEFAULTS = require('color_my_ascii.config.DEFAULTS')
 
---- Cache for dynamically created highlight groups
----@type table<string, boolean>
+--- Cache for dynamically created highlight groups: name -> the attrs table
+--- passed to nvim_set_hl, so the group can be re-applied verbatim later (see
+--- M.reapply_custom_highlights).
+---@type table<string, table>
 local created_highlight_groups = {}
 
 --- Load all language definitions from the languages/ directory
@@ -176,7 +178,7 @@ local function resolve_highlight(spec)
     :gsub('#', '') -- Remove # from hex colors for group name
 
   if not created_highlight_groups[name] then
-    vim.api.nvim_set_hl(0, name, {
+    local attrs = {
       fg = hl_def.fg,
       bg = hl_def.bg,
       bold = hl_def.bold,
@@ -184,11 +186,24 @@ local function resolve_highlight(spec)
       underline = hl_def.underline,
       undercurl = hl_def.undercurl,
       strikethrough = hl_def.strikethrough,
-    })
-    created_highlight_groups[name] = true
+    }
+    vim.api.nvim_set_hl(0, name, attrs)
+    created_highlight_groups[name] = attrs
   end
 
   return name
+end
+
+--- Re-apply all dynamically created custom ASCII-art highlight groups
+--- (fixed-hex scheme colors, see e.g. schemes/catppuccin.lua). Neovim's
+--- `:colorscheme` command runs an implicit `hi clear` that wipes these even
+--- though `created_highlight_groups` still thinks they exist, so without this
+--- the ASCII art highlighting goes stale after a colorscheme switch.
+---@return nil
+function M.reapply_custom_highlights()
+  for name, attrs in pairs(created_highlight_groups) do
+    vim.api.nvim_set_hl(0, name, attrs)
+  end
 end
 
 --- Build a lookup table for fast character-to-highlight-group resolution

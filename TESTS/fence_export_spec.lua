@@ -70,6 +70,38 @@ return function(H)
   ok(okrun, "no-fence: does not error")
   ok(vim.fn.filereadable(tmp .. "/never.js") == 0, "no-fence: nothing written")
 
+  -- ---- overwrite of an existing path asks kit.confirm, not vim.fn.confirm --
+  -- Fresh buffer: the previous --replace step already swapped this buffer's
+  -- only fence for a link reference, so it no longer has a fence to export.
+  local buf2 = H.scratch("markdown", {
+    "```javascript",
+    "let b = 2;",
+    "```",
+  })
+  api.nvim_win_set_cursor(0, { 2, 0 })
+
+  local existing = tmp .. "/already_here.js"
+  vim.fn.writefile({ "OLD" }, existing)
+
+  local captured_question
+  package.loaded["lib.nvim.ui.kit"] = {
+    confirm = function(opts)
+      captured_question = opts.question
+      opts.on_answer(false) -- Cancel: must not overwrite
+    end,
+  }
+  package.loaded["color_my_ascii.commands.fence.export"] = nil
+  export = require("color_my_ascii.commands.fence.export")
+
+  export.run({ existing })
+  ok(captured_question ~= nil, "overwrite: kit.confirm was asked")
+  eq(vim.fn.readfile(existing)[1], "OLD", "overwrite: Cancel leaves the file untouched")
+
+  package.loaded["lib.nvim.ui.kit"] = nil
+  package.loaded["color_my_ascii.commands.fence.export"] = nil
+  export = require("color_my_ascii.commands.fence.export")
+
+  api.nvim_buf_delete(buf2, { force = true })
   api.nvim_buf_delete(buf, { force = true })
   vim.fn.delete(tmp, "rf")
   require("color_my_ascii.config").setup({})

@@ -61,24 +61,27 @@ local function replace_block_with_ref(bufnr, block, path)
   api.nvim_buf_set_lines(bufnr, block.open_row, block.close_row + 1, false, { ref })
 end
 
---- Write `content` to `path` and run the requested follow-ups.
+--- Yes/No confirm: kit.confirm (soft dependency, matching
+--- lib.nvim.fs.write.to_file's convention just below) when lib.nvim is
+--- installed, else the native vim.fn.confirm.
+---@param question string
+---@param on_answer fun(yes: boolean)
+local function confirm(question, on_answer)
+  local ok_kit, kit = pcall(require, 'lib.nvim.ui.kit')
+  if ok_kit then
+    kit.confirm({ question = question, on_answer = on_answer })
+    return
+  end
+  on_answer(vim.fn.confirm(question, '&Yes\n&No', 2) == 1)
+end
+
+--- Actually write `content` to `path` (overwrite already confirmed if needed).
 ---@param bufnr integer
 ---@param block table
 ---@param content string[]
 ---@param path string
 ---@param flags { open?: boolean, replace?: boolean }
-local function write_and_finish(bufnr, block, content, path, flags)
-  path = vim.fn.expand(path)
-  path = vim.fn.fnamemodify(path, ':p')
-
-  if vim.fn.filereadable(path) == 1 then
-    local choice = vim.fn.confirm(("'%s' exists. Overwrite?"):format(vim.fn.fnamemodify(path, ':~')), '&Yes\n&No', 2)
-    if choice ~= 1 then
-      util.notify('export cancelled')
-      return
-    end
-  end
-
+local function write_content(bufnr, block, content, path, flags)
   -- mkdir -p + write: prefer lib.nvim.fs.write.to_file (soft dependency,
   -- matching bindings/keymaps.lua's convention) when installed; it takes a
   -- single string, so the lines are joined first. Falls back to the
@@ -109,6 +112,34 @@ local function write_and_finish(bufnr, block, content, path, flags)
     local open_cmd = c.open_cmd or 'vsplit'
     pcall(vim.cmd, open_cmd .. ' ' .. vim.fn.fnameescape(path))
   end
+end
+
+--- Write `content` to `path` and run the requested follow-ups.
+---@param bufnr integer
+---@param block table
+---@param content string[]
+---@param path string
+---@param flags { open?: boolean, replace?: boolean }
+local function write_and_finish(bufnr, block, content, path, flags)
+  path = vim.fn.expand(path)
+  path = vim.fn.fnamemodify(path, ':p')
+
+  local function do_write()
+    write_content(bufnr, block, content, path, flags)
+  end
+
+  if vim.fn.filereadable(path) == 1 then
+    confirm(("'%s' exists. Overwrite?"):format(vim.fn.fnamemodify(path, ':~')), function(yes)
+      if not yes then
+        util.notify('export cancelled')
+        return
+      end
+      do_write()
+    end)
+    return
+  end
+
+  do_write()
 end
 
 --- `:Fence export` entry point.

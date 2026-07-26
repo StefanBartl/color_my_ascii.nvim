@@ -175,6 +175,9 @@ function M.run(argv)
   end
 
   -- No path given: prompt with the suggested default + file completion.
+  -- Stays on vim.ui.input on purpose: it needs cmdline-style completion =
+  -- 'file' Tab-completion, which kit.input (a plain insert-mode buffer) has
+  -- no equivalent for yet.
   vim.ui.input({
     prompt = 'Export fence to: ',
     default = suggest_path(bufnr, block),

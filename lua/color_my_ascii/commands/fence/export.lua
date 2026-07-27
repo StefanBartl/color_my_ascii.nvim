@@ -75,6 +75,34 @@ local function confirm(question, on_answer)
   on_answer(vim.fn.confirm(question, '&Yes\n&No', 2) == 1)
 end
 
+--- Prompt for a path with file completion: kit.input (soft dependency, same
+--- convention as confirm() above) when lib.nvim is installed -- its
+--- completion = "file" now covers the cmdline-style Tab-completion this
+--- needs (lib.nvim Phase 11) -- else the native vim.ui.input.
+---@param prompt string
+---@param default string
+---@param on_input fun(path: string|nil)  # nil on cancel or an empty submit
+local function prompt_path(prompt, default, on_input)
+  local ok_kit, kit = pcall(require, 'lib.nvim.ui.kit')
+  if ok_kit then
+    kit.input({
+      prompt = prompt,
+      default = default,
+      completion = 'file',
+      on_submit = function(path)
+        on_input(vim.trim(path) ~= '' and path or nil)
+      end,
+      on_cancel = function()
+        on_input(nil)
+      end,
+    })
+    return
+  end
+  vim.ui.input({ prompt = prompt, default = default, completion = 'file' }, function(input)
+    on_input((input and vim.trim(input) ~= '') and input or nil)
+  end)
+end
+
 --- Actually write `content` to `path` (overwrite already confirmed if needed).
 ---@param bufnr integer
 ---@param block table
@@ -175,19 +203,12 @@ function M.run(argv)
   end
 
   -- No path given: prompt with the suggested default + file completion.
-  -- Stays on vim.ui.input on purpose: it needs cmdline-style completion =
-  -- 'file' Tab-completion, which kit.input (a plain insert-mode buffer) has
-  -- no equivalent for yet.
-  vim.ui.input({
-    prompt = 'Export fence to: ',
-    default = suggest_path(bufnr, block),
-    completion = 'file',
-  }, function(input)
-    if input == nil or vim.trim(input) == '' then
+  prompt_path('Export fence to: ', suggest_path(bufnr, block), function(chosen_path)
+    if not chosen_path then
       util.notify('export cancelled')
       return
     end
-    write_and_finish(bufnr, block, content, input, flags)
+    write_and_finish(bufnr, block, content, chosen_path, flags)
   end)
 end
 

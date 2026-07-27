@@ -97,10 +97,50 @@ return function(H)
   ok(captured_question ~= nil, "overwrite: kit.confirm was asked")
   eq(vim.fn.readfile(existing)[1], "OLD", "overwrite: Cancel leaves the file untouched")
 
+  -- ---- no path given prompts via kit.input(completion="file") -------------
+  local buf3 = H.scratch("markdown", {
+    "```javascript",
+    "let c = 3;",
+    "```",
+  })
+  api.nvim_win_set_cursor(0, { 2, 0 })
+
+  local prompted = tmp .. "/prompted.js"
+  local captured_opts
+  package.loaded["lib.nvim.ui.kit"] = {
+    input = function(opts)
+      captured_opts = opts
+      opts.on_submit(prompted)
+    end,
+  }
+  package.loaded["color_my_ascii.commands.fence.export"] = nil
+  export = require("color_my_ascii.commands.fence.export")
+
+  export.run({})
+  ok(captured_opts ~= nil, "no-path: kit.input was asked")
+  eq(captured_opts.completion, "file", "no-path: prompted with completion = \"file\"")
+  ok(vim.fn.filereadable(prompted) == 1, "no-path: submitted path is written")
+
+  -- <Esc> (on_cancel) -> nothing written, no error.
+  api.nvim_win_set_cursor(0, { 2, 0 })
+  local not_written = tmp .. "/not_written.js"
+  package.loaded["lib.nvim.ui.kit"] = {
+    input = function(opts)
+      opts.on_cancel()
+    end,
+  }
+  package.loaded["color_my_ascii.commands.fence.export"] = nil
+  export = require("color_my_ascii.commands.fence.export")
+
+  local okcancel = pcall(export.run, {})
+  ok(okcancel, "no-path cancel: does not error")
+  ok(vim.fn.filereadable(not_written) == 0, "no-path cancel: nothing written")
+
   package.loaded["lib.nvim.ui.kit"] = nil
   package.loaded["color_my_ascii.commands.fence.export"] = nil
   export = require("color_my_ascii.commands.fence.export")
 
+  api.nvim_buf_delete(buf3, { force = true })
   api.nvim_buf_delete(buf2, { force = true })
   api.nvim_buf_delete(buf, { force = true })
   vim.fn.delete(tmp, "rf")

@@ -296,6 +296,8 @@ function M.check()
   else
     health.error('Some core modules failed to load - plugin may not function correctly')
   end
+
+  require('lib.nvim.usercmd.composer').checkhealth('ColorMyAscii')
 end
 
 return M

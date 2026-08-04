@@ -1,5 +1,5 @@
 ---@module 'color_my_ascii.commands.fence.util'
----@brief Shared helpers for the `:Fence` subcommands.
+--- Shared helpers for the `:Fence` subcommands.
 
 local M = {}
 

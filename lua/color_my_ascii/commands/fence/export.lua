@@ -1,7 +1,6 @@
 ---@module 'color_my_ascii.commands.fence.export'
----@brief `:Fence export ["path"] [--open] [--replace]` — extract the fenced
----       block under the cursor into a standalone file.
----@description
+--- Extracts the fenced block under the cursor into a standalone file via
+--- `:Fence export ["path"] [--open] [--replace]`.
 --- Resolves the block at the cursor via the public fence API, writes its content
 --- to `path` (prompted with file completion when omitted), and optionally opens
 --- the new file (`--open`) and/or replaces the block with a link reference in a
@@ -18,6 +17,7 @@ local function cfg()
 end
 
 --- Suggested default export path for the block.
+---@internal
 ---@param bufnr integer
 ---@param block table
 ---@return string
@@ -35,6 +35,7 @@ local function suggest_path(bufnr, block)
 end
 
 --- Best-effort path relative to `base` (falls back to absolute).
+---@internal
 ---@param target string
 ---@param base string
 ---@return string
@@ -48,6 +49,7 @@ local function relpath(target, base)
 end
 
 --- Replace the fenced block with a link reference to the exported file.
+---@internal
 ---@param bufnr integer
 ---@param block table
 ---@param path string
@@ -64,6 +66,7 @@ end
 --- Yes/No confirm: kit.confirm (soft dependency, matching
 --- lib.nvim.fs.write.to_file's convention just below) when lib.nvim is
 --- installed, else the native vim.fn.confirm.
+---@internal
 ---@param question string
 ---@param on_answer fun(yes: boolean)
 local function confirm(question, on_answer)
@@ -79,6 +82,7 @@ end
 --- convention as confirm() above) when lib.nvim is installed -- its
 --- completion = "file" now covers the cmdline-style Tab-completion this
 --- needs (lib.nvim Phase 11) -- else the native vim.ui.input.
+---@internal
 ---@param prompt string
 ---@param default string
 ---@param on_input fun(path: string|nil)  # nil on cancel or an empty submit
@@ -104,6 +108,7 @@ local function prompt_path(prompt, default, on_input)
 end
 
 --- Actually write `content` to `path` (overwrite already confirmed if needed).
+---@internal
 ---@param bufnr integer
 ---@param block table
 ---@param content string[]
@@ -143,6 +148,7 @@ local function write_content(bufnr, block, content, path, flags)
 end
 
 --- Write `content` to `path` and run the requested follow-ups.
+---@internal
 ---@param bufnr integer
 ---@param block table
 ---@param content string[]

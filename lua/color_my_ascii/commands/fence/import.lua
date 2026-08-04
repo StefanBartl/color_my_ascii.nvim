@@ -6,7 +6,8 @@ local M = {}
 local api = vim.api
 local util = require('color_my_ascii.commands.fence.util')
 
----@param argv string[]
+--- `:Fence import <file>` entry point.
+---@param argv string[] Tokens after `import`; `argv[1]` is the source file path.
 function M.run(argv)
   local path = argv and argv[1]
   if not path or path == '' then

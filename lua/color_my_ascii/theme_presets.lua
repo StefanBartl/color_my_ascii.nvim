@@ -1,6 +1,6 @@
 ---@module 'color_my_ascii.theme_presets'
----@brief Theme-matched fence-line-highlight presets + current-theme detection.
----@description
+--- Theme-matched fence-line-highlight presets and current-theme detection.
+---
 --- Hand-tuned fence-line looks for the most common Neovim colorschemes. Each
 --- entry is a ColorMyAscii.CustomHighlight applied to both the opening and
 --- closing fence line: `bg` is a subtle surface tint from the theme's palette,

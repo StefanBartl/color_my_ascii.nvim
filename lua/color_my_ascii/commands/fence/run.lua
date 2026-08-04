@@ -34,6 +34,10 @@ local RUNNERS = {
   raku = 'raku',
 }
 
+--- Render an interpreter's stdout/stderr/exit-code into a scratch split.
+---@internal
+---@param lang string
+---@param res table Completion result from `vim.system` (`stdout`/`stderr`/`code`)
 local function show_output(lang, res)
   local lines = {}
   local function add(s)
@@ -60,7 +64,8 @@ local function show_output(lang, res)
   api.nvim_win_set_height(0, math.min(#lines + 1, 15))
 end
 
----@param _argv string[]
+--- `:Fence run` entry point.
+---@param _argv string[] Unused; `:Fence run` takes no arguments.
 function M.run(_argv)
   if not vim.system then
     util.notify('`:Fence run` needs Neovim 0.10+ (vim.system)', vim.log.levels.WARN)

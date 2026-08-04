@@ -32,7 +32,8 @@ local FORMATTERS = {
   rs = { 'rustfmt', '--emit', 'stdout' },
 }
 
----@param _argv string[]
+--- `:Fence format` entry point.
+---@param _argv string[] Unused; `:Fence format` takes no arguments.
 function M.run(_argv)
   if not vim.system then
     util.notify('`:Fence format` needs Neovim 0.10+ (vim.system)', vim.log.levels.WARN)

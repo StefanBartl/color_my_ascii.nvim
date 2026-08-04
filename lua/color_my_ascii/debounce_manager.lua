@@ -1,6 +1,6 @@
 ---@module 'color_my_ascii.debounce_manager'
----@brief Adaptive debouncing system for text change events
----@description
+--- Adaptive debouncing system for text change events.
+---
 --- Implements smart debouncing with:
 --- - File size-based adaptive delays (tiered thresholds, configurable)
 --- - Per-buffer timer management
@@ -80,6 +80,7 @@ function M.configure(opts)
 end
 
 --- Calculate adaptive delay based on buffer size
+---@internal
 ---@param bufnr integer Buffer number
 ---@return integer delay Debounce delay in milliseconds
 local function calculate_delay(bufnr)

@@ -5,7 +5,8 @@ local M = {}
 local api = vim.api
 local util = require('color_my_ascii.commands.fence.util')
 
----@param argv string[]
+--- `:Fence lang` entry point.
+---@param argv string[] Tokens after `lang`; `argv[1]` is the new language tag.
 function M.run(argv)
   local newlang = argv and argv[1]
   if not newlang or newlang == '' then

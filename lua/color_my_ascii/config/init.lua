@@ -19,6 +19,7 @@ local created_highlight_groups = {}
 
 --- Load all language definitions from the languages/ directory
 --- Implements safe loading with error recovery and validation
+---@internal
 ---@return table<string, ColorMyAscii.KeywordGroup> languages Map of language name to keyword group
 ---@return string[] errors List of loading errors (non-fatal)
 local function load_languages()
@@ -84,6 +85,7 @@ end
 
 --- Load all character group definitions from the groups/ directory
 --- Implements safe loading with error recovery and validation
+---@internal
 ---@return table<string, ColorMyAscii.CharGroup> groups Map of group name to character group
 ---@return string[] errors List of loading errors (non-fatal)
 local function load_groups()
@@ -156,6 +158,7 @@ local defaults = vim.deepcopy(DEFAULTS)
 local current_config = vim.deepcopy(defaults)
 
 --- Create or get a custom highlight group
+---@internal
 ---@param spec string|ColorMyAscii.CustomHighlight Highlight specification
 ---@return string highlight_group_name Name of the highlight group to use
 local function resolve_highlight(spec)
@@ -207,6 +210,7 @@ function M.reapply_custom_highlights()
 end
 
 --- Build a lookup table for fast character-to-highlight-group resolution
+---@internal
 ---@return table<string, string> Map of character to highlight group name
 local function build_char_lookup()
   local lookup = {}
@@ -241,6 +245,7 @@ local function build_char_lookup()
 end
 
 --- Build a lookup table for keywords across all languages
+---@internal
 ---@return table<string, table<integer, {language: string, hl: string}>> Map of keyword to list of {language, hl_group}
 local function build_keyword_lookup()
   if not current_config.enable_keywords then
@@ -264,6 +269,7 @@ local function build_keyword_lookup()
 end
 
 --- Build a lookup table for unique keywords per language (for heuristic detection)
+---@internal
 ---@return table<string, string> Map of unique keyword to language name
 local function build_unique_keyword_lookup()
   if not current_config.enable_language_detection then

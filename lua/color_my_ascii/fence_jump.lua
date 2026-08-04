@@ -1,6 +1,6 @@
 ---@module 'color_my_ascii.fence_jump'
----@brief `%`-style jump between a fenced block's opening and closing delimiter.
----@description
+--- `%`-style jump between a fenced block's opening and closing delimiter.
+---
 --- Optional motion: when the cursor sits on a fence delimiter line (the
 --- ```lang opening line or its closing ``` line), jump to the matching
 --- delimiter - the same mental model `%` already applies to ()/{}/[] pairs

@@ -1,6 +1,5 @@
 ---@module 'color_my_ascii.debug.commands'
----@brief Route definitions for the debug subcommands of :ColorMyAscii.
----@description
+--- Route definitions for the debug subcommands of :ColorMyAscii.
 --- Pure route factory (no side effects, no self-registration) — the
 --- composer verb in bindings/usrcmds.lua includes M.routes() only when debug
 --- mode is enabled, and rebuilds the whole verb whenever that flag changes

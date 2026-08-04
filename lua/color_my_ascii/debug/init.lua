@@ -1,6 +1,4 @@
 ---@module 'color_my_ascii.debug'
----@brief Debug module for color_my_ascii.nvim
----@description
 --- Provides debugging utilities for inspecting configuration, groups, and character mappings.
 --- Only loaded when debug mode is enabled in configuration.
 
@@ -10,6 +8,7 @@ local M = {}
 local debug_state = nil
 
 ---Check if debug module is enabled
+---@internal
 ---@return boolean
 local function is_enabled()
   local cfg = require('color_my_ascii.config').get()

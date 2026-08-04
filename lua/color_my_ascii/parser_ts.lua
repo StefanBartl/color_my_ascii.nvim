@@ -19,6 +19,7 @@ end
 
 --- Collect all `fenced_code_block` nodes in the tree (they don't nest, so we
 --- don't need to recurse further once one is found).
+---@internal
 ---@param node TSNode
 ---@param results TSNode[]
 local function collect_fenced_blocks(node, results)
@@ -33,6 +34,8 @@ end
 
 --- Extract the language tag, content node, and delimiter rows from a
 --- `fenced_code_block` node.
+---@internal
+---@param bufnr integer Buffer number the node belongs to
 ---@param node TSNode
 ---@return string lang Trimmed language tag (empty string if none)
 ---@return TSNode|nil content_node The `code_fence_content` child, if present

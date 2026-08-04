@@ -1,4 +1,6 @@
----@module 'color_my_ascii.debug.types'
+---@module 'color_my_ascii.debug.@types'
+--- Type declarations for the debug module: debug state and inspection results.
+---@meta
 
 ---@class DebugConfig
 ---@field enabled boolean Whether debug module is active

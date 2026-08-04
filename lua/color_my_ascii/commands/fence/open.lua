@@ -1,8 +1,6 @@
 ---@module 'color_my_ascii.commands.fence.open'
----@brief `:Fence open [--split|--vsplit|--tab|--edit]` — edit a fenced block in
----       a real split buffer (correct filetype -> full LSP/formatter), and sync
----       the changes back into the fence on `:w`.
----@description
+--- Edits a fenced block in a real split buffer via `:Fence open [--split|--vsplit|--tab|--edit]`,
+--- with the correct filetype so LSP/formatter tooling attaches, syncing changes back on `:w`.
 --- A lightweight "otter-lite": instead of proxying LSP into the markdown buffer,
 --- it opens the fence content as a temp file with the right extension, so the
 --- language's LSP and tooling attach normally. The fence interior is anchored
@@ -57,7 +55,8 @@ function M.cleanup(tbuf)
   sessions[tbuf] = nil
 end
 
----@param argv string[]
+--- `:Fence open` entry point.
+---@param argv string[] Tokens after `open` (`--split`, `--vsplit`, `--tab`, `--edit`).
 function M.run(argv)
   local buf, block = util.current_block()
   if not block then

@@ -11,6 +11,7 @@
 local M = {}
 
 --- Resolve the keymap-setting function, preferring lib.nvim.map if installed
+---@internal
 ---@return fun(mode: string, lhs: string, rhs: function|string, opts: table)
 local function resolve_set()
   local ok, lib_map = pcall(require, 'lib.nvim.map')

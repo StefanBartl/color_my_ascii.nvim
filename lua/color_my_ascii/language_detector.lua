@@ -10,6 +10,7 @@ local parser = require('color_my_ascii.parser')
 --- Detect language from explicit block marker
 --- Supports formats: ```ascii-c, ```ascii lua, ```ascii:python
 --- Also resolves standard fence language tags via fence_language_map (e.g., ```vim).
+---@internal
 ---@param fence_line string The opening fence line
 ---@return string? language Detected language name or nil
 local function detect_from_fence(fence_line)
@@ -46,6 +47,7 @@ end
 
 --- Detect language using heuristic analysis of keywords
 --- Counts unique keyword matches per language and selects the best match
+---@internal
 ---@param block_lines string[] Lines of the ASCII block
 ---@return string? language Detected language name or nil
 local function detect_from_content(block_lines)
@@ -110,6 +112,7 @@ end
 
 --- Detect language from buffer filetype context
 --- Uses the filetype of the buffer containing the ASCII block
+---@internal
 ---@param bufnr integer Buffer number
 ---@return string? language Detected language name or nil
 local function detect_from_buffer(bufnr)

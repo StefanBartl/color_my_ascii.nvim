@@ -1,7 +1,6 @@
 ---@module 'color_my_ascii.scheme_loader'
----@brief Scheme loading and management for color_my_ascii.nvim
----@description
---- This module handles loading of predefined color schemes by name.
+--- Loads predefined color schemes by name for color_my_ascii.nvim.
+---
 --- Schemes can be loaded either by passing a scheme name string or
 --- by passing a complete scheme table directly.
 

@@ -1,6 +1,6 @@
 ---@module 'color_my_ascii.api.fences'
----@brief Public, stable fenced-code-block API for other plugins to consume.
----@description
+--- Public, stable fenced-code-block API for other plugins to consume.
+---
 --- color_my_ascii owns the most robust fenced-block detection in the ecosystem
 --- (heuristic state machine + treesitter, with CommonMark-compatible fence
 --- length matching). This module exposes that intelligence in a language-
@@ -64,6 +64,7 @@ function M.is_markdown_lang(lang, extra)
 end
 
 --- Normalize an optional lang filter (string | string[] | nil) into a lowercase set.
+---@internal
 ---@param lang string|string[]|nil
 ---@return table<string, boolean>|nil set nil = no language filtering
 local function build_lang_set(lang)
@@ -85,6 +86,7 @@ end
 
 --- Get the cached range-only block list for a buffer, (re)scanning on a stale
 --- or missing changedtick.
+---@internal
 ---@param bufnr integer
 ---@return ColorMyAscii.FenceBlock[]
 local function scan_cached(bufnr)

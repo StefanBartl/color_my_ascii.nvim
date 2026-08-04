@@ -1,6 +1,6 @@
 ---@module 'color_my_ascii.cache_manager'
----@brief Caching system for parsed blocks and highlighting data
----@description
+--- Caching system for parsed blocks and highlighting data.
+---
 --- Implements a memory-efficient caching system with:
 --- - Weak table for automatic memory reclamation
 --- - Timestamp-based cache invalidation
@@ -55,6 +55,7 @@ function M.configure(opts)
 end
 
 --- Get buffer metadata for cache validation
+---@internal
 ---@param bufnr integer Buffer number
 ---@return integer|nil changedtick Buffer changedtick
 ---@return integer|nil line_count Number of lines
@@ -77,6 +78,7 @@ local function get_buffer_metadata(bufnr)
 end
 
 --- Check if cache entry is still valid
+---@internal
 ---@param bufnr integer Buffer number
 ---@param entry CacheEntry Cache entry to validate
 ---@return boolean valid True if cache is valid

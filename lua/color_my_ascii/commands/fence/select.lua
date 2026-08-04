@@ -5,7 +5,8 @@ local M = {}
 local api = vim.api
 local util = require('color_my_ascii.commands.fence.util')
 
----@param _argv string[]
+--- `:Fence select` entry point.
+---@param _argv string[] Unused; `:Fence select` takes no arguments.
 function M.run(_argv)
   local _, block = util.current_block()
   if not block then

@@ -1,6 +1,6 @@
 ---@module 'color_my_ascii.fence_hl'
----@brief Full-line highlight of fenced-block delimiter lines and interior.
----@description
+--- Full-line highlight of fenced-block delimiter lines and interior.
+---
 --- Optional feature: paints the whole opening (```lang) and closing (```) line
 --- of fenced code blocks, as a visual boundary. Uses `line_hl_group` extmarks
 --- in its own namespace so it can be refreshed/cleared independently of the
@@ -44,6 +44,7 @@ local PRESETS = {
 ---   generic name    -> subtle | accent | underline | bar
 ---   theme name      -> the matching hand-tuned theme preset (see theme_presets)
 ---   anything else   -> "subtle"
+---@internal
 ---@param preset string
 ---@return ColorMyAscii.CustomHighlight
 local function base_preset(preset)
@@ -63,6 +64,7 @@ end
 --- Resolve a per-delimiter spec into a highlight definition.
 --- string override -> link to that existing group; table override -> attrs;
 --- nil -> fall back to the resolved preset.
+---@internal
 ---@param override string|ColorMyAscii.CustomHighlight|nil
 ---@param preset string
 ---@return table hl A table suitable for nvim_set_hl
@@ -77,6 +79,7 @@ end
 
 --- Best-effort resolution of a highlight group's background to a "#rrggbb"
 --- string, following one `link` hop and finally falling back to "Normal".
+---@internal
 ---@param name string
 ---@return string|nil hex
 local function group_bg_hex(name)
@@ -91,6 +94,7 @@ local function group_bg_hex(name)
 end
 
 --- Resolve a base preset/table into a "#rrggbb" bg, if one can be determined.
+---@internal
 ---@param spec table Result of resolve_spec/base_preset
 ---@return string|nil hex
 local function spec_bg_hex(spec)
@@ -106,6 +110,7 @@ end
 --- Resolve the fence_content_highlight spec: an explicit `hl` override wins
 --- outright; otherwise shade the resolved fence-line base color (its own
 --- `preset`, falling back to fence_line_highlight's) darker/lighter.
+---@internal
 ---@param cfg ColorMyAscii.Config
 ---@return table hl A table suitable for nvim_set_hl
 local function resolve_content_spec(cfg)
@@ -165,6 +170,7 @@ function M.clear(bufnr)
   pcall(api.nvim_buf_clear_namespace, bufnr, ns, 0, -1)
 end
 
+---@internal
 local function set_line(bufnr, row, group, priority)
   pcall(api.nvim_buf_set_extmark, bufnr, ns, row, 0, {
     line_hl_group = group,

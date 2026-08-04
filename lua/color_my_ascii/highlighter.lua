@@ -37,6 +37,7 @@ end
 ---@param line integer Line number (0-indexed)
 ---@param col_start integer Start column (0-indexed, byte offset)
 ---@param col_end integer End column (0-indexed, byte offset, exclusive)
+---@internal
 ---@param hl_group string|ColorMyAscii.CustomHighlight Highlight group name (already resolved to a string at runtime, see config.resolve_highlight)
 ---@param context string Context for debug messages (e.g., "default", "chars", "keywords")
 ---@param line_content string Content of the line (used to validate columns)
@@ -54,6 +55,7 @@ local function highlight_range(bufnr, line, col_start, col_end, hl_group, contex
 end
 
 --- Detect and highlight function names (heuristic: word followed by '(')
+---@internal
 ---@param bufnr integer Buffer number
 ---@param line_num integer Line number (0-indexed)
 ---@param line_content string Content of the line
@@ -84,6 +86,7 @@ local function highlight_function_names(bufnr, line_num, line_content)
 end
 
 --- Highlight keywords in a line
+---@internal
 ---@param bufnr integer Buffer number
 ---@param line_num integer Line number (0-indexed)
 ---@param line_content string Content of the line
@@ -147,6 +150,7 @@ local function highlight_keywords(bufnr, line_num, line_content, detected_langua
 end
 
 --- Highlight individual characters in a line based on character groups
+---@internal
 ---@param bufnr integer Buffer number
 ---@param line_num integer Line number (0-indexed)
 ---@param line_content string Content of the line

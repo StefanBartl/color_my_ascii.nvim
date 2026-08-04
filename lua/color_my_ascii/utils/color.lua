@@ -1,13 +1,13 @@
 ---@module 'color_my_ascii.utils.color'
----@brief Minimal hex-color math: parse, format, and shade toward black/white.
----@description
+--- Minimal hex-color math: parse, format, and shade toward black/white.
+---
 --- Used to derive the fence-content background from a resolved fence-line
 --- color (or any other hex bg) without hand-tuning a second palette per theme.
 
 local M = {}
 
 --- Parse "#rrggbb" (case-insensitive) into 0-255 components.
----@param hex string
+---@param hex string Hex color string, expected "#rrggbb".
 ---@return integer|nil r
 ---@return integer|nil g
 ---@return integer|nil b
@@ -22,9 +22,9 @@ function M.hex_to_rgb(hex)
   return tonumber(h:sub(1, 2), 16), tonumber(h:sub(3, 4), 16), tonumber(h:sub(5, 6), 16)
 end
 
----@param r integer
----@param g integer
----@param b integer
+---@param r integer Red component, 0-255.
+---@param g integer Green component, 0-255.
+---@param b integer Blue component, 0-255.
 ---@return string hex "#rrggbb"
 function M.rgb_to_hex(r, g, b)
   local function clamp(n)

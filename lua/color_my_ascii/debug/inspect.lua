@@ -1,5 +1,5 @@
 ---@module 'color_my_ascii.debug.inspect'
----@brief Inspection utilities for debugging
+--- Inspection utilities for debugging character, group, and keyword state.
 
 local M = {}
 
@@ -173,6 +173,7 @@ end
 ---ColorMyAscii.CustomHighlight spec table (see @types.lua); tables can't be
 ---concatenated or safely relied upon as stable map keys, so custom specs are
 ---rendered to their `vim.inspect` form instead.
+---@internal
 ---@param hl string|ColorMyAscii.CustomHighlight
 ---@return string
 local function highlight_label(hl)

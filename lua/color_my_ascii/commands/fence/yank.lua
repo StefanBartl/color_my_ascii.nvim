@@ -5,7 +5,8 @@ local M = {}
 
 local util = require('color_my_ascii.commands.fence.util')
 
----@param argv string[]
+--- `:Fence yank` entry point.
+---@param argv string[] Tokens after `yank`; `argv[1]` is an optional register name.
 function M.run(argv)
   local buf, block = util.current_block()
   if not block then

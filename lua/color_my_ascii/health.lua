@@ -7,6 +7,7 @@ local M = {}
 local fn = vim.fn
 
 --- Check if a module can be loaded
+---@internal
 ---@param module_name string Name of the module to check
 ---@return boolean success True if module can be loaded
 ---@return string? error_msg Error message if loading failed
@@ -19,6 +20,7 @@ local function check_module(module_name)
 end
 
 --- Count files in a directory
+---@internal
 ---@param path string Path to directory
 ---@param pattern string File pattern (e.g., '*.lua')
 ---@return integer count Number of files found

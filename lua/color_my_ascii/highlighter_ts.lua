@@ -59,6 +59,7 @@ local LANGUAGE_MAP = {
 }
 
 --- Check whether a treesitter parser is available for the given plugin language.
+---@internal
 ---@param language string|nil Plugin language name (e.g. "lua", "cpp")
 ---@return string|nil ts_lang The mapped treesitter language name, if available
 local function resolve_ts_language(language)

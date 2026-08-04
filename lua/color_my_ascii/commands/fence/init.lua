@@ -1,6 +1,5 @@
 ---@module 'color_my_ascii.commands.fence'
----@brief Buffer-local `:Fence <sub> [args]` dispatcher.
----@description
+--- Buffer-local `:Fence <sub> [args]` dispatcher.
 --- Actions on the fenced code block under the cursor, built on the public fence
 --- API (color_my_ascii.api.fences). Registered buffer-local in markdown buffers
 --- so the short `:Fence` name doesn't pollute the global command namespace.
@@ -81,6 +80,7 @@ local SUBCOMMANDS = {
 }
 
 --- The subcommand names, for usage/completion.
+---@internal
 ---@return string[]
 local function sub_names()
   local names = {}
@@ -113,10 +113,20 @@ function M.execute(args, ctx)
   handler(argv, ctx)
 end
 
+--- Whether `s` begins with `prefix`.
+---@internal
+---@param s string
+---@param prefix string
+---@return boolean
 local function starts_with(s, prefix)
   return s:sub(1, #prefix) == prefix
 end
 
+--- Filter `items` to those starting with `arglead`.
+---@internal
+---@param items string[]
+---@param arglead string
+---@return string[]
 local function filter_prefix(items, arglead)
   local out = {}
   for _, it in ipairs(items) do

@@ -1,4 +1,8 @@
 ---@module 'color_my_ascii.@types'
+---@meta
+--- Shared LuaCATS type declarations for color_my_ascii.nvim: config shape, cache/debounce
+--- settings, and the block/highlight descriptors passed between the parser, highlighter,
+--- and public fence API.
 
 ---@alias ColorMyAscii.SchemeName
 ---| "default"    # Uses built-in Neovim highlights

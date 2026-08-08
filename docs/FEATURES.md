@@ -10,6 +10,7 @@ removed from the personal roadmap notes once logged here.
 
   - [Custom Language Definitions](#custom-language-definitions)
   - [Export/Copy with Highlighting](#exportcopy-with-highlighting)
+  - [Hover Info for Characters](#hover-info-for-characters)
 
 ---
 
@@ -79,3 +80,42 @@ color_my_ascii highlighting**.
 **Tests:** `TESTS/highlight_export_spec.lua`, plus `--html`/`--ansi`
 coverage added to `TESTS/fence_export_spec.lua` /
 `TESTS/fence_actions_spec.lua`.
+
+---
+
+## Hover Info for Characters
+
+**Commit:** `63ab446` — `feat(hover): :ColorMyAscii hover — highlight/group/keyword info at cursor`
+
+"Which group / highlight is behind this character?" was previously only
+answerable via `:ColorMyAscii inspect char <char>` (debug-mode only, prints
+to `:messages`, requires typing the character as an argument).
+
+- New module `hover.lua` combines two views for the character under the
+  cursor: the live answer (the actual `hl_group` color_my_ascii's own
+  extmarks painted at this exact position right now, with resolved fg/bg -
+  covers overlaps between char/keyword/treesitter highlighting the same
+  cell, whichever was painted last) and the config answer (which character
+  groups it belongs to per config, override status - independent of
+  whether anything is painted right now, e.g. cursor outside any ASCII
+  block). Also reports keyword-language matches when the cursor sits on a
+  recognized keyword.
+- Displayed via `lib.nvim.ui.kit`'s `note` popup (`relative = "cursor"`)
+  when installed, falling back to a plain `nvim_open_win` float
+  (q/`<Esc>`/`<C-c>` to close) otherwise - same soft-dependency pattern
+  `commands/fence/export.lua` already uses for `kit.confirm`/`kit.input`.
+- The same info text is also copied to the unnamed register (+ system
+  clipboard where available), for pasting into a bug report or a chat.
+- Not debug-gated (unlike `inspect char`) - useful any time, not just with
+  `debug_enabled = true`.
+- Side fix while in the area: `:ColorMyAscii fence-jump` never got its own
+  vimdoc command entry (only a keybindings-section mention) - added.
+
+**Files:** `lua/color_my_ascii/commands/hover.lua` (new),
+`lua/color_my_ascii/bindings/usrcmds.lua` (`hover` route),
+`lua/color_my_ascii/bindings/keymaps.lua` (`hover` action).
+
+**Docs:** [commands.md#core-commands](commands.md#core-commands),
+`docs/BINDINGS.md`, `:h :ColorMyAscii-hover`.
+
+**Tests:** `TESTS/hover_spec.lua`.

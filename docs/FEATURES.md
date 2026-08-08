@@ -11,6 +11,7 @@ removed from the personal roadmap notes once logged here.
   - [Custom Language Definitions](#custom-language-definitions)
   - [Export/Copy with Highlighting](#exportcopy-with-highlighting)
   - [Hover Info for Characters](#hover-info-for-characters)
+  - [Box-Drawing Edge Alignment](#box-drawing-edge-alignment)
 
 ---
 
@@ -119,3 +120,45 @@ to `:messages`, requires typing the character as an argument).
 `docs/BINDINGS.md`, `:h :ColorMyAscii-hover`.
 
 **Tests:** `TESTS/hover_spec.lua`.
+
+---
+
+## Box-Drawing Edge Alignment
+
+**Commit:** `6f5d6b3` — `feat(fence): :Fence align — straighten misaligned box-drawing edges`
+
+Hand-editing an ASCII box (adding/removing text inside it) commonly drifts
+its right edge out of alignment; fixing that by hand means re-counting
+columns on every row.
+
+- New module `box_align.lua`: detects simple 4-sided boxes (corner +
+  horizontal + corner top/bottom, vertical-edge interior rows - light/
+  heavy/rounded Unicode, or ASCII `+-|`) and widens each box to its own
+  widest row. Content is only ever padded, never cut off; a missing right
+  edge on an interior row is added rather than treated as "not a box".
+  Column math counts UTF-8 codepoints (documented limitation: a genuinely
+  double-width character - CJK, emoji - inside a box can still throw off
+  visual alignment).
+- Deliberately narrow v1 scope (confirmed with the user before building):
+  only a box's own width is touched. Directory-tree connectors
+  (`├──`/`└──` indentation depth) and anything that isn't a clean
+  rectangle are left completely untouched - verified against both an
+  actual directory tree and a malformed stacked-box case (a `├────┤`
+  divider line breaks box detection entirely, by design, since junction
+  glyphs aren't corners). A second roadmap bullet ("generic fence/buffer/
+  cwd repair command applying several such rules") was explicitly out of
+  scope for this pass.
+- `:Fence align` - a normal buffer edit; `u` undoes it like any other
+  change, no confirmation prompt needed (same convention as `:Fence wrap`/
+  `unwrap`/`:ColorMyAscii ensure-blank-lines`).
+
+**Files:** `lua/color_my_ascii/box_align.lua` (new),
+`lua/color_my_ascii/commands/fence/align.lua` (new),
+`lua/color_my_ascii/commands/fence/init.lua` (`align` subcommand),
+`lua/color_my_ascii/bindings/keymaps.lua` (`fence_align` action).
+
+**Docs:** [commands.md#fence-actions--fence-buffer-local-markdown](commands.md#fence-actions--fence-buffer-local-markdown),
+`docs/BINDINGS.md`, vimdoc `:Fence align` entry.
+
+**Tests:** `TESTS/box_align_spec.lua` (the algorithm, incl. adversarial
+cases), plus wiring coverage in `TESTS/fence_actions_spec.lua`.

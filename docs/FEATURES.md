@@ -12,6 +12,7 @@ removed from the personal roadmap notes once logged here.
   - [Export/Copy with Highlighting](#exportcopy-with-highlighting)
   - [Hover Info for Characters](#hover-info-for-characters)
   - [Box-Drawing Edge Alignment](#box-drawing-edge-alignment)
+  - [ASCII Blocks in Code Comments](#ascii-blocks-in-code-comments)
 
 ---
 
@@ -162,3 +163,51 @@ columns on every row.
 
 **Tests:** `TESTS/box_align_spec.lua` (the algorithm, incl. adversarial
 cases), plus wiring coverage in `TESTS/fence_actions_spec.lua`.
+
+---
+
+## ASCII Blocks in Code Comments
+
+**Commit:** `947e274` — `feat(comment-ascii): ASCII blocks in code comments outside markdown`
+
+The plugin previously activated only on `FileType markdown` and only
+recognized ``` ``` ``` fences; there was no way to highlight an ASCII
+diagram living in a Lua/Python/... source file's comments.
+
+- New module `comment_ascii.lua`: detects `-- ascii` … `-- /ascii` marked
+  blocks (comment prefix derived from the buffer's own `commentstring`,
+  so it works for any language with a simple line-comment syntax - `--`,
+  `#`, `//`, ...). Same open/close symmetry as a markdown fence tag
+  (`ascii-<lang>` also supported for explicit language detection). Blocks
+  are returned in the exact shape `parser.lua`'s markdown scanner uses, so
+  the existing highlighter (character/keyword passes + the treesitter
+  overlay) highlights them completely unchanged - no parallel highlighting
+  logic needed.
+- `config.comment_ascii = { enable, filetypes }` - **off by default**,
+  unlike most other features, since enabling it activates the plugin on
+  non-markdown filetypes. `parser.find_ascii_blocks`/`find_inline_codes`
+  dispatch to `comment_ascii` for buffers whose filetype is in the
+  configured list.
+- `bindings/autocmds.lua` now registers a `FileType` autocmd for the
+  configured filetypes, and is re-callable: `init.lua`'s `M.setup()` calls
+  it again on every `setup()`, so a `comment_ascii.filetypes` list supplied
+  by the user takes effect regardless of load order relative to the
+  `plugin/` bootstrap's own (default-config-only) call to it.
+- Explicitly scoped to **highlighting only**, confirmed before building:
+  the `:Fence` toolkit and fence-line/fence-content background highlighting
+  remain markdown-only. The roadmap item's other framing point
+  ("README.org/.rst/.adoc support") was prose context, not an actual
+  checkbox task, and wasn't built.
+
+**Files:** `lua/color_my_ascii/comment_ascii.lua` (new),
+`lua/color_my_ascii/parser.lua` (dispatch),
+`lua/color_my_ascii/bindings/autocmds.lua` (FileType registration,
+re-callable), `lua/color_my_ascii/init.lua` (re-calls `autocmds.enable()`),
+`lua/color_my_ascii/config/DEFAULTS.lua`, `lua/color_my_ascii/@types.lua`.
+
+**Docs:** [configuration.md#ascii-blocks-in-code-comments](configuration.md#ascii-blocks-in-code-comments),
+`:h color_my_ascii-config-comment_ascii`.
+
+**Tests:** `TESTS/comment_ascii_spec.lua` (the marker scanner, incl.
+different comment syntaxes and unclosed-block handling), plus dispatch
+coverage in the same file.

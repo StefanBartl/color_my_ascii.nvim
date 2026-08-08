@@ -69,6 +69,14 @@ function M.enable()
     },
 
     {
+      path = { 'hover' },
+      desc = 'Show a float with the applied highlight/group/keyword info for the character under the cursor (also copied to a register)',
+      run = function()
+        require('color_my_ascii.commands.hover').show()
+      end,
+    },
+
+    {
       path = { 'schemes', 'list' },
       desc = 'List available color schemes',
       run = function()

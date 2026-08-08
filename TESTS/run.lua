@@ -66,6 +66,7 @@ local specs = {
   'debounce_manager_spec.lua',
   'debug_inspect_spec.lua',
   'config_languages_spec.lua',
+  'hover_spec.lua',
 }
 
 local failed = 0

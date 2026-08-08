@@ -28,6 +28,7 @@ distinct from the separate buffer-local `:Fence` toolkit below.
 | `:ColorMyAscii check-fences` | Check current buffer for unmatched fenced code blocks |
 | `:ColorMyAscii ensure-blank-lines` | Ensure blank lines before and after fenced code blocks |
 | `:ColorMyAscii fence-jump` | Jump between a fence's opening/closing delimiter (%-style); falls back to the built-in `%` elsewhere |
+| `:ColorMyAscii hover` | Show a float with the applied highlight/group/keyword info for the character under the cursor (also copied to a register) |
 | `:ColorMyAscii schemes list` | List available color schemes |
 | `:ColorMyAscii schemes switch <name>` | Switch to a different color scheme |
 | `:ColorMyAscii schemes pick` | Pick color scheme with Telescope (live preview) |
@@ -69,6 +70,7 @@ separate which-key registration needed.
 | `debug` | `:ColorMyAscii debug` | `<leader>ad` |
 | `check_fences` | `:ColorMyAscii check-fences` | `<leader>ax` |
 | `fence_jump` | `:ColorMyAscii fence-jump` | `%` |
+| `hover` | `:ColorMyAscii hover` | `<leader>ai` |
 | `fence_yank` | `:Fence yank` | `<leader>fy` |
 | `fence_open` | `:Fence open` | `<leader>fo` |
 | `fence_run` | `:Fence run` | `<leader>fr` |
@@ -95,6 +97,7 @@ require('color_my_ascii').setup({
     debug               = '<leader>ad',
     check_fences        = '<leader>ax',
     fence_jump          = '%',
+    hover               = '<leader>ai',
     fence_yank          = '<leader>fy',
     fence_open          = '<leader>fo',
     fence_run           = '<leader>fr',

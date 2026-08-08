@@ -36,6 +36,10 @@ local ACTIONS = {
   debug = { cmd = 'ColorMyAscii debug', desc = 'color_my_ascii: show debug info' },
   check_fences = { cmd = 'ColorMyAscii check-fences', desc = 'color_my_ascii: check fences' },
   fence_jump = { cmd = 'ColorMyAscii fence-jump', desc = 'color_my_ascii: jump between fence markers (%-style)' },
+  hover = {
+    cmd = 'ColorMyAscii hover',
+    desc = 'color_my_ascii: show highlight info for the character under the cursor',
+  },
   fence_yank = { cmd = 'Fence yank', desc = 'color_my_ascii: yank fence content' },
   fence_open = { cmd = 'Fence open', desc = 'color_my_ascii: open fence content in a split' },
   fence_run = { cmd = 'Fence run', desc = 'color_my_ascii: run fence content' },

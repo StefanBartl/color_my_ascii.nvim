@@ -660,6 +660,26 @@ Fence Management~
     Adds missing blank lines automatically.
     Reports number of changes made.
 
+:ColorMyAscii fence-jump                       *:ColorMyAscii-fence-jump*
+    Jump from a fence delimiter line (the ```lang opening line or its
+    closing ```) to the matching one - the same mental model `%` already
+    applies to ()/{}/[] pairs, extended to fenced blocks. Falls back to the
+    built-in `%` (bracket-pair matching) when the cursor isn't on a
+    delimiter. Meant to be bound to `%` itself via the `fence_jump` keymap
+    action - see |color_my_ascii-keybindings|.
+
+:ColorMyAscii hover                                 *:ColorMyAscii-hover*
+    Show a float with the applied highlight/group/keyword info for the
+    character under the cursor; also copies the same text to the unnamed
+    register (+ system clipboard where available). Combines the live
+    answer (the actual `hl_group` color_my_ascii's own extmarks painted at
+    this exact position right now, with resolved fg/bg) and the config
+    answer (which character groups it belongs to per config, and whether
+    it's an override - independent of whether anything is painted right
+    now). If the cursor sits on a recognized keyword, also shows which
+    language(s) it maps to. Uses lib.nvim.ui.kit's `note` popup when
+    available, else a plain floating window (q/<Esc>/<C-c> to close).
+
 *:Fence*                                        *color_my_ascii-fence-command*
     Buffer-local (markdown) dispatcher for actions on the fenced block under
     the cursor. Argument completion suggests subcommands, flags, file paths
@@ -788,6 +808,7 @@ Available actions:~
         debug               = '<leader>ad',  -- :ColorMyAscii debug
         check_fences        = '<leader>ax',  -- :ColorMyAscii check-fences
         fence_jump          = '%',           -- :ColorMyAscii fence-jump
+        hover               = '<leader>ai',  -- :ColorMyAscii hover
         fence_yank          = '<leader>fy',  -- :Fence yank
         fence_open          = '<leader>fo',  -- :Fence open
         fence_run           = '<leader>fr',  -- :Fence run

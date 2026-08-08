@@ -29,8 +29,19 @@ toolkit below.
 | `:ColorMyAscii toggle` | Enable/disable plugin |
 | `:ColorMyAscii debug` | Show debug information (basic) |
 | `:ColorMyAscii show-config` | Show detailed configuration |
+| `:ColorMyAscii hover` | Show a float with the applied highlight/group/keyword info for the character under the cursor (also copied to a register) |
 | `:checkhealth color_my_ascii` | Run health check |
 | `:h color_my_ascii` | Open Vim help |
+
+**hover** — two views of "why is this character colored the way it is": the
+*live* answer (the actual `hl_group` color_my_ascii's own extmarks painted at
+this exact position right now, with its resolved fg/bg) and the *config*
+answer (which character groups it belongs to per config, and whether it's an
+override - independent of whether anything is painted right now). If the
+cursor sits on a recognized keyword, also shows which language(s) it maps to.
+The same text is copied to the unnamed register (+ system clipboard where
+available), handy for pasting into a bug report while building a custom
+[language](languages.md#custom-languages) or [group](features/group-configuration.md).
 
 ---
 
@@ -165,6 +176,7 @@ require('color_my_ascii').setup({
     debug               = '<leader>ad',
     check_fences        = '<leader>ax',
     fence_jump          = '%',
+    hover               = '<leader>ai',
   },
 })
 ```

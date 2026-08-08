@@ -7,6 +7,7 @@ standard markdown fence-tag detection for each.
 
   - [Language Table](#language-table)
   - [Standard Fence Tag Support](#standard-fence-tag-support)
+  - [Custom Languages](#custom-languages)
 
 ---
 
@@ -78,7 +79,46 @@ require('color_my_ascii').setup({
 })
 ````
 
-Additional languages can be easily added (see [Contributing](contributing.md)).
+Additional languages can be added to the plugin itself (see
+[Contributing](contributing.md)), or - without forking anything - through
+`config.languages` below.
+
+---
+
+## Custom Languages
+
+Add your own language from `setup()` via `languages`, without touching the
+plugin itself. Same entry shape as the built-in `languages/*.lua` files:
+
+````lua
+require('color_my_ascii').setup({
+  languages = {
+    mylang = {
+      words        = { 'foo', 'bar', 'baz' }, -- highlighted with `hl` when this language is active
+      unique_words = { 'foo' },               -- optional: words unique enough to drive heuristic detection
+      hl           = 'Function',              -- highlight-group name or a ColorMyAscii.CustomHighlight table
+    },
+  },
+  -- optional: also treat a markdown fence tag as this language
+  fence_language_map = {
+    mylang = 'mylang',
+  },
+})
+````
+
+Entries are merged into the built-in set at `setup()` time; a name that
+matches a built-in language (e.g. `lua`) **replaces** that language's entry
+wholesale rather than merging field-by-field. A malformed entry (missing
+`words` or `hl`) is skipped with a warning instead of breaking the other
+languages.
+
+Calling `setup()` again (e.g. after adding or editing a `languages` entry)
+re-highlights every already-open, plugin-managed buffer immediately - no
+need to touch the buffer or restart Neovim.
+
+See [Configuration](configuration.md#custom-languages) for the full
+`config.languages` reference, and |color_my_ascii-config-languages| in the
+Vim help.
 
 ---
 

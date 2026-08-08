@@ -10,6 +10,12 @@ return {
   scheme = 'default',
   groups = {},
   keywords = {},
+  -- Extension point for adding your own language without a languages/*.lua
+  -- file in the plugin itself. Same entry shape as the built-ins ({ words,
+  -- unique_words?, hl }); merged into `keywords` at setup() (a name that
+  -- matches a built-in language overrides it). Malformed entries are skipped
+  -- with a warning rather than breaking keyword-lookup construction.
+  languages = {},
   overrides = {},
   default_hl = 'Normal',
   default_text_hl = nil,

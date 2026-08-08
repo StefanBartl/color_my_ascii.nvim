@@ -23,7 +23,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 ## Features
 
 - **Automatic Detection** of `ascii` code blocks in Markdown files
-- **31 predefined languages** (C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM IR, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS), detected explicitly, via standard fence tags, by keyword heuristic, or falling back to buffer filetype
+- **31 predefined languages** (C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM IR, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS), detected explicitly, via standard fence tags, by keyword heuristic, or falling back to buffer filetype — plus your own via `config.languages`, no fork required
 - **Modular character groups and custom highlights** with full RGB/Hex control, plus predefined color schemes (Matrix, Nord, Gruvbox, Dracula, and more)
 - **Non-intrusive**: uses extmarks, no buffer modification
 - **Function name and bracket highlighting**, inline code highlighting, and configurable treatment of empty fenced blocks

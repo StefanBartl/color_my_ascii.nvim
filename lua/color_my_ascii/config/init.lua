@@ -289,6 +289,41 @@ local function build_unique_keyword_lookup()
   return lookup
 end
 
+--- Merge user-declared `config.languages` into `current_config.keywords` - the
+--- extension point for adding a language without a languages/*.lua file (see
+--- |color_my_ascii-config-languages|). Same entry structure as the built-in
+--- language files (`{ words, unique_words?, hl }`); an entry reusing a
+--- built-in language's name overrides it. Invalid entries are skipped with a
+--- warning instead of breaking keyword-lookup construction.
+---@return nil
+local function merge_user_languages()
+  local user_languages = current_config.languages
+  if type(user_languages) ~= 'table' or vim.tbl_isempty(user_languages) then
+    return
+  end
+
+  local valid = {}
+  for lang_name, lang_def in pairs(user_languages) do
+    if type(lang_def) == 'table' and type(lang_def.words) == 'table' and lang_def.hl ~= nil then
+      valid[lang_name] = lang_def
+    else
+      notify(
+        string.format(
+          'color_my_ascii: languages.%s has an invalid structure (expected { words = {...}, hl = ... }), skipping',
+          tostring(lang_name)
+        ),
+        vim.log.levels.WARN
+      )
+    end
+  end
+
+  -- Shallow extend: a name reused from a built-in language replaces that
+  -- language's entry wholesale (words/unique_words/hl together), not a
+  -- field-by-field deep merge - deep-extending would splice the user's
+  -- `words` into the built-in array index-by-index instead of replacing it.
+  current_config.keywords = vim.tbl_extend('force', current_config.keywords, valid)
+end
+
 --- Setup the configuration with user options
 ---@param opts? ColorMyAscii.Config|{scheme: string} User configuration to merge with defaults
 function M.setup(opts)
@@ -322,6 +357,8 @@ function M.setup(opts)
   else
     current_config = vim.deepcopy(defaults)
   end
+
+  merge_user_languages()
 
   -- Resolve default_text_hl if it's a custom highlight
   if current_config.default_text_hl then

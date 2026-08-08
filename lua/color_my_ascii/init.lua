@@ -89,6 +89,19 @@ function M.setup(opts)
     desc = 'Re-apply color_my_ascii ASCII-art highlight groups after colorscheme change',
   })
 
+  -- Hot-reload: calling setup() again (e.g. after adding/editing a
+  -- config.languages entry) invalidates the stale per-buffer parse cache and
+  -- immediately re-highlights every already-managed buffer, so a changed
+  -- definition takes effect without touching the buffer or restarting.
+  if next(state.buffers) ~= nil then
+    cache_manager.clear_all()
+    for bufnr, _ in pairs(state.buffers) do
+      if safe_api.is_valid_buffer(bufnr) then
+        M.highlight_buffer(bufnr)
+      end
+    end
+  end
+
   return true, nil
 end
 

@@ -142,6 +142,10 @@ Full default configuration:~
       -- Character-specific overrides (highest priority)
       overrides = {},
 
+      -- Your own language(s), merged into the built-in set.
+      -- See |color_my_ascii-config-languages|.
+      languages = {},
+
       -- Default highlight for unmatched characters
       default_hl = 'Normal',
 
@@ -186,6 +190,56 @@ Configuration options:~
 *color_my_ascii-config-overrides*
     overrides               Character-specific highlight overrides
                             Type: table<string, string|table>
+
+*color_my_ascii-config-languages*
+    languages               Extension point for adding your own language(s)
+                            from setup(), without a languages/*.lua file in
+                            the plugin itself. Same entry shape as the
+                            built-in language files.
+                            Type: table<string, table>
+                            Default: {}
+
+                            Each entry:~
+                              words         string[]  words highlighted with
+                                            `hl` when this language is active
+                              unique_words  string[]|nil  optional subset
+                                            unique enough to drive heuristic
+                                            language detection
+                              hl            string|table  highlight-group
+                                            name or an attribute table
+
+                            Merged into the built-in language set at
+                            setup() time. An entry whose name matches a
+                            built-in language (e.g. "lua") replaces that
+                            language's entry wholesale (words/unique_words/hl
+                            together) - not a field-by-field merge. A
+                            malformed entry (missing `words` or `hl`) is
+                            skipped with a warning; the rest still load.
+
+                            Calling setup() again (e.g. after editing a
+                            `languages` entry) re-highlights every already-
+                            open, plugin-managed buffer immediately - no
+                            need to touch the buffer or restart Neovim.
+
+                            To also recognize a markdown fence tag as your
+                            language, add it to |color_my_ascii-config-fence_language_map|
+                            too.
+
+                            Example:~
+>lua
+    require('color_my_ascii').setup({
+      languages = {
+        mylang = {
+          words        = { 'foo', 'bar', 'baz' },
+          unique_words = { 'foo' },
+          hl           = 'Function',
+        },
+      },
+      fence_language_map = {
+        mylang = 'mylang',
+      },
+    })
+<
 
 *color_my_ascii-config-default_hl*
     default_hl              Default highlight for unmatched characters

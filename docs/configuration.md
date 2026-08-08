@@ -7,6 +7,7 @@ highlights, and the fence-line / fence-content highlighting features.
 ## Table of content
 
   - [Default Configuration](#default-configuration)
+  - [Custom Languages](#custom-languages)
   - [Treesitter Integration](#treesitter-integration)
   - [With Color Scheme](#with-color-scheme)
   - [Custom Highlights](#custom-highlights)
@@ -28,6 +29,10 @@ require('color_my_ascii').setup({
 
   -- Character-specific overrides (highest priority)
   overrides = {},
+
+  -- Your own language(s), merged into the built-in set (see "Custom
+  -- Languages" below). Empty by default.
+  languages = {},
 
   -- Default highlighting for unmatched characters
   default_hl = 'Normal',
@@ -82,6 +87,42 @@ require('color_my_ascii').setup({
   },
 })
 ````
+
+---
+
+## Custom Languages
+
+The plugin ships ~30 languages as `languages/*.lua` files (see
+[Supported Languages](languages.md)). `languages` in `setup()` is the
+extension point for adding your own without forking the plugin - same entry
+shape as those files:
+
+````lua
+require('color_my_ascii').setup({
+  languages = {
+    mylang = {
+      words        = { 'foo', 'bar', 'baz' }, -- highlighted with `hl`
+      unique_words = { 'foo' },               -- optional: drives heuristic language detection
+      hl           = 'Function',              -- hl-group name or a CustomHighlight table
+    },
+  },
+})
+````
+
+Entries are merged into the built-in language set at `setup()` time. Reusing
+a built-in name (e.g. `lua`) **replaces** that language's entry wholesale -
+`words`/`unique_words`/`hl` together, not a field-by-field merge. A
+malformed entry (missing `words` or `hl`) is skipped with a warning; the
+rest of your languages (and all built-ins) still load normally.
+
+Calling `setup()` again - e.g. from a keymap after editing a `languages`
+entry - re-highlights every already-open, plugin-managed buffer immediately,
+so a changed definition takes effect without touching the buffer or
+restarting Neovim.
+
+To also recognize a markdown fence tag as your language (not just
+```` ```ascii-mylang ````), add it to `fence_language_map` too - see
+[Standard Fence Tag Support](languages.md#standard-fence-tag-support).
 
 ---
 

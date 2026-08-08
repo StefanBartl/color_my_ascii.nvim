@@ -6,8 +6,8 @@
 -- Loads every *_spec.lua listed below, runs it against the shared harness,
 -- prints a per-spec result, and exits non-zero on the first failing spec.
 
-local dir = debug.getinfo(1, "S").source:sub(2):match("(.*[/\\])") or "./"
-local H = dofile(dir .. "harness.lua")
+local dir = debug.getinfo(1, 'S').source:sub(2):match('(.*[/\\])') or './'
+local H = dofile(dir .. 'harness.lua')
 
 -- color_my_ascii.nvim depends on lib.nvim at runtime (debounce_manager.lua),
 -- so the suite needs it on the runtimepath.
@@ -23,25 +23,25 @@ local function add_lib_nvim()
   if vim.env.LIB_NVIM_PATH then
     candidates[#candidates + 1] = vim.env.LIB_NVIM_PATH
   end
-  candidates[#candidates + 1] = vim.fn.getcwd() .. "/../lib.nvim"
-  candidates[#candidates + 1] = vim.fn.stdpath("data") .. "/lazy/lib.nvim"
+  candidates[#candidates + 1] = vim.fn.getcwd() .. '/../lib.nvim'
+  candidates[#candidates + 1] = vim.fn.stdpath('data') .. '/lazy/lib.nvim'
 
   for _, path in ipairs(candidates) do
     -- Normalize first: the sibling candidate contains a ".." segment and the
     -- stdpath one mixes separators on Windows; the runtimepath module searcher
     -- does not resolve either, so an unnormalized entry silently finds nothing.
     local norm = vim.fs.normalize(path)
-    if vim.fn.isdirectory(norm .. "/lua/lib") == 1 then
+    if vim.fn.isdirectory(norm .. '/lua/lib') == 1 then
       vim.opt.rtp:append(norm)
       -- rtp alone is not enough here: the runtimepath searcher does not pick
       -- up entries appended after startup. lib.nvim's own README prescribes
       -- registering it on package.path as well (the C require searcher is the
       -- fallback that always applies).
       package.path = table.concat({
-        norm .. "/lua/?.lua",
-        norm .. "/lua/?/init.lua",
+        norm .. '/lua/?.lua',
+        norm .. '/lua/?/init.lua',
         package.path,
-      }, ";")
+      }, ';')
       return norm
     end
   end
@@ -50,20 +50,21 @@ end
 
 local lib_path = add_lib_nvim()
 if not lib_path then
-  print("FAIL  cannot locate lib.nvim (a runtime dependency of color_my_ascii.nvim).")
-  print("      Set $LIB_NVIM_PATH, or check it out next to this repo.")
+  print('FAIL  cannot locate lib.nvim (a runtime dependency of color_my_ascii.nvim).')
+  print('      Set $LIB_NVIM_PATH, or check it out next to this repo.')
   os.exit(1)
 end
 
 local specs = {
-  "fences_spec.lua",
-  "fence_hl_spec.lua",
-  "fence_content_hl_spec.lua",
-  "fence_jump_spec.lua",
-  "fence_export_spec.lua",
-  "fence_actions_spec.lua",
-  "debounce_manager_spec.lua",
-  "debug_inspect_spec.lua",
+  'fences_spec.lua',
+  'fence_hl_spec.lua',
+  'fence_content_hl_spec.lua',
+  'fence_jump_spec.lua',
+  'fence_export_spec.lua',
+  'fence_actions_spec.lua',
+  'debounce_manager_spec.lua',
+  'debug_inspect_spec.lua',
+  'config_languages_spec.lua',
 }
 
 local failed = 0
@@ -71,16 +72,16 @@ for _, name in ipairs(specs) do
   local run = dofile(dir .. name)
   local ok, err = pcall(run, H)
   if ok then
-    print(("ok    %s"):format(name))
+    print(('ok    %s'):format(name))
   else
     failed = failed + 1
-    print(("FAIL  %s\n      %s"):format(name, tostring(err)))
+    print(('FAIL  %s\n      %s'):format(name, tostring(err)))
   end
 end
 
 if failed > 0 then
-  print(("\n%d spec(s) failed"):format(failed))
+  print(('\n%d spec(s) failed'):format(failed))
   os.exit(1)
 end
 
-print("\nCOLOR_MY_ASCII_TESTS_OK")
+print('\nCOLOR_MY_ASCII_TESTS_OK')

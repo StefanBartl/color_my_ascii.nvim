@@ -110,7 +110,8 @@
 ---@field debug_enabled? boolean Toggle debug mode
 ---@field debug_verbose? boolean Toggle write debug logs to file
 ---@field groups? table<string, ColorMyAscii.CharGroup> Named character groups with their highlight settings
----@field keywords? table<string, ColorMyAscii.KeywordGroup> Language-specific keyword definitions
+---@field keywords? table<string, ColorMyAscii.KeywordGroup> Language-specific keyword definitions (built-ins + `languages`, merged; usually left alone in favor of `languages` below)
+---@field languages? table<string, ColorMyAscii.KeywordGroup> User-defined languages, merged on top of the built-in languages/*.lua set at setup() (same entry shape: { words, unique_words?, hl }; reusing a built-in name overrides it). The intended extension point for adding a language without forking the plugin - see |color_my_ascii-config-languages|
 ---@field custom_groups? table<string, ColorMyAscii.CustomGroup> User-defined character groups with custom highlights
 ---@field overrides? table<string, string|ColorMyAscii.CustomHighlight> Individual character to highlight group mappings (highest priority)
 ---@field default_hl? string|ColorMyAscii.CustomHighlight Default highlight group for characters not matching any rules

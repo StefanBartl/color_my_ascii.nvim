@@ -90,6 +90,7 @@ installation with packer.nvim.
 - [Inline Code](docs/features/inline-code.md) — highlighting in `` `...` ``
 - [Test File](docs/dev/TEST.md) — test all features
 - [Roadmap](docs/ROADMAP.md) — planned and considered future work
+- [Features Log](docs/FEATURES.md) — detailed record of implemented roadmap items, traceable to their commit
 - [Changelog](docs/CHANGELOG.md) — version history
 - [Vim Help](doc/color_my_ascii.txt) — complete reference (`:h color_my_ascii`)
 

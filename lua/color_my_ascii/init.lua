@@ -69,6 +69,12 @@ function M.setup(opts)
     require('color_my_ascii.bindings.keymaps').attach(cfg.keymaps)
   end
 
+  -- Re-register static autocommands so a comment_ascii.filetypes list
+  -- supplied here takes effect: the plugin/ bootstrap's own call to this
+  -- happens with only the default config (before this setup() call, if any,
+  -- has run). Re-callable: the augroup is cleared and rebuilt each time.
+  require('color_my_ascii.bindings.autocmds').enable()
+
   -- Optional fence-line highlighting: resolve its highlight groups now and keep
   -- them in sync with colorscheme changes.
   fence_hl.setup_hl(cfg)

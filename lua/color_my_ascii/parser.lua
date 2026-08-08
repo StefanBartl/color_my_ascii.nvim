@@ -152,15 +152,38 @@ function M.find_ascii_blocks_heuristic(bufnr)
   return blocks
 end
 
+--- Whether `bufnr` should use comment_ascii's `-- ascii` marker scanner
+--- instead of markdown fence detection (config.comment_ascii.enable, and the
+--- buffer's filetype is in config.comment_ascii.filetypes).
+---@internal
+---@param bufnr integer
+---@param cfg ColorMyAscii.Config
+---@return boolean
+local function use_comment_ascii(bufnr, cfg)
+  local ca = cfg.comment_ascii
+  if not (ca and ca.enable and type(ca.filetypes) == 'table') then
+    return false
+  end
+  local ft = vim.bo[bufnr].filetype
+  return vim.tbl_contains(ca.filetypes, ft)
+end
+
 --- Find all ASCII code blocks in the buffer.
---- Dispatches to the treesitter-backed parser (parser_ts.lua) when
---- config.treesitter.{enabled,block_detection} are both true and a markdown
---- parser is available; falls back to the heuristic line scanner otherwise
---- (including when the treesitter path errors), so this always returns a result.
+--- Dispatches to `comment_ascii.find_blocks` for buffers opted into
+--- `config.comment_ascii` (see there); otherwise to the treesitter-backed
+--- parser (parser_ts.lua) when config.treesitter.{enabled,block_detection}
+--- are both true and a markdown parser is available, falling back to the
+--- heuristic line scanner otherwise (including when the treesitter path
+--- errors), so this always returns a result.
 ---@param bufnr integer Buffer number to search
 ---@return ColorMyAscii.Block[] blocks List of found ASCII blocks
 function M.find_ascii_blocks(bufnr)
   local cfg = require('color_my_ascii.config').get()
+
+  if use_comment_ascii(bufnr, cfg) then
+    return require('color_my_ascii.comment_ascii').find_blocks(bufnr)
+  end
+
   local ts_cfg = cfg.treesitter
 
   if ts_cfg and ts_cfg.enabled and ts_cfg.block_detection then
@@ -174,10 +197,7 @@ function M.find_ascii_blocks(bufnr)
 
       if cfg.debug_enabled then
         notify.warn(
-          string.format(
-            'Treesitter block detection failed, falling back to heuristic parser: %s',
-            tostring(blocks)
-          )
+          string.format('Treesitter block detection failed, falling back to heuristic parser: %s', tostring(blocks))
         )
       end
     end
@@ -209,10 +229,7 @@ function M.find_all_blocks(bufnr, opts)
 
       if cfg.debug_enabled then
         notify.warn(
-          string.format(
-            'Treesitter block scan failed, falling back to heuristic parser: %s',
-            tostring(blocks)
-          )
+          string.format('Treesitter block scan failed, falling back to heuristic parser: %s', tostring(blocks))
         )
       end
     end
@@ -302,6 +319,12 @@ function M.find_inline_codes(bufnr)
   local cfg = require('color_my_ascii.config').get()
 
   if not cfg.enable_inline_code then
+    return {}
+  end
+
+  -- Inline `code` spans are a markdown/prose concept; skip them entirely for
+  -- comment_ascii buffers (a Lua/Python/... source file, not markdown).
+  if use_comment_ascii(bufnr, cfg) then
     return {}
   end
 

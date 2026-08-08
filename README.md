@@ -29,7 +29,9 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 - **Function name and bracket highlighting**, inline code highlighting, and configurable treatment of empty fenced blocks
 - **Fence-line and fence-content highlighting**: full-line/full-width highlight of fence delimiters and interiors, on by default and theme-matched
 - **Public Fence API** (`require("color_my_ascii").fences`) for other plugins to reuse fenced-block detection
-- **`:Fence` actions**: a literate-programming toolkit for the block under the cursor — export, yank, open (edit-in-split + sync), run, format, import, change language, select, wrap/unwrap
+- **`:Fence` actions**: a literate-programming toolkit for the block under the cursor — export (plain or HTML with its applied highlighting), yank (plain or ANSI-colored), open (edit-in-split + sync), run, format, import, change language, select, wrap/unwrap, align (straighten box-drawing edges)
+- **ASCII blocks in code comments** (opt-in, `config.comment_ascii`): explicitly-marked `-- ascii` … `-- /ascii` blocks get the same highlighting outside markdown
+- **`:ColorMyAscii hover`**: highlight/group/keyword info for the character under the cursor, in a float
 - **Health check** (`:checkhealth color_my_ascii`) and fence validation (`:ColorMyAscii check-fences`)
 
 ---

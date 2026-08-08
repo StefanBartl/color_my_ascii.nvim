@@ -68,6 +68,7 @@ local specs = {
   'config_languages_spec.lua',
   'hover_spec.lua',
   'box_align_spec.lua',
+  'comment_ascii_spec.lua',
 }
 
 local failed = 0

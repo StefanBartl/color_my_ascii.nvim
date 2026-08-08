@@ -31,6 +31,42 @@ return {
     block_detection = true,
     syntax_highlight = true,
   },
+  -- Optional detection/highlighting of explicitly-marked ASCII blocks inside
+  -- code comments, outside markdown - `-- ascii` ... `-- /ascii` (using the
+  -- buffer's own line-comment prefix). Off by default: unlike most other
+  -- features, enabling this activates the plugin on non-markdown filetypes.
+  -- Highlighting only - the :Fence toolkit and fence-line/-content
+  -- background highlighting remain markdown-only.
+  comment_ascii = {
+    enable = false,
+    filetypes = {
+      'lua',
+      'python',
+      'javascript',
+      'typescript',
+      'go',
+      'rust',
+      'c',
+      'cpp',
+      'sh',
+      'bash',
+      'zsh',
+      'ruby',
+      'java',
+      'kotlin',
+      'scala',
+      'swift',
+      'dart',
+      'elixir',
+      'haskell',
+      'perl',
+      'r',
+      'clojure',
+      'groovy',
+      'php',
+      'csharp',
+    },
+  },
   treat_empty_fence_as_ascii = true,
   enable_inline_code = true,
   enable_function_names = true,

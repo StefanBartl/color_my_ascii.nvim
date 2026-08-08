@@ -472,6 +472,53 @@ Configuration options:~
                             syntax_highlight = true }
                             See |color_my_ascii-treesitter|
 
+*color_my_ascii-config-comment_ascii*
+    comment_ascii            Optional detection/highlighting of explicitly-
+                            marked ASCII blocks inside code comments, outside
+                            markdown. Off by default - unlike most other
+                            features, enabling this activates the plugin on
+                            non-markdown filetypes.
+                            Type: table { enable, filetypes }
+                            Fields:
+                              enable     boolean   (default false)
+                              filetypes  string[]  filetypes to activate on
+                                         when enabled (default: a broad
+                                         built-in list, see
+                                         lua/color_my_ascii/config/DEFAULTS.lua)
+
+                            Marker: a comment line whose trimmed, comment-
+                            prefix-stripped text is "ascii" (or "ascii-lang",
+                            same tag syntax as a markdown fence tag), up to a
+                            matching "/ascii" line - the buffer's own line-
+                            comment prefix (vim.bo.commentstring) instead of
+                            backticks:
+>lua
+    local function foo()
+      -- ascii
+      -- ┌────┐
+      -- │ hi │
+      -- └────┘
+      -- /ascii
+      return 1
+    end
+<
+                            Highlighting only - the |:Fence| toolkit and
+                            fence-line/fence-content background highlighting
+                            remain markdown-only. Only single-line comment
+                            syntax is supported (the commentstring prefix
+                            before "%s"), not block comments. Algorithm in
+                            lua/color_my_ascii/comment_ascii.lua.
+
+                            Example:~
+>lua
+    require('color_my_ascii').setup({
+      comment_ascii = {
+        enable    = true,
+        filetypes = { 'lua', 'python' },
+      },
+    })
+<
+
 Custom highlight specification:~
 
 Highlights can be specified as strings (built-in highlight groups) or tables
@@ -559,6 +606,20 @@ When enabled, treats empty fences (``` without language) as ASCII blocks:
 <
 
 See |color_my_ascii-config-treat_empty_fence_as_ascii|.
+
+Comment ASCII Blocks~                           *color_my_ascii-comment-ascii*
+
+Opt-in (config.comment_ascii): explicitly-marked ASCII blocks inside code
+comments, outside markdown:
+>lua
+    -- ascii
+    -- +--+
+    -- |ok|
+    -- +--+
+    -- /ascii
+<
+
+See |color_my_ascii-config-comment_ascii|.
 
 ==============================================================================
 7. TREESITTER INTEGRATION                       *color_my_ascii-treesitter*

@@ -17,6 +17,7 @@ highlights, and the fence-line / fence-content highlighting features.
     - [Theme-matched presets](#theme-matched-presets)
     - [Overrides](#overrides)
   - [Fence-content highlighting](#fence-content-highlighting)
+  - [ASCII Blocks in Code Comments](#ascii-blocks-in-code-comments)
 
 ---
 
@@ -62,6 +63,13 @@ require('color_my_ascii').setup({
     enabled = true,
     block_detection = true,
     syntax_highlight = true,
+  },
+
+  -- Optional ASCII blocks inside code comments outside markdown, off by
+  -- default (see "ASCII Blocks in Code Comments" below).
+  comment_ascii = {
+    enable = false,
+    filetypes = { 'lua', 'python', 'javascript', --[[ ... ]] },
   },
 
   -- Full-line highlight of fence delimiter lines (see "Fence-line highlighting"
@@ -335,6 +343,48 @@ fence_content_highlight = {
 
 Turn it off with `enable = false` if you only want the delimiter-line
 highlight above.
+
+---
+
+## ASCII Blocks in Code Comments
+
+Everything above activates on markdown (` ``` ` fences). `comment_ascii`
+extends detection to code comments in **other** filetypes, via an explicit
+marker instead - there's no fence syntax to anchor to outside markdown:
+
+````lua
+require('color_my_ascii').setup({
+  comment_ascii = {
+    enable    = true,
+    filetypes = { 'lua', 'python' }, -- default: a broad built-in list, see DEFAULTS.lua
+  },
+})
+````
+
+```lua
+local function foo()
+  -- ascii
+  -- ┌────┐
+  -- │ hi │
+  -- └────┘
+  -- /ascii
+  return 1
+end
+```
+
+The marker (`ascii` / `ascii-<lang>`, same tag syntax as a markdown fence)
+must be on its own comment line, using the buffer's own line-comment prefix
+(`vim.bo.commentstring`); `/ascii` closes it, same open/close symmetry as a
+` ``` ` fence. A non-comment line before `/ascii` ends the scan without a
+match, so an accidentally-unclosed block is silently skipped rather than
+swallowing the rest of the file.
+
+**Off by default** - unlike most other features, enabling this activates the
+plugin on non-markdown filetypes. **Highlighting only**: the `:Fence` toolkit
+and fence-line/fence-content background highlighting remain markdown-only;
+comment blocks only get character/keyword/treesitter-overlay highlighting.
+Only single-line comment syntax is supported (the `commentstring` prefix
+before `%s`), not block comments (`/* ... */`).
 
 ---
 

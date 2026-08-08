@@ -100,6 +100,14 @@
 ---@field replace_format? string string.format template for the reference; args are (filename, relpath)
 ---@field ext_map? table<string, string> Language-tag -> file-extension overrides
 
+--- Extends ASCII-block detection to code comments outside markdown, via an
+--- explicit marker (`-- ascii` … `-- /ascii`, using the buffer's own
+--- line-comment prefix) instead of ``` fences. Off by default - unlike most
+--- other features, this activates the plugin on non-markdown filetypes.
+---@class ColorMyAscii.CommentAscii
+---@field enable? boolean Detect and highlight `-- ascii` ... `-- /ascii` blocks in comments (default false)
+---@field filetypes? string[] Filetypes to activate on when enabled (default: a broad built-in list of languages with a simple line-comment prefix)
+
 ---@class ColorMyAscii.TreesitterConfig
 ---@field enabled? boolean Master switch for both features below (default true; both sub-features fall back to heuristic-only behavior when no parser is installed)
 ---@field block_detection? boolean Use treesitter's markdown grammar to detect fenced code blocks instead of the heuristic line scanner (default true, only applies if enabled=true)
@@ -120,6 +128,7 @@
 ---@field enable_language_detection? boolean Whether to use heuristic language detection
 ---@field language_detection_threshold? integer Minimum unique keyword matches for language detection
 ---@field treesitter? ColorMyAscii.TreesitterConfig Optional treesitter-based block detection and syntax highlighting
+---@field comment_ascii? ColorMyAscii.CommentAscii Optional detection/highlighting of explicitly-marked ASCII blocks inside code comments, outside markdown
 ---@field treat_empty_fence_as_ascii? boolean Treat `` without language as ASCII block
 ---@field enable_inline_code? boolean Enable highlighting in inline code ...`)
 ---@field enable_function_names? boolean Enable heuristic function name detection

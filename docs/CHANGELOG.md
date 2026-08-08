@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `:Fence export --html` / `:Fence yank --ansi`: export or copy a fenced block's *applied* color_my_ascii highlighting (not just plain text) as a standalone HTML document or 24-bit ANSI escape codes, via the new `highlight_export.lua` module.
 - `:ColorMyAscii hover` (+ opt-in `hover` keymap action): float showing the applied highlight, config-level group/override, and keyword-language info for the character under the cursor; also copies the same text to a register for pasting into a bug report.
 - `:Fence align` (+ opt-in `fence_align` keymap action): straightens simple box-drawing boxes whose right edge has drifted after hand-editing, widening each box to its own widest row so content is only ever padded, never cut off. Directory-tree connectors and anything that isn't a clean rectangle are left untouched. Algorithm in the new `box_align.lua`.
+- `config.comment_ascii`: opt-in detection/highlighting of explicitly-marked ASCII blocks inside code comments outside markdown (`-- ascii` … `-- /ascii`, using the buffer's own line-comment prefix), activating the plugin on the configured non-markdown filetypes. Highlighting only - the `:Fence` toolkit and fence-line/fence-content background highlighting remain markdown-only.
 - State-based fence parser for accurate block detection
 - Support for tilde fences (`~~~`) in addition to backticks
 - `ColorMyAsciiCheckFences` command to detect unmatched code blocks

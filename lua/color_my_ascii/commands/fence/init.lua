@@ -152,13 +152,15 @@ function M.complete(arglead, cmdline, _)
   local sub = toks[2]
   if sub == 'export' then
     if starts_with(arglead, '-') then
-      return filter_prefix({ '--open', '--replace' }, arglead)
+      return filter_prefix({ '--open', '--replace', '--html' }, arglead)
     end
     return vim.fn.getcompletion(arglead, 'file')
   elseif sub == 'import' then
     return vim.fn.getcompletion(arglead, 'file')
   elseif sub == 'open' then
     return filter_prefix({ '--split', '--vsplit', '--tab', '--edit' }, arglead)
+  elseif sub == 'yank' then
+    return filter_prefix({ '--ansi' }, arglead)
   elseif sub == 'lang' or sub == 'wrap' then
     return filter_prefix(require('color_my_ascii.commands.fence.util').lang_tags(), arglead)
   end

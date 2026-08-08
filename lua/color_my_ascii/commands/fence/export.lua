@@ -1,11 +1,13 @@
 ---@module 'color_my_ascii.commands.fence.export'
 --- Extracts the fenced block under the cursor into a standalone file via
---- `:Fence export ["path"] [--open] [--replace]`.
+--- `:Fence export ["path"] [--open] [--replace] [--html]`.
 --- Resolves the block at the cursor via the public fence API, writes its content
 --- to `path` (prompted with file completion when omitted), and optionally opens
 --- the new file (`--open`) and/or replaces the block with a link reference in a
 --- "literate tangle" style (`--replace`). Behaviour defaults come from
 --- `config.fence_export`; the flags override them per call.
+--- `--html` exports the block's *applied* color_my_ascii highlighting instead
+--- of plain text (`<span>` runs + a stylesheet, via `highlight_export.to_html`).
 
 local M = {}
 
@@ -20,8 +22,9 @@ end
 ---@internal
 ---@param bufnr integer
 ---@param block table
+---@param ext? string Extension override (default: derived from the block's language)
 ---@return string
-local function suggest_path(bufnr, block)
+local function suggest_path(bufnr, block, ext)
   local c = cfg()
   local bufname = api.nvim_buf_get_name(bufnr)
   local dir
@@ -31,7 +34,7 @@ local function suggest_path(bufnr, block)
     dir = vim.fn.fnamemodify(bufname, ':h')
   end
   local stem = (bufname ~= '' and vim.fn.fnamemodify(bufname, ':t:r')) or 'fence'
-  return dir .. '/' .. stem .. '_fence.' .. util.ext_for(block.lang)
+  return dir .. '/' .. stem .. '_fence.' .. (ext or util.ext_for(block.lang))
 end
 
 --- Best-effort path relative to `base` (falls back to absolute).
@@ -179,13 +182,15 @@ end
 --- `:Fence export` entry point.
 ---@param argv string[] Tokens after `export` (path + flags, in any order).
 function M.run(argv)
-  local flags = { open = false, replace = false }
+  local flags = { open = false, replace = false, html = false }
   local path = nil
   for _, a in ipairs(argv or {}) do
     if a == '--open' then
       flags.open = true
     elseif a == '--replace' then
       flags.replace = true
+    elseif a == '--html' then
+      flags.html = true
     elseif a:sub(1, 2) == '--' then
       util.notify('export: unknown flag ' .. a, vim.log.levels.WARN)
     elseif not path then
@@ -201,7 +206,13 @@ function M.run(argv)
     return
   end
 
-  local content = api.nvim_buf_get_lines(bufnr, block.content_start, block.content_end, false)
+  local content
+  if flags.html then
+    local html = require('color_my_ascii.highlight_export').to_html(bufnr, block)
+    content = vim.split(html, '\n', { plain = true })
+  else
+    content = api.nvim_buf_get_lines(bufnr, block.content_start, block.content_end, false)
+  end
 
   if path then
     write_and_finish(bufnr, block, content, path, flags)
@@ -209,7 +220,8 @@ function M.run(argv)
   end
 
   -- No path given: prompt with the suggested default + file completion.
-  prompt_path('Export fence to: ', suggest_path(bufnr, block), function(chosen_path)
+  local suggested = suggest_path(bufnr, block, flags.html and 'html' or nil)
+  prompt_path('Export fence to: ', suggested, function(chosen_path)
     if not chosen_path then
       util.notify('export cancelled')
       return

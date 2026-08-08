@@ -53,8 +53,8 @@ language tags.
 
 | Subcommand | Description |
 |------------|-------------|
-| `:Fence export [path] [--open] [--replace]` | Extract the block into a standalone file |
-| `:Fence yank [reg]` | Copy the block content (no markers) to a register (default `"` + `+`) |
+| `:Fence export [path] [--open] [--replace] [--html]` | Extract the block into a standalone file (or an HTML file with its applied highlighting, `--html`) |
+| `:Fence yank [reg] [--ansi]` | Copy the block content (no markers) to a register (default `"` + `+`); `--ansi` copies it with its applied highlighting as ANSI escape codes |
 | `:Fence open [--split\|--vsplit\|--tab\|--edit]` | Edit the block in a real split (full LSP/formatter); `:w` syncs back |
 | `:Fence run` | Run the block with its interpreter; show output in a scratch split |
 | `:Fence format` | Format the block in place with the language's formatter |
@@ -69,6 +69,17 @@ language tags.
 suggested filename (extension derived from the fence language) + file completion.
 `--open` opens the file after; `--replace` swaps the block for a link reference
 (literate tangle).
+
+**export --html / yank --ansi** — export or copy the block's *applied*
+color_my_ascii highlighting instead of plain text, via
+[`highlight_export.lua`](../lua/color_my_ascii/highlight_export.lua): re-reads
+the extmarks already painted on the block and reconstructs the same colors as
+HTML (`<span class="cma-<Group>">` runs + a stylesheet with only the classes
+actually used) or 24-bit ANSI truecolor escape codes. Handy for pasting a
+colored ASCII diagram into a chat or a webpage instead of losing the color the
+moment it leaves the buffer. `--html`'s suggested filename gets a `.html`
+extension regardless of the fence language; `--ansi` works with any `:Fence
+yank` register argument.
 
 **open** — the "otter-lite" editor: the block is written to a temp file with the
 right extension and opened in a split, so the language server and formatters

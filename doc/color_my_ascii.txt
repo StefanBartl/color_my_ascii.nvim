@@ -665,19 +665,28 @@ Fence Management~
     the cursor. Argument completion suggests subcommands, flags, file paths
     and language tags.
 
-    :Fence export [path] [--open] [--replace]
+    :Fence export [path] [--open] [--replace] [--html]
         Extract the block's content into a standalone file.
         - path: quoted or bare ("src/a.js", 'a b.py', a.lua). Omitted -> a
           prompt with a suggested filename (extension derived from the fence
-          language) and file-path completion.
+          language, or "html" with --html) and file-path completion.
         - --open:    open the exported file afterwards (config open_cmd).
         - --replace: replace the fenced block with a link reference to the new
           file (literate-tangle style; config replace_format).
+        - --html:    export the block's applied color_my_ascii highlighting
+          instead of plain text - a standalone HTML document with
+          `<span class="cma-<Group>">` runs and a stylesheet covering only the
+          groups the block actually uses. See
+          |color_my_ascii-highlight-export|.
         See |color_my_ascii-config-fence_export|.
 
-    :Fence yank [register]
+    :Fence yank [register] [--ansi]
         Copy the block content (without delimiters) to a register.
         Default: unnamed " and system + .
+        - --ansi: copy the block's applied color_my_ascii highlighting
+          instead of plain text, as 24-bit truecolor ANSI escape codes -
+          paste-ready for a terminal or a chat that renders ANSI. See
+          |color_my_ascii-highlight-export|.
 
     :Fence open [--split|--vsplit|--tab|--edit]
         Edit the block in a real split buffer with the correct filetype (so the
@@ -708,6 +717,27 @@ Fence Management~
 
     :Fence unwrap
         Remove the fence delimiters around the block under the cursor.
+
+                                                 *color_my_ascii-highlight-export*
+Highlight export (`:Fence export --html` / `:Fence yank --ansi`)~
+
+    `lua/color_my_ascii/highlight_export.lua` re-reads a block's applied
+    color_my_ascii highlighting (the extmarks it already painted, following
+    any links to their effective colors) and reconstructs the same colors as
+    HTML or ANSI, so a colored ASCII block survives being copied out of the
+    buffer - into a chat, a terminal, or a web page.
+
+    - HTML: `M.to_html(bufnr, block)` returns a standalone HTML document - a
+      `<pre>` block of `<span class="cma-<Group>">` runs plus a `<style>`
+      block with a rule only for each group the block actually uses (not the
+      whole plugin palette).
+    - ANSI: `M.to_ansi(bufnr, block)` returns 24-bit truecolor escape codes
+      (`\x1b[38;2;r;g;bm` / `\x1b[48;2;r;g;bm`, plus bold/italic/underline),
+      reset after every colored run.
+
+    Unhighlighted text (no color_my_ascii extmark on it) passes through
+    unstyled in both formats. Available as a public Lua API for other
+    consumers too, not just the two `:Fence` flags above.
 
 Scheme Management~                              *color_my_ascii-scheme-commands*
 

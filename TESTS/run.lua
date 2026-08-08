@@ -62,6 +62,7 @@ local specs = {
   'fence_jump_spec.lua',
   'fence_export_spec.lua',
   'fence_actions_spec.lua',
+  'highlight_export_spec.lua',
   'debounce_manager_spec.lua',
   'debug_inspect_spec.lua',
   'config_languages_spec.lua',

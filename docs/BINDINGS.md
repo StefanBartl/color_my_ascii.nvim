@@ -36,8 +36,8 @@ distinct from the separate buffer-local `:Fence` toolkit below.
 | `:ColorMyAscii inspect inline` | (debug mode only) inspect inline code on the current line |
 | `:ColorMyAscii inspect highlight <hl>` | (debug mode only) list groups using a highlight |
 | `:ColorMyAscii stats` | (debug mode only) show comprehensive plugin statistics |
-| `:Fence export [path] [--open] [--replace]` | Buffer-local (markdown): extract the fenced block under the cursor into a file |
-| `:Fence yank [reg]` | Copy the block content (no markers) to a register |
+| `:Fence export [path] [--open] [--replace] [--html]` | Buffer-local (markdown): extract the fenced block under the cursor into a file (or an HTML file with its applied highlighting, `--html`) |
+| `:Fence yank [reg] [--ansi]` | Copy the block content (no markers) to a register; `--ansi` copies it with its applied highlighting as ANSI escape codes |
 | `:Fence open [--split\|--vsplit\|--tab\|--edit]` | Edit the block in a split (full LSP); `:w` syncs back |
 | `:Fence run` | Run the block with its interpreter; output in a scratch split |
 | `:Fence format` | Format the block in place with the language's formatter |

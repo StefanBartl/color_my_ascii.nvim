@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `fence_content_highlight`: full-width background highlight of a fenced block's interior (blank lines and trailing whitespace included), on by default, shaded from the resolved `fence_line_highlight` color
 - `fence_jump` keymap action / `:ColorMyAscii fence-jump`: `%`-style jump between a fence's opening and closing delimiter, falling back to the built-in `%` elsewhere
 - `config.languages`: extension point for adding a custom language from `setup()` without a `languages/*.lua` file in the plugin itself; merges into the built-in set (same-name entries replace a built-in wholesale), invalid entries are skipped with a warning. Calling `setup()` again re-highlights already-open buffers immediately (simple hot-reload).
+- `:Fence export --html` / `:Fence yank --ansi`: export or copy a fenced block's *applied* color_my_ascii highlighting (not just plain text) as a standalone HTML document or 24-bit ANSI escape codes, via the new `highlight_export.lua` module.
 - State-based fence parser for accurate block detection
 - Support for tilde fences (`~~~`) in addition to backticks
 - `ColorMyAsciiCheckFences` command to detect unmatched code blocks

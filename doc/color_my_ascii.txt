@@ -738,6 +738,17 @@ Fence Management~
     :Fence unwrap
         Remove the fence delimiters around the block under the cursor.
 
+    :Fence align
+        Straighten simple box-drawing boxes (corner+horizontal+corner top
+        and bottom, vertical-edge interior rows - light, heavy, rounded, or
+        ASCII +-| style) whose right edge has drifted after hand-editing.
+        Each box is widened to its own widest row, so content is only ever
+        padded, never cut off - a normal buffer edit, `u` undoes it like any
+        other change. Narrow scope: only genuine 4-sided boxes; directory-
+        tree connectors (e.g. tree-branch glyphs) and anything that isn't a
+        clean rectangle are left untouched. Algorithm in
+        lua/color_my_ascii/box_align.lua.
+
                                                  *color_my_ascii-highlight-export*
 Highlight export (`:Fence export --html` / `:Fence yank --ansi`)~
 
@@ -816,6 +827,7 @@ Available actions:~
         fence_select        = '<leader>fv',  -- :Fence select
         fence_wrap          = '<leader>fw',  -- :Fence wrap
         fence_unwrap        = '<leader>fu',  -- :Fence unwrap
+        fence_align         = '<leader>fg',  -- :Fence align
       },
     })
 <

@@ -74,6 +74,7 @@ language tags.
 | `:Fence select` | Visually select the block interior |
 | `:'<,'>Fence wrap [lang]` | Wrap the current line / visual range in a fence |
 | `:Fence unwrap` | Remove the fence around the block under the cursor |
+| `:Fence align` | Straighten misaligned box-drawing edges in the block |
 
 **export** — path may be quoted or bare (`:Fence export "src/a.js"`,
 `:Fence export 'a b.py'`, `:Fence export a.lua`); omit it for a prompt with a
@@ -96,6 +97,15 @@ yank` register argument.
 right extension and opened in a split, so the language server and formatters
 attach normally. The fence interior is anchored with extmarks; saving the split
 (`:w`) writes the changes back into the fence.
+
+**align** — straightens simple box-drawing boxes (`┌─┐`/`│...│`/`└─┘`, the
+heavy/rounded variants, or ASCII `+-|`) whose right edge has drifted after
+hand-editing: each box is widened to its own widest row, so content is only
+ever padded, never cut off. A normal buffer edit - `u` undoes it like any
+other change. Deliberately narrow scope: only touches genuine 4-sided boxes;
+directory-tree connectors (`├──`/`└──`) and anything that isn't a clean
+rectangle are left alone. See
+[`box_align.lua`](../lua/color_my_ascii/box_align.lua) for the algorithm.
 
 ````lua
 require('color_my_ascii').setup({

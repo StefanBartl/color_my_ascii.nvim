@@ -47,6 +47,7 @@ local ACTIONS = {
   fence_select = { cmd = 'Fence select', desc = 'color_my_ascii: select fence content' },
   fence_wrap = { cmd = 'Fence wrap', desc = 'color_my_ascii: wrap line in a fence' },
   fence_unwrap = { cmd = 'Fence unwrap', desc = 'color_my_ascii: unwrap fence under cursor' },
+  fence_align = { cmd = 'Fence align', desc = 'color_my_ascii: straighten box-drawing edges in the fence' },
 }
 
 --- Attach user-configured keymaps

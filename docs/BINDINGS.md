@@ -47,6 +47,7 @@ distinct from the separate buffer-local `:Fence` toolkit below.
 | `:Fence select` | Visually select the block interior |
 | `:[range]Fence wrap [lang]` | Wrap the current line / range in a fence |
 | `:Fence unwrap` | Remove the fence around the block under the cursor |
+| `:Fence align` | Straighten misaligned box-drawing edges in the block |
 
 ---
 
@@ -78,6 +79,7 @@ separate which-key registration needed.
 | `fence_select` | `:Fence select` | `<leader>fv` |
 | `fence_wrap` | `:Fence wrap` | `<leader>fw` |
 | `fence_unwrap` | `:Fence unwrap` | `<leader>fu` |
+| `fence_align` | `:Fence align` | `<leader>fg` |
 
 The `fence_*` actions call the argument-less `:Fence` sub-commands (see
 [User Commands](#user-commands) above); like `check_fences`/`fence_jump` they
@@ -105,6 +107,7 @@ require('color_my_ascii').setup({
     fence_select        = '<leader>fv',
     fence_wrap          = '<leader>fw',
     fence_unwrap        = '<leader>fu',
+    fence_align         = '<leader>fg',
   },
 })
 ```

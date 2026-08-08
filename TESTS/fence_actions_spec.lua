@@ -130,5 +130,36 @@ return function(H)
     api.nvim_buf_delete(buf, { force = true })
   end
 
+  -- ---- align (:Fence align wiring; algorithm itself in box_align_spec) -----
+  do
+    local buf = H.scratch('markdown', {
+      '```ascii',
+      '┌────┐',
+      '│ hi │',
+      '│ world  │',
+      '└────┘',
+      '```',
+    })
+    api.nvim_win_set_cursor(0, { 3, 0 })
+    require('color_my_ascii.commands.fence.align').run({})
+    local L = api.nvim_buf_get_lines(buf, 0, -1, false)
+    eq(L[2], '┌────────┐', 'align: fence content rewritten in the buffer')
+    eq(L[3], '│ hi     │', 'align: interior row padded to match')
+    eq(L[6], '```', 'align: closing fence untouched')
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
+  -- ---- align: no boxes -> no-op, no error -----------------------------------
+  do
+    local buf = md_buf()
+    api.nvim_win_set_cursor(0, { 4, 0 })
+    local L_before = api.nvim_buf_get_lines(buf, 0, -1, false)
+    local okrun = pcall(require('color_my_ascii.commands.fence.align').run, {})
+    ok(okrun, 'align: does not error on a block with no boxes')
+    local L_after = api.nvim_buf_get_lines(buf, 0, -1, false)
+    eq(table.concat(L_after, '\n'), table.concat(L_before, '\n'), 'align: buffer untouched when nothing to align')
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
   require('color_my_ascii.config').setup({})
 end

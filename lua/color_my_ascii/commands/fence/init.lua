@@ -77,6 +77,9 @@ local SUBCOMMANDS = {
   unwrap = function(argv, _)
     require('color_my_ascii.commands.fence.wrap').unwrap(argv)
   end,
+  align = function(argv, _)
+    require('color_my_ascii.commands.fence.align').run(argv)
+  end,
 }
 
 --- The subcommand names, for usage/completion.
@@ -188,7 +191,7 @@ function M.register(bufnr)
     complete = function(arglead, cmdline, cursorpos)
       return M.complete(arglead, cmdline, cursorpos)
     end,
-    desc = '[color_my_ascii] Fence actions (export, yank, open, run, format, import, lang, select, wrap, unwrap)',
+    desc = '[color_my_ascii] Fence actions (export, yank, open, run, format, import, lang, select, wrap, unwrap, align)',
   })
 end
 

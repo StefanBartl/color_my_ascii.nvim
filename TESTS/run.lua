@@ -67,6 +67,7 @@ local specs = {
   'debug_inspect_spec.lua',
   'config_languages_spec.lua',
   'hover_spec.lua',
+  'box_align_spec.lua',
 }
 
 local failed = 0

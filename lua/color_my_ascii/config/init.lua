@@ -41,8 +41,7 @@ local function load_languages()
 
   -- Check directory existence
   if fn.isdirectory(lang_path) == 0 then
-    table.insert(errors, string.format('Languages directory not found: %s', lang_path))
-    notify('color_my_ascii: CRITICAL - languages/ directory not found at: ' .. lang_path, vim.log.levels.ERROR)
+    table.insert(errors, string.format('CRITICAL - languages/ directory not found at: %s', lang_path))
     return languages, errors
   end
 
@@ -54,8 +53,7 @@ local function load_languages()
   end
 
   if #files == 0 then
-    table.insert(errors, 'No language files found')
-    notify('color_my_ascii: WARNING - No language files found in: ' .. lang_path, vim.log.levels.WARN)
+    table.insert(errors, string.format('WARNING - No language files found in: %s', lang_path))
     return languages, errors
   end
 
@@ -69,14 +67,10 @@ local function load_languages()
       if type(lang_module.words) == 'table' and type(lang_module.hl) ~= 'nil' then
         languages[lang_name] = lang_module
       else
-        local err = string.format('Language "%s" has invalid structure', lang_name)
-        table.insert(errors, err)
-        notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
+        table.insert(errors, string.format('Language "%s" has invalid structure', lang_name))
       end
     else
-      local err = string.format('Failed to load language "%s": %s', lang_name, tostring(lang_module))
-      table.insert(errors, err)
-      notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
+      table.insert(errors, string.format('Failed to load language "%s": %s', lang_name, tostring(lang_module)))
     end
   end
 
@@ -107,8 +101,7 @@ local function load_groups()
 
   -- Check directory existence
   if fn.isdirectory(group_path) == 0 then
-    table.insert(errors, string.format('Groups directory not found: %s', group_path))
-    notify('color_my_ascii: CRITICAL - groups/ directory not found at: ' .. group_path, vim.log.levels.ERROR)
+    table.insert(errors, string.format('CRITICAL - groups/ directory not found at: %s', group_path))
     return groups, errors
   end
 
@@ -120,8 +113,7 @@ local function load_groups()
   end
 
   if #files == 0 then
-    table.insert(errors, 'No group files found')
-    notify('color_my_ascii: WARNING - No group files found in: ' .. group_path, vim.log.levels.WARN)
+    table.insert(errors, string.format('WARNING - No group files found in: %s', group_path))
     return groups, errors
   end
 
@@ -135,14 +127,10 @@ local function load_groups()
       if type(group_module.chars) == 'string' and type(group_module.hl) ~= 'nil' then
         groups[group_name] = group_module
       else
-        local err = string.format('Group "%s" has invalid structure', group_name)
-        table.insert(errors, err)
-        notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
+        table.insert(errors, string.format('Group "%s" has invalid structure', group_name))
       end
     else
-      local err = string.format('Failed to load group "%s": %s', group_name, tostring(group_module))
-      table.insert(errors, err)
-      notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
+      table.insert(errors, string.format('Failed to load group "%s": %s', group_name, tostring(group_module)))
     end
   end
 
@@ -293,26 +281,28 @@ end
 --- extension point for adding a language without a languages/*.lua file (see
 --- |color_my_ascii-config-languages|). Same entry structure as the built-in
 --- language files (`{ words, unique_words?, hl }`); an entry reusing a
---- built-in language's name overrides it. Invalid entries are skipped with a
---- warning instead of breaking keyword-lookup construction.
----@return nil
+--- built-in language's name overrides it. Invalid entries are skipped and
+--- reported back to the caller instead of breaking keyword-lookup construction.
+---@internal
+---@return string[] errors List of skipped-entry warnings (empty if none)
 local function merge_user_languages()
   local user_languages = current_config.languages
   if type(user_languages) ~= 'table' or vim.tbl_isempty(user_languages) then
-    return
+    return {}
   end
 
+  local errors = {}
   local valid = {}
   for lang_name, lang_def in pairs(user_languages) do
     if type(lang_def) == 'table' and type(lang_def.words) == 'table' and lang_def.hl ~= nil then
       valid[lang_name] = lang_def
     else
-      notify(
+      table.insert(
+        errors,
         string.format(
-          'color_my_ascii: languages.%s has an invalid structure (expected { words = {...}, hl = ... }), skipping',
+          'languages.%s has an invalid structure (expected { words = {...}, hl = ... }), skipping',
           tostring(lang_name)
-        ),
-        vim.log.levels.WARN
+        )
       )
     end
   end
@@ -322,14 +312,29 @@ local function merge_user_languages()
   -- field-by-field deep merge - deep-extending would splice the user's
   -- `words` into the built-in array index-by-index instead of replacing it.
   current_config.keywords = vim.tbl_extend('force', current_config.keywords, valid)
+
+  return errors
 end
 
 --- Setup the configuration with user options
 ---@param opts? ColorMyAscii.Config|{scheme: string} User configuration to merge with defaults
 function M.setup(opts)
-  -- Load modular definitions
-  local loaded_groups = load_groups()
-  local loaded_languages = load_languages()
+  -- Load modular definitions. Both loaders return non-fatal error/warning
+  -- lists rather than notifying themselves - setup() is the boundary that
+  -- decides whether and how to surface them to the user.
+  local loaded_groups, group_errors = load_groups()
+  local loaded_languages, language_errors = load_languages()
+
+  local function notify_load_error(err)
+    local level = err:match('^CRITICAL') and vim.log.levels.ERROR or vim.log.levels.WARN
+    notify('color_my_ascii: ' .. err, level)
+  end
+  for _, err in ipairs(group_errors) do
+    notify_load_error(err)
+  end
+  for _, err in ipairs(language_errors) do
+    notify_load_error(err)
+  end
 
   defaults.groups = loaded_groups
   defaults.keywords = loaded_languages
@@ -358,7 +363,9 @@ function M.setup(opts)
     current_config = vim.deepcopy(defaults)
   end
 
-  merge_user_languages()
+  for _, err in ipairs(merge_user_languages()) do
+    notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
+  end
 
   -- Resolve default_text_hl if it's a custom highlight
   if current_config.default_text_hl then

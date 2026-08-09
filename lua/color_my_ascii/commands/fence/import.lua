@@ -24,7 +24,11 @@ function M.run(argv)
     util.notify('no fenced block under the cursor', vim.log.levels.WARN)
     return
   end
-  local lines = vim.fn.readfile(path)
+  local ok, lines = pcall(vim.fn.readfile, path)
+  if not ok then
+    util.notify('failed to read ' .. path .. ': ' .. tostring(lines), vim.log.levels.ERROR)
+    return
+  end
   api.nvim_buf_set_lines(buf, block.content_start, block.content_end, false, lines)
   util.notify(('imported %d line(s) from %s'):format(#lines, vim.fn.fnamemodify(path, ':~:.')))
 end

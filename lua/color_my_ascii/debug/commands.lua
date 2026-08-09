@@ -16,7 +16,8 @@ function M.routes()
   local group_names = vim.tbl_keys(require('color_my_ascii.config').get().groups)
 
   return {
-    { path = { 'inspect', 'char' },
+    {
+      path = { 'inspect', 'char' },
       args = { { name = 'char', type = 'STRING' } },
       desc = 'Inspect which groups and highlights a character belongs to',
       run = function(ctx)
@@ -27,9 +28,11 @@ function M.routes()
         print('Highlight: ' .. (result.highlight or 'none'))
         print('Override: ' .. tostring(result.override))
         print('Groups: ' .. (#result.groups > 0 and table.concat(result.groups, ', ') or 'none'))
-      end },
+      end,
+    },
 
-    { path = { 'inspect', 'group' },
+    {
+      path = { 'inspect', 'group' },
       args = { { name = 'group', type = 'STRING', values = group_names } },
       desc = 'Inspect all characters in a specific group',
       run = function(ctx)
@@ -44,9 +47,11 @@ function M.routes()
         print('Highlight: ' .. result.highlight)
         print('Character count: ' .. result.count)
         print('Characters: ' .. table.concat(result.chars, ' '))
-      end },
+      end,
+    },
 
-    { path = { 'inspect', 'inline' },
+    {
+      path = { 'inspect', 'inline' },
       desc = 'Inspect inline code in current line',
       run = function()
         local line = vim.api.nvim_get_current_line()
@@ -73,9 +78,11 @@ function M.routes()
             end
           end
         end
-      end },
+      end,
+    },
 
-    { path = { 'inspect', 'highlight' },
+    {
+      path = { 'inspect', 'highlight' },
       args = { { name = 'hl_group', type = 'STRING' } },
       desc = 'Show all groups using a specific highlight',
       run = function(ctx)
@@ -87,9 +94,11 @@ function M.routes()
         for _, group_name in ipairs(groups) do
           print('  - ' .. group_name)
         end
-      end },
+      end,
+    },
 
-    { path = { 'stats' },
+    {
+      path = { 'stats' },
       desc = 'Show comprehensive plugin statistics',
       run = function()
         local stats = inspect.get_statistics()
@@ -114,7 +123,8 @@ function M.routes()
         print('  Keyword mappings: ' .. stats.lookups.keyword_count)
         print('  Unique keywords: ' .. stats.lookups.unique_keyword_count)
         print('  Overrides: ' .. stats.overrides)
-      end },
+      end,
+    },
   }
 end
 

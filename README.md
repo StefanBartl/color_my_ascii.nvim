@@ -16,9 +16,17 @@
 ![Neovim](https://img.shields.io/badge/Neovim-0.9+-success.svg)
 ![Lua](https://img.shields.io/badge/language-Lua-yellow.svg)
 
-> 🔧 Beta stage – under active development. Changes possible.
+> Beta stage - under active development. Changes possible.
 
 A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks with automatic language detection, custom highlights, and predefined color schemes.
+
+## Table of Contents
+
+- [Features](#features)
+- [Quickstart](#quickstart)
+- [Documentation](#documentation)
+- [Credits](#credits)
+- [See Also](#see-also)
 
 ## Features
 

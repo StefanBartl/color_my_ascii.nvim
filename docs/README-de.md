@@ -452,10 +452,7 @@ Commands, Keymap-Aktionen und Autocommands.
 
 ### Features
 
-- [Custom Highlights](features/custom-highlights.md) - RGB/Hex-Farben und Styles
-- [Function Detection](features/function-detection.md) - Automatische Funktionsnamen-Erkennung
-- [Bracket Highlighting](features/bracket-highlighting.md) - Klammern hervorheben
-- [Inline Code](features/inline-code.md) - Highlighting in `` `...` ``
+- [Features](FEATURES/README.md) - vollständiger Feature-Katalog nach Themen
 
 ---
 

@@ -538,7 +538,7 @@ vim.opt.termguicolors = true
 
 ## See Also
 
-- [Custom Highlights](./features/custom-highlights.md)
+- [Custom Highlights](./FEATURES/HIGHLIGHTING.md#custom-highlights--overrides)
 - [Configuration](../README.md#configuration)
 
 ---

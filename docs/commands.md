@@ -41,7 +41,7 @@ override - independent of whether anything is painted right now). If the
 cursor sits on a recognized keyword, also shows which language(s) it maps to.
 The same text is copied to the unnamed register (+ system clipboard where
 available), handy for pasting into a bug report while building a custom
-[language](languages.md#custom-languages) or [group](features/group-configuration.md).
+[language](languages.md#custom-languages) or [group](FEATURES/HIGHLIGHTING.md#character-groups).
 
 ---
 

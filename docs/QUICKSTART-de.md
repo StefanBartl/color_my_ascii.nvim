@@ -330,10 +330,7 @@ require('color_my_ascii').setup({
 ## Nächste Schritte
 
 1. **Feature-Dokumentation** lesen:
-   - [Custom Highlights](features/custom-highlights.md)
-   - [Function Detection](features/function-detection.md)
-   - [Bracket Highlighting](features/bracket-highlighting.md)
-   - [Inline Code](features/inline-code.md)
+   - [Features](FEATURES/README.md)
 
 2. **Test-Datei** ausprobieren:
    - Öffne [TEST.md](dev/TEST.md)

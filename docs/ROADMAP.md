@@ -1,9 +1,10 @@
 # Roadmap
 
 Ideas and planned work for color_my_ascii.nvim. Nothing here is committed to a
-timeline - this is a working list of what might come next. For a more
-detailed, commit-traceable record of what's landed, see
-[FEATURES.md](FEATURES.md).
+timeline - this is a working list of what might come next. For the full,
+themed catalog of what's actually implemented, see
+[FEATURES/README.md](FEATURES/README.md); for a version-by-version history,
+see [CHANGELOG.md](CHANGELOG.md).
 
 ## Planned
 

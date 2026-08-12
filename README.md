@@ -94,13 +94,9 @@ installation with packer.nvim.
 - [Bindings Cheatsheet](docs/BINDINGS.md) — compact table of all commands, keymaps, and autocommands
 - [Troubleshooting](docs/troubleshooting.md) — performance notes and common issues
 - [Contributing](docs/contributing.md) — dev setup (stylua/luacheck/CI), adding a new language or character group
-- [Custom Highlights](docs/features/custom-highlights.md) — RGB/Hex colors and styles
-- [Function Detection](docs/features/function-detection.md) — automatic function name detection
-- [Bracket Highlighting](docs/features/bracket-highlighting.md) — highlight brackets
-- [Inline Code](docs/features/inline-code.md) — highlighting in `` `...` ``
+- [Features](docs/FEATURES/README.md) — full feature catalog, grouped by theme (highlighting, languages, fences, color schemes, tools)
 - [Test File](docs/dev/TEST.md) — test all features
 - [Roadmap](docs/ROADMAP.md) — planned and considered future work
-- [Features Log](docs/FEATURES.md) — detailed record of implemented roadmap items, traceable to their commit
 - [Changelog](docs/CHANGELOG.md) — version history
 - [Vim Help](doc/color_my_ascii.txt) — complete reference (`:h color_my_ascii`)
 

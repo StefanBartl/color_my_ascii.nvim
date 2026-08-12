@@ -8,11 +8,42 @@ removed from the personal roadmap notes once logged here.
 
 ## Table of content
 
+  - [Implemented - noch aufteilen!](#implemented-noch-aufteilen)
   - [Custom Language Definitions](#custom-language-definitions)
   - [Export/Copy with Highlighting](#exportcopy-with-highlighting)
   - [Hover Info for Characters](#hover-info-for-characters)
   - [Box-Drawing Edge Alignment](#box-drawing-edge-alignment)
   - [ASCII Blocks in Code Comments](#ascii-blocks-in-code-comments)
+
+---
+
+## Implemented - noch aufteilen!
+
+- Optional treesitter-based block detection and real syntax highlighting
+  (`treesitter.block_detection` / `treesitter.syntax_highlight`), on by
+  default via `treesitter.enabled = true` - falls back silently to
+  heuristic-only behavior wherever a parser isn't installed.
+  See [README.md](../README.md#treesitter-integration).
+- 31 predefined languages (up from 11), with `fence_language_map` now covering
+  every one of them under its common tag(s) by default - plain ` ```go `/
+  ` ```javascript `/` ```json ` etc. blocks are highlighted without needing the
+  `ascii-` prefix. See [README.md](../README.md#supported-languages).
+- Full `:Fence` sub-command toolkit turning the dispatcher into a small
+  literate-programming tool: `yank`, `open` (sync-on-`:w` split editing),
+  `run`, `format`, `import`, `lang`, `select`, `wrap`/`unwrap`, on top of the
+  original `export`. See [BINDINGS.md](BINDINGS.md#user-commands) for the full
+  list.
+- Additional user commands for scheme/keyword introspection: `schemes list`/
+  `switch`/`pick` plus the debug-mode `inspect char|group|inline|highlight`
+  and `stats` commands. See [BINDINGS.md](BINDINGS.md#user-commands).
+- Default keymap actions for the argument-less `:Fence` sub-commands (`yank`,
+  `open`, `run`, `format`, `select`, `wrap`, `unwrap`), opt-in via
+  `setup({ keymaps = {...} })` like the existing `:ColorMyAscii` actions.
+  See [BINDINGS.md](BINDINGS.md#keymaps).
+- `ColorScheme` autocommand that re-applies color_my_ascii's dynamically
+  created (fixed-hex) ASCII-art highlight groups, so highlighting survives a
+  `:colorscheme` switch instead of going stale after Neovim's implicit
+  `:hi clear`. See [BINDINGS.md](BINDINGS.md#autocommands).
 
 ---
 
@@ -211,3 +242,6 @@ re-callable), `lua/color_my_ascii/init.lua` (re-calls `autocmds.enable()`),
 **Tests:** `TESTS/comment_ascii_spec.lua` (the marker scanner, incl.
 different comment syntaxes and unclosed-block handling), plus dispatch
 coverage in the same file.
+
+---
+

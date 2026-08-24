@@ -114,6 +114,22 @@ require('color_my_ascii').setup({
 
 ---
 
+## Right-click context menu
+
+`color_my_ascii.integrations.menu` contributes the actions above (except
+`ensure_blank_lines`, `show_config`, `debug`, `check_fences`, `fence_jump`,
+`fence_select`, `fence_import`, `fence_lang`, `fence_export` — commands
+needing arguments or acting on a range aren't a great fit for a no-argument
+menu click) as entries in the shape [nvzone/menu](https://github.com/nvzone/menu)
+expects, in markdown buffers only. `:Fence *` entries beyond `wrap` are
+further gated on the cursor being inside a fenced block. No dependency on
+`menu` itself — a host (typically your own `<RightMouse>` dispatcher)
+composes the entries into its own menu. See
+[docs/features/FENCES.md#right-click-context-menu](features/FENCES.md#right-click-context-menu).
+`opts.menu.enable = false` opts out.
+
+---
+
 ## Autocommands
 
 ---

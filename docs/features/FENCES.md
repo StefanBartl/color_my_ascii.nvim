@@ -192,3 +192,23 @@ of color_my_ascii's own overlay for languages it recognizes — see
 [HIGHLIGHTING.md#treesitter-syntax-overlay](HIGHLIGHTING.md#treesitter-syntax-overlay).
 Full LSP inside fences (completion/hover/diagnostics) is on the roadmap, not
 built — see [ROADMAP/lsp_integration_fence.md](../ROADMAP/lsp_integration_fence.md).
+
+## Right-click context menu
+
+`color_my_ascii.integrations.menu` contributes entries — Toggle
+highlighting, Switch color scheme, Highlight info, and the `:Fence`
+toolkit (Yank/Open/Run/Format/Align/Unwrap/Wrap) — in the shape
+[nvzone/menu](https://github.com/nvzone/menu) expects, in markdown buffers
+only (where `:ColorMyAscii`/`:Fence` are themselves active). The `:Fence *`
+entries beyond `wrap` are further gated on the cursor actually being inside
+a fenced block — the same check `commands.fence.util.current_block()` runs
+before every `:Fence` subcommand — so right-click never offers a fence
+action with nothing under the cursor to apply it to. `wrap` has no such
+precondition (it *creates* a fence around the current line/range), so it
+stays available everywhere in a markdown buffer. color_my_ascii.nvim has no
+dependency on `menu` and never opens a context menu itself — a host
+(typically your own `<RightMouse>` dispatcher) composes the entries into
+its own menu.
+
+- **Module:** `integrations/menu.lua` (`M.items`, `M.submenu`)
+- **Config:** `opts.menu.enable` (default `true`)

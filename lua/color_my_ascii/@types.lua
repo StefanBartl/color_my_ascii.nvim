@@ -142,6 +142,13 @@
 ---@field keymaps? false|table<string, string> Optional default keymaps (action name -> lhs). false (default) disables all keymaps. See lua/color_my_ascii/bindings/keymaps.lua
 ---@field cache? CacheConfig Optional override for cache_manager defaults
 ---@field debounce? DebounceConfig Optional override for debounce_manager defaults
+---@field menu? ColorMyAscii.MenuConfig `color_my_ascii.integrations.menu` (nvzone/menu context-menu contribution) opt-out
+
+--- Opt-out for `color_my_ascii.integrations.menu`. color_my_ascii.nvim has
+--- no nvzone/menu dependency itself; this only gates whether
+--- `M.items()`/`M.submenu()` return entries.
+---@class ColorMyAscii.MenuConfig
+---@field enable? boolean default true
 
 ---@class ColorMyAscii.State
 ---@field enabled boolean Whether the plugin is currently enabled

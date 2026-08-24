@@ -196,4 +196,11 @@ return {
   -- nil = use the plugin's built-in defaults.
   cache = nil,
   debounce = nil,
+  -- Right-click context menu (nvzone/menu, soft dependency; entries from
+  -- color_my_ascii.integrations.menu). Off automatically when nvzone/menu
+  -- isn't installed - this only gates whether M.items()/M.submenu() return
+  -- entries at all.
+  menu = {
+    enable = true,
+  },
 }

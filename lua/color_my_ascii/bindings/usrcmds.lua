@@ -22,9 +22,17 @@ function M.enable()
   local routes = {
     {
       path = { 'toggle' },
-      desc = 'Toggle ASCII art highlighting',
-      run = function()
-        require('color_my_ascii').toggle()
+      args = { { name = 'scope', type = 'STRING', enum = { 'global', 'buffer' }, optional = true } },
+      desc = 'Toggle ASCII art highlighting  :ColorMyAscii toggle [global|buffer]',
+      run = function(ctx)
+        -- Defaults to `global`, which is what this subcommand has always done
+        -- (`toggle()` flips one `state.enabled` across every managed buffer).
+        -- `buffer` is the case that had no expression before.
+        if ctx.args.scope == 'buffer' then
+          require('color_my_ascii').toggle_buffer()
+        else
+          require('color_my_ascii').toggle()
+        end
       end,
     },
 

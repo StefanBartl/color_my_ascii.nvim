@@ -26,7 +26,7 @@ toolkit below.
 | Command | Description |
 |---------|-------------|
 | `:ColorMyAscii` | Manually update highlighting |
-| `:ColorMyAscii toggle` | Enable/disable plugin |
+| `:ColorMyAscii toggle [global\|buffer]` | Enable/disable the plugin (`global`, the default) or just the current buffer (`buffer`) |
 | `:ColorMyAscii debug` | Show debug information (basic) |
 | `:ColorMyAscii show-config` | Show detailed configuration |
 | `:ColorMyAscii hover` | Show a float with the applied highlight/group/keyword info for the character under the cursor (also copied to a register) |

@@ -76,7 +76,11 @@ register, default `"` and `+`.
 
 - **Module:** `commands/fence/export.lua`, `commands/fence/yank.lua`
 - **Usercmds:** [../BINDINGS.md#user-commands](../BINDINGS.md#user-commands)
-- **Keymaps:** `fence_yank`
+- **Keymaps:** `fence_yank`, `fence_export` (added 2026-08-24 — it was the
+  one `Fence` subcommand with no entry in the keymap ACTIONS table, closing
+  the flag/option audit's entry. The mapping runs the bare `:Fence export`,
+  i.e. the prompt-for-a-path form, which is what every other entry in that
+  table does with its own optional arguments.)
 
 ## Highlight export & copy — HTML & ANSI
 

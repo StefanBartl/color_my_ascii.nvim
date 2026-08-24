@@ -30,6 +30,10 @@ end
 local ACTIONS = {
   highlight = { cmd = 'ColorMyAscii', desc = 'color_my_ascii: highlight buffer' },
   toggle = { cmd = 'ColorMyAscii toggle', desc = 'color_my_ascii: toggle highlighting' },
+  toggle_buffer = {
+    cmd = 'ColorMyAscii toggle buffer',
+    desc = 'color_my_ascii: toggle highlighting for this buffer',
+  },
   schemes = { cmd = 'ColorMyAscii schemes pick', desc = 'color_my_ascii: switch color scheme' },
   ensure_blank_lines = { cmd = 'ColorMyAscii ensure-blank-lines', desc = 'color_my_ascii: format code blocks' },
   show_config = { cmd = 'ColorMyAscii show-config', desc = 'color_my_ascii: show config' },
@@ -48,6 +52,10 @@ local ACTIONS = {
   fence_wrap = { cmd = 'Fence wrap', desc = 'color_my_ascii: wrap line in a fence' },
   fence_unwrap = { cmd = 'Fence unwrap', desc = 'color_my_ascii: unwrap fence under cursor' },
   fence_align = { cmd = 'Fence align', desc = 'color_my_ascii: straighten box-drawing edges in the fence' },
+  -- The one `Fence` subcommand that had no entry here. It takes optional
+  -- arguments (`[path] [--open] [--replace]`); the keymap runs the bare
+  -- form, which is the same thing every other entry in this table does.
+  fence_export = { cmd = 'Fence export', desc = 'color_my_ascii: export fence content to a file' },
 }
 
 --- Attach user-configured keymaps

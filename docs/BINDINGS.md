@@ -22,7 +22,7 @@ distinct from the separate buffer-local `:Fence` toolkit below.
 | command | desc |
 | --- | --- |
 | `:ColorMyAscii` | Highlight ASCII art in current buffer |
-| `:ColorMyAscii toggle` | Toggle ASCII art highlighting |
+| `:ColorMyAscii toggle [global\|buffer]` | Toggle ASCII art highlighting. Defaults to `global` (every managed buffer), which is what this command has always done; `buffer` toggles just the current one. |
 | `:ColorMyAscii debug` | Show debug information |
 | `:ColorMyAscii show-config` | Show current configuration |
 | `:ColorMyAscii check-fences` | Check current buffer for unmatched fenced code blocks |
@@ -65,6 +65,7 @@ separate which-key registration needed.
 | --- | --- | --- |
 | `highlight` | `:ColorMyAscii` | `<leader>ah` |
 | `toggle` | `:ColorMyAscii toggle` | `<leader>at` |
+| `toggle_buffer` | `:ColorMyAscii toggle buffer` | `<leader>ab` |
 | `schemes` | `:ColorMyAscii schemes pick` | `<leader>as` |
 | `ensure_blank_lines` | `:ColorMyAscii ensure-blank-lines` | `<leader>af` |
 | `show_config` | `:ColorMyAscii show-config` | `<leader>ac` |
@@ -80,6 +81,7 @@ separate which-key registration needed.
 | `fence_wrap` | `:Fence wrap` | `<leader>fw` |
 | `fence_unwrap` | `:Fence unwrap` | `<leader>fu` |
 | `fence_align` | `:Fence align` | `<leader>fg` |
+| `fence_export` | `:Fence export` | `<leader>fx` |
 
 The `fence_*` actions call the argument-less `:Fence` sub-commands (see
 [User Commands](#user-commands) above); like `check_fences`/`fence_jump` they
@@ -93,6 +95,7 @@ require('color_my_ascii').setup({
   keymaps = {
     highlight           = '<leader>ah',
     toggle              = '<leader>at',
+    toggle_buffer       = '<leader>ab',
     schemes             = '<leader>as',
     ensure_blank_lines  = '<leader>af',
     show_config         = '<leader>ac',
@@ -108,6 +111,7 @@ require('color_my_ascii').setup({
     fence_wrap          = '<leader>fw',
     fence_unwrap        = '<leader>fu',
     fence_align         = '<leader>fg',
+    fence_export        = '<leader>fx',
   },
 })
 ```

@@ -136,35 +136,33 @@ function M.setup_buffer(bufnr)
     notify.warn(string.format('Initial highlighting failed: %s', err))
   end
 
-  -- Setup autocommands for this buffer
-  -- NOTE: these two autocmds are buffer-scoped (opts.buffer), which
-  -- lib.nvim.autocmd.create does not support, so they stay on the raw API;
-  -- only augroup creation is routed through the lib.nvim wrapper.
+  -- Setup autocommands for this buffer. Both are buffer-scoped; these used to
+  -- call the raw API with a comment saying lib.nvim.autocmd.create did not
+  -- support `opts.buffer`. It does, so they go through the wrapper like
+  -- everything else -- which also gets them the wrapper's error reporting.
   local group = autocmd.augroup.create.clear('ColorMyAsciiBuffer_' .. bufnr)
 
   -- Re-highlight on text change with adaptive debouncing
-  api.nvim_create_autocmd({ 'TextChanged', 'TextChangedI' }, {
+  autocmd.create({ 'TextChanged', 'TextChangedI' }, function()
+    debounce_manager.debounce(bufnr, function()
+      M.highlight_buffer(bufnr)
+    end)
+  end, {
     group = group,
     buffer = bufnr,
-    callback = function()
-      debounce_manager.debounce(bufnr, function()
-        M.highlight_buffer(bufnr)
-      end)
-    end,
     desc = 'Re-highlight ASCII art on text change with debouncing',
   })
 
   -- Cleanup on buffer delete
-  api.nvim_create_autocmd('BufDelete', {
+  autocmd.create('BufDelete', function()
+    state.buffers[bufnr] = nil
+    highlighter.clear_buffer(bufnr)
+    fence_hl.clear(bufnr)
+    cache_manager.invalidate(bufnr)
+    debounce_manager.cancel(bufnr)
+  end, {
     group = group,
     buffer = bufnr,
-    callback = function()
-      state.buffers[bufnr] = nil
-      highlighter.clear_buffer(bufnr)
-      fence_hl.clear(bufnr)
-      cache_manager.invalidate(bufnr)
-      debounce_manager.cancel(bufnr)
-    end,
     desc = 'Cleanup ASCII art highlighting on buffer delete',
   })
 
@@ -263,6 +261,48 @@ function M.highlight_buffer(bufnr)
 
   pcall(fence_hl.apply, bufnr, cfg)
   return true, nil
+end
+
+--- Toggle highlighting for one buffer, leaving the global switch alone.
+---
+--- `M.toggle()` has always been global — a single `state.enabled` flag applied
+--- across every managed buffer — so "turn it off just here" had no expression
+--- at all. This is that: it flips whether the buffer is *managed*, reusing the
+--- existing `state.buffers` model rather than adding a second one.
+---
+--- Note it does not survive a re-attach: the FileType/BufReadPost autocmds
+--- call `setup_buffer` again, which re-marks the buffer as managed. Toggling
+--- off is for the buffer as it is open now, not a persistent per-file opt-out
+--- (`filetypes`/`disable` config is that).
+---@param bufnr? integer Buffer number (defaults to current buffer)
+---@return boolean managed New state (true = highlighted, false = cleared)
+function M.toggle_buffer(bufnr)
+  bufnr = bufnr or api.nvim_get_current_buf()
+
+  if not safe_api.is_valid_buffer(bufnr) then
+    notify.warn(string.format('Invalid buffer: %d', bufnr))
+    return false
+  end
+
+  if state.buffers[bufnr] then
+    state.buffers[bufnr] = nil
+    highlighter.clear_buffer(bufnr)
+    fence_hl.clear(bufnr)
+    notify.info('disabled for this buffer')
+    return false
+  end
+
+  -- Honour the global switch: enabling one buffer while the plugin is off
+  -- would mark it managed and then highlight nothing, which reads as a bug.
+  if not state.enabled then
+    notify.warn('plugin is disabled globally — :ColorMyAscii toggle first')
+    return false
+  end
+
+  state.buffers[bufnr] = true
+  M.highlight_buffer(bufnr)
+  notify.info('enabled for this buffer')
+  return true
 end
 
 --- Toggle the plugin on/off

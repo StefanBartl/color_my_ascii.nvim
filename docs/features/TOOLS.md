@@ -41,12 +41,35 @@ repo/machine, not per edit.
 
 The small set of always-available commands for the plugin as a whole:
 `:ColorMyAscii` (manual re-highlight of the current buffer),
-`:ColorMyAscii toggle` (enable/disable), `:ColorMyAscii debug` (basic debug
-info), `:ColorMyAscii show-config` (dump the resolved configuration table).
+`:ColorMyAscii toggle [global|buffer]` (enable/disable),
+`:ColorMyAscii debug` (basic debug info), `:ColorMyAscii show-config` (dump
+the resolved configuration table).
 
-- **Module:** `commands/debug.lua`, `commands/config.lua`
+### Toggle scope (2026-08-24)
+
+`toggle` is and has always been **global**: one `state.enabled` flag applied
+across every managed buffer. The flag/option audit recorded it as
+"current-buffer only" and asked for a bang or range to reach several buffers
+— that premise was backwards. What genuinely had no expression was the
+opposite: turning highlighting off in *one* buffer.
+
+`:ColorMyAscii toggle buffer` is that. `global` stays the default, so the
+bare command is unchanged. It reuses the existing `state.buffers` model — a
+buffer is highlighted when it is managed — instead of introducing a second
+piece of state, and the two switches stay independent.
+
+Two deliberate edges: enabling a single buffer while the plugin is globally
+off is **refused** (it would mark the buffer managed and then highlight
+nothing, which reads as a bug rather than a setting), and the per-buffer
+state does not survive a re-attach — the FileType/BufReadPost autocmds call
+`setup_buffer` again. It is for the buffer as it is open now; the
+`filetypes`/`disable` config is the persistent opt-out.
+
+- **Module:** `commands/debug.lua`, `commands/config.lua`,
+  `init.lua` (`toggle`, `toggle_buffer`)
 - **Usercmds:** [../BINDINGS.md#user-commands](../BINDINGS.md#user-commands)
-- **Keymaps:** `highlight`, `toggle`, `debug`, `show_config`
+- **Keymaps:** `highlight`, `toggle`, `toggle_buffer`, `debug`, `show_config`
+- **Tests:** `TESTS/toggle_buffer_spec.lua`
 
 ## Debug-mode inspect & stats commands
 

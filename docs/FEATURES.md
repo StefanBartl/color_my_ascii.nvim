@@ -8,7 +8,7 @@ removed from the personal roadmap notes once logged here.
 
 ## Table of content
 
-  - [Implemented - noch aufteilen!](#implemented-noch-aufteilen)
+  - [Implemented - still to be split up](#implemented---still-to-be-split-up)
   - [Custom Language Definitions](#custom-language-definitions)
   - [Export/Copy with Highlighting](#exportcopy-with-highlighting)
   - [Hover Info for Characters](#hover-info-for-characters)
@@ -17,7 +17,7 @@ removed from the personal roadmap notes once logged here.
 
 ---
 
-## Implemented - noch aufteilen!
+## Implemented - still to be split up
 
 - Optional treesitter-based block detection and real syntax highlighting
   (`treesitter.block_detection` / `treesitter.syntax_highlight`), on by

@@ -1,6 +1,6 @@
 # Feature Implementation Plan
 
-Ich werde die Features implementieren. Hier ist der Plan:
+The features will be implemented as follows. Here is the plan:
 
 ### 1. Commands Module Refactoring ✓
 

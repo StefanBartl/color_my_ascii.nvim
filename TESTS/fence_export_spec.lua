@@ -146,9 +146,11 @@ return function(H)
   ok(okcancel, 'no-path cancel: does not error')
   ok(vim.fn.filereadable(not_written) == 0, 'no-path cancel: nothing written')
 
+  -- Drop both from the module cache so the next spec gets a copy that has not
+  -- seen this one's stubbed `kit`. Clearing the entry is the whole reset; the
+  -- re-require that used to stand here assigned to a local nothing read again.
   package.loaded['lib.nvim.ui.kit'] = nil
   package.loaded['color_my_ascii.commands.fence.export'] = nil
-  export = require('color_my_ascii.commands.fence.export')
 
   api.nvim_buf_delete(buf3, { force = true })
   api.nvim_buf_delete(buf2, { force = true })

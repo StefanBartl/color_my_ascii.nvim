@@ -6,21 +6,21 @@
 
 return function(H)
   local eq, ok = H.eq, H.ok
-  local config = require("color_my_ascii.config")
-  local inspect = require("color_my_ascii.debug.inspect")
+  local config = require('color_my_ascii.config')
+  local inspect = require('color_my_ascii.debug.inspect')
 
   -- ---- scheme with table-valued group highlights (dracula) ------------------
   do
-    config.setup({ scheme = "dracula" })
+    config.setup({ scheme = 'dracula' })
 
     local stats = inspect.get_statistics()
-    ok(stats.groups.count > 0, "get_statistics: dracula scheme reports groups")
+    ok(stats.groups.count > 0, 'get_statistics: dracula scheme reports groups')
 
     for hl, groups in pairs(stats.groups.by_highlight) do
-      eq(type(hl), "string", "by_highlight: key is always a string, even for table-valued group.hl")
-      ok(#groups > 0, "by_highlight: each key maps to at least one group name")
+      eq(type(hl), 'string', 'by_highlight: key is always a string, even for table-valued group.hl')
+      ok(#groups > 0, 'by_highlight: each key maps to at least one group name')
       -- Must not error: this is exactly what the stats printer does.
-      local _ = "    " .. hl .. ": " .. table.concat(groups, ", ")
+      local _ = '    ' .. hl .. ': ' .. table.concat(groups, ', ')
     end
   end
 
@@ -30,8 +30,8 @@ return function(H)
 
     local stats = inspect.get_statistics()
     for hl, _ in pairs(stats.groups.by_highlight) do
-      eq(type(hl), "string", "by_highlight: key is a string for the default scheme too")
-      ok(not hl:find("^table:"), "by_highlight: plain highlight names aren't mangled")
+      eq(type(hl), 'string', 'by_highlight: key is a string for the default scheme too')
+      ok(not hl:find('^table:'), "by_highlight: plain highlight names aren't mangled")
     end
   end
 

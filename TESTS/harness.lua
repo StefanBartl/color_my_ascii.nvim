@@ -9,7 +9,7 @@ local H = {}
 ---@param msg string|nil
 function H.eq(a, b, msg)
   if a ~= b then
-    error(("FAIL %s: expected %q, got %q"):format(msg or "", tostring(b), tostring(a)), 2)
+    error(('FAIL %s: expected %q, got %q'):format(msg or '', tostring(b), tostring(a)), 2)
   end
 end
 
@@ -18,7 +18,7 @@ end
 ---@param msg string|nil
 function H.ok(v, msg)
   if not v then
-    error(("FAIL %s: expected truthy, got %q"):format(msg or "", tostring(v)), 2)
+    error(('FAIL %s: expected truthy, got %q'):format(msg or '', tostring(v)), 2)
   end
 end
 
@@ -29,8 +29,12 @@ end
 function H.scratch(ft, lines)
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_set_current_buf(buf)
-  if ft then vim.bo[buf].filetype = ft end
-  if lines then vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines) end
+  if ft then
+    vim.bo[buf].filetype = ft
+  end
+  if lines then
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  end
   return buf
 end
 

@@ -31,8 +31,12 @@ function M.items(bufnr)
 
   local cfg = require('color_my_ascii.config').get()
   local mcfg = cfg.menu or {}
-  if mcfg.enable == false then return {} end
-  if vim.bo[bufnr].filetype ~= 'markdown' then return {} end
+  if mcfg.enable == false then
+    return {}
+  end
+  if vim.bo[bufnr].filetype ~= 'markdown' then
+    return {}
+  end
 
   local _, block = require('color_my_ascii.commands.fence.util').current_block()
   local in_fence = block ~= nil
@@ -41,23 +45,41 @@ function M.items(bufnr)
 
   contextmenu.group(
     out,
-    contextmenu.entry(true, '  Toggle ASCII highlighting', function() vim.cmd('ColorMyAscii toggle') end),
-    contextmenu.entry(true, '  Switch color scheme', function() vim.cmd('ColorMyAscii schemes pick') end),
-    contextmenu.entry(true, '  Highlight info for character under cursor', function() vim.cmd('ColorMyAscii hover') end)
+    contextmenu.entry(true, '  Toggle ASCII highlighting', function()
+      vim.cmd('ColorMyAscii toggle')
+    end),
+    contextmenu.entry(true, '  Switch color scheme', function()
+      vim.cmd('ColorMyAscii schemes pick')
+    end),
+    contextmenu.entry(true, '  Highlight info for character under cursor', function()
+      vim.cmd('ColorMyAscii hover')
+    end)
   )
 
   contextmenu.group(
     out,
-    contextmenu.entry(in_fence, '  Yank fence content', function() vim.cmd('Fence yank') end),
-    contextmenu.entry(in_fence, '  Open fence in split', function() vim.cmd('Fence open') end),
-    contextmenu.entry(in_fence, '  Run fence content', function() vim.cmd('Fence run') end)
+    contextmenu.entry(in_fence, '  Yank fence content', function()
+      vim.cmd('Fence yank')
+    end),
+    contextmenu.entry(in_fence, '  Open fence in split', function()
+      vim.cmd('Fence open')
+    end),
+    contextmenu.entry(in_fence, '  Run fence content', function()
+      vim.cmd('Fence run')
+    end)
   )
 
   contextmenu.group(
     out,
-    contextmenu.entry(in_fence, '  Format fence', function() vim.cmd('Fence format') end),
-    contextmenu.entry(in_fence, '  Straighten box-drawing edges (align)', function() vim.cmd('Fence align') end),
-    contextmenu.entry(in_fence, '  Unwrap fence under cursor', function() vim.cmd('Fence unwrap') end)
+    contextmenu.entry(in_fence, '  Format fence', function()
+      vim.cmd('Fence format')
+    end),
+    contextmenu.entry(in_fence, '  Straighten box-drawing edges (align)', function()
+      vim.cmd('Fence align')
+    end),
+    contextmenu.entry(in_fence, '  Unwrap fence under cursor', function()
+      vim.cmd('Fence unwrap')
+    end)
   )
 
   -- Unlike the group above, `wrap` *creates* a fence around the current
@@ -65,7 +87,9 @@ function M.items(bufnr)
   -- gated on `in_fence` (see commands/fence/wrap.lua's M.wrap).
   contextmenu.group(
     out,
-    contextmenu.entry(true, '  Wrap line in a fence', function() vim.cmd('Fence wrap') end)
+    contextmenu.entry(true, '  Wrap line in a fence', function()
+      vim.cmd('Fence wrap')
+    end)
   )
 
   return out

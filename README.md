@@ -57,14 +57,14 @@ there is nothing to do until a Markdown file is actually being edited.
   ft = 'markdown',
   dependencies = { 'StefanBartl/lib.nvim' }, -- required: the :ColorMyAscii command is built on it
   opts = {
-    -- Optional: Configuration here
+    -- Optional: configuration goes here; every option has a default.
   }
 }
 ```
 
-```lua
-require('color_my_ascii').setup()
-```
+`opts` is all that is needed — lazy.nvim calls `setup()` with it. Only call
+`require('color_my_ascii').setup()` yourself if you are not using a plugin
+manager that does.
 
 The plugin activates automatically for Markdown files:
 

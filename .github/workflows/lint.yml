@@ -1,4 +1,4 @@
-name: Lint
+name: CI
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: v2.5.2
-          args: --check lua/ plugin/
+          args: --check lua/ plugin/ TESTS/
 
   luacheck:
     name: luacheck
@@ -26,4 +26,29 @@ jobs:
       - name: Run luacheck
         uses: lunarmodules/luacheck@v1
         with:
-          args: lua/ plugin/
+          args: lua/ plugin/ TESTS/
+
+  tests:
+    name: tests (headless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: color_my_ascii.nvim
+
+      # lib.nvim is a runtime dependency (debounce_manager), checked out as a
+      # sibling -- the layout TESTS/run.lua's own resolver looks for after
+      # $LIB_NVIM_PATH.
+      - uses: actions/checkout@v4
+        with:
+          repository: StefanBartl/lib.nvim
+          path: lib.nvim
+
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: stable
+
+      - name: Run TESTS/run.lua
+        working-directory: color_my_ascii.nvim
+        run: nvim --headless -u NONE -c "set rtp+=." -l TESTS/run.lua

@@ -303,7 +303,7 @@ require('color_my_ascii.telescope_picker').blocks(opts)
 
 ### features
 
-- [ ] Usercommand das bei ausführung wird sicherstellt, dass vor und nach jedem fenced block eine zeile abstand (leerzeile) vorhanden ist
+- [ ] A user command that, when run, ensures a blank line of separation exists before and after every fenced block
 
 ### Language Management
 

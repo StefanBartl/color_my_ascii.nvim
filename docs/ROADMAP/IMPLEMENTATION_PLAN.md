@@ -1,44 +1,49 @@
 # Implementation Plan
 
-Synthese aus [Arch&Coding.md](Arch&Coding.md), [Zentral-Prinzipien.md](Zentral-Prinzipien.md),
-[Checklist.md](Checklist.md) und dem bestehenden [../ROADMAP.md](../ROADMAP.md).
+A synthesis of [Arch&Coding.md](Arch&Coding.md), [Zentral-Prinzipien.md](Zentral-Prinzipien.md),
+[Checklist.md](Checklist.md) and the existing [../ROADMAP.md](../ROADMAP.md).
 
-color_my_ascii.nvim erfüllt inzwischen **alle** aus den drei Checklisten abgeleiteten
-Code- und Tooling-Punkte. Die ursprünglich identifizierten Lücken sind abgearbeitet;
-was bleibt, sind bewusst vertagte Design-Entscheidungen (siehe unten).
+color_my_ascii.nvim by now satisfies **all** the code and tooling points
+derived from those three checklists. The gaps originally identified are
+worked off; what remains are deliberately deferred design decisions (see
+below).
 
-## Abgeschlossen
+## Completed
 
-Die konkreten Code- und Tooling-Fixes aus früheren Durchgängen sind umgesetzt und
-verifiziert — sie sind hier nicht mehr einzeln aufgeführt (siehe Git-Historie /
+The concrete code and tooling fixes from earlier rounds are implemented and
+verified — they are no longer listed individually here (see the git history /
 [../CHANGELOG.md](../CHANGELOG.md)):
 
-- ~~Hot-Path: Mehrfach-API-Zugriffe in `highlighter.lua` (`line_content` wird jetzt
-  durchgereicht statt pro Zeichen neu geholt).~~
-- ~~`enable_treesitter`-Flag durch echtes `treesitter`-Config-Table + Block-Erkennung
-  (`parser_ts.lua`) und Grammar-Highlighting (`highlighter_ts.lua`) ersetzt.~~
-- ~~`.luarc.json` angelegt.~~
-- ~~**Formatter/Linter (stylua, luacheck) + CI.** `.stylua.toml` (2-Space, Single-Quote,
-  120 cols, passend zum Bestandsstil), `.luacheckrc` (luajit-std, `vim` als Global,
-  Längenprüfung an stylua delegiert) und `.github/workflows/lint.yml` (`stylua --check`
-  + `luacheck` auf Push/PR). Bestand einmalig durchformatiert; beide Linter laufen
-  lokal grün (0 Fehler / 0 Warnungen).~~
+- ~~Hot path: repeated API access in `highlighter.lua` (`line_content` is now
+  passed through instead of being fetched again per character).~~
+- ~~The `enable_treesitter` flag replaced by a real `treesitter` config table
+  plus block detection (`parser_ts.lua`) and grammar highlighting
+  (`highlighter_ts.lua`).~~
+- ~~`.luarc.json` created.~~
+- ~~**Formatter/linter (stylua, luacheck) plus CI.** `.stylua.toml` (2 spaces,
+  single quotes, 120 columns, matching the existing style), `.luacheckrc`
+  (luajit std, `vim` as a global, length checking delegated to stylua) and
+  `.github/workflows/lint.yml` (`stylua --check` plus `luacheck` on push/PR).
+  The existing code was formatted through once; both linters run green
+  locally (0 errors / 0 warnings).~~
 
-## Bewusst vertagt (keine offenen Tasks)
+## Deliberately deferred (not open tasks)
 
-Diese Punkte sind dokumentierte Entscheidungen, **nicht** offene Arbeit — sie werden
-erst bei nachgewiesenem Bedarf gebaut:
+These points are documented decisions, **not** open work — they get built
+only on demonstrated demand:
 
-- **Externe Highlighter-API für Fences** (Phase 1–3): siehe
-  [fence_highlighter_api.md](fence_highlighter_api.md). Kein konkreter Konsument
-  bekannt; Phase 1 (`User ColorMyAsciiFenceBlock`) ist startbereit, sobald einer da ist.
-- **Volle LSP im Fence**: siehe [lsp_integration_fence.md](lsp_integration_fence.md).
-  Empfehlung: zuerst otter.nvim-Adapter evaluieren, statt eine eigene Embedded-LSP-Engine
-  zu bauen.
-- **Per-Verzeichnis `@types`-Ordner**: aktuelle Struktur (root `@types.lua` +
-  `debug/@types.lua`) deckt den Bedarf; zusätzliche fast leere Types-Dateien wären
-  Overengineering für die aktuelle Codegröße.
-- **Automatisiertes Test-Framework** (plenary/busted): bewusst ausgelassen
-  ("state of the art"-Klausel); manuelle Verifikation über `TESTS/`.
-- **Tiefere `lib.nvim`-Integration** in performance-kritischen Modulen: abhängig von
-  `lib.nvim`s Stabilisierung, siehe [../ROADMAP.md](../ROADMAP.md) "Under Consideration".
+- **An external highlighter API for fences** (phases 1–3): see
+  [fence_highlighter_api.md](fence_highlighter_api.md). No concrete consumer
+  known; phase 1 (`User ColorMyAsciiFenceBlock`) is ready to start as soon as
+  there is one.
+- **Full LSP in the fence**: see [lsp_integration_fence.md](lsp_integration_fence.md).
+  Recommendation: evaluate an otter.nvim adapter first, instead of building
+  an embedded LSP engine of our own.
+- **A per-directory `@types` folder**: the current structure (root
+  `@types.lua` plus `debug/@types.lua`) covers the need; additional nearly
+  empty types files would be overengineering for the current size of the code.
+- **An automated test framework** (plenary/busted): deliberately left out
+  (the "state of the art" clause); manual verification through `TESTS/`.
+- **Deeper `lib.nvim` integration** in performance-critical modules: depends
+  on `lib.nvim` stabilizing, see [../ROADMAP.md](../ROADMAP.md) "Under
+  Consideration".

@@ -1,14 +1,14 @@
-# LSP- & Syntax-Integration in Fenced Blocks
+# LSP and syntax integration inside fenced blocks
 
-Status-Dokument (Deutsch). Beschreibt, was für Highlighting **innerhalb von
-Code-Fences** bereits existiert, und skizziert die zwei Wege zu **voller
-LSP-Unterstützung** (Completion/Hover/Diagnostics) im Fence.
+A status document. It describes what already exists for highlighting
+**inside code fences**, and sketches the two roads to **full LSP support**
+(completion/hover/diagnostics) within a fence.
 
 ---
 
-## 1. Ausgangslage
+## 1. Where things stand
 
-In einer Markdown-Datei stehen Code-Fences mit einer Sprache, z.B.:
+A markdown file contains code fences with a language, e.g.:
 
 ````markdown
 ```javascript
@@ -17,102 +17,108 @@ console.log(a);
 ```
 ````
 
-Ziel: Der Code **im** Fence soll so behandelt werden, als wäre es echter
-JavaScript-Code — mindestens Syntax-Highlighting, idealerweise volle LSP-Features
-(Completion, Hover, Diagnostics, Go-to-Definition …).
+The goal: the code **inside** the fence should be treated as if it were real
+JavaScript code — syntax highlighting at minimum, ideally full LSP features
+(completion, hover, diagnostics, go-to-definition …).
 
 ---
 
-## 2. Highlighting — was heute schon funktioniert
+## 2. Highlighting — what already works today
 
-Für Highlighting brauchen wir **nichts Neues zu bauen**; es gibt drei sich
-ergänzende Mechanismen:
+For highlighting we need to build **nothing new**; there are three
+complementary mechanisms:
 
-### 2a) Native Treesitter-Injection (der eigentliche Weg)
+### 2a) Native treesitter injection (the actual road)
 
-`tree-sitter-markdown` liefert `injections.scm`. Ist der Parser der Fence-Sprache
-installiert und Highlighting aktiv, injiziert Neovim die Sprache automatisch —
-`` ```javascript `` bekommt echtes JS-Highlighting, ganz ohne Plugin.
+`tree-sitter-markdown` ships `injections.scm`. If the fence language's parser
+is installed and highlighting is active, Neovim injects the language
+automatically — `` ```javascript `` gets real JS highlighting, with no plugin
+at all.
 
-- Voraussetzung: `nvim-treesitter` mit `highlight.enable = true` **und** der
-  jeweilige Parser (`:TSInstall javascript`).
-- Das ist die empfohlene, „richtige" Lösung für echten Code in Fences.
+- Prerequisite: `nvim-treesitter` with `highlight.enable = true` **and** the
+  respective parser (`:TSInstall javascript`).
+- This is the recommended, "correct" solution for real code in fences.
 
-### 2b) color_my_ascii's eigenes Grammar-Highlighting (für ASCII-Blöcke)
+### 2b) color_my_ascii's own grammar highlighting (for ASCII blocks)
 
-color_my_ascii behandelt Fences, deren Sprache in `fence_language_map` steht (bzw.
-`` ```ascii-* ``), als ASCII-Blöcke und färbt sie über
-[`highlighter_ts.lua`](../../lua/color_my_ascii/highlighter_ts.lua) **zusätzlich**
-mit der echten Ziel-Grammatik (Pass 5 in `highlighter.highlight_block`), sofern
-`treesitter.syntax_highlight = true` (Default). Damit erhalten die meisten
-gängigen Sprachen (`js`, `python`, `lua`, …) bereits eine Grammatik-Ebene über
-der ASCII-Heuristik.
+color_my_ascii treats fences whose language is in `fence_language_map` (or
+`` ```ascii-* ``) as ASCII blocks and colours them through
+[`highlighter_ts.lua`](../../lua/color_my_ascii/highlighter_ts.lua)
+**additionally** with the real target grammar (pass 5 in
+`highlighter.highlight_block`), provided `treesitter.syntax_highlight = true`
+(the default). That already gives most common languages (`js`, `python`,
+`lua`, …) a grammar layer on top of the ASCII heuristic.
 
-### 2c) Health-Check (Diagnose)
+### 2c) Health check (diagnosis)
 
-`:checkhealth color_my_ascii` listet die im aktuellen Buffer vorkommenden
-Fence-Sprachen und meldet, für welche **kein** Treesitter-Parser installiert ist
-— das ist der häufigste Grund, warum ein `` ```lang ``-Block *nicht* gehighlightet
-wird. Fix jeweils `:TSInstall <lang>`.
+`:checkhealth color_my_ascii` lists the fence languages occurring in the
+current buffer and reports which of them have **no** treesitter parser
+installed — that is the most common reason a `` ```lang `` block is *not*
+highlighted. The fix in each case is `:TSInstall <lang>`.
 
-> **Verworfen:** Ein generischer „highlighte alle Fences per Grammatik"-Schalter
-> (`fence_syntax`) wurde evaluiert und wieder entfernt: Die Schnittmenge aus
-> „nicht bereits vom ASCII-Pfad abgedeckt" und „hat einen Parser in der
-> LANGUAGE_MAP" ist leer — das Feature wäre toter, redundanter Code gewesen.
-> 2a + 2b decken Highlighting vollständig ab.
+> **Discarded:** a generic "highlight all fences by grammar" switch
+> (`fence_syntax`) was evaluated and removed again: the intersection of "not
+> already covered by the ASCII path" and "has a parser in the LANGUAGE_MAP"
+> is empty — the feature would have been dead, redundant code.
+> 2a + 2b cover highlighting completely.
 
-**Fazit Highlighting:** Erledigt über 2a/2b; unser Beitrag ist der Health-Check
-(2c) + Doku. Für echten Code in Fences ist native Injection (2a) der richtige Weg.
+**Conclusion on highlighting:** done via 2a/2b; our contribution is the
+health check (2c) plus documentation. For real code in fences, native
+injection (2a) is the right road.
 
 ---
 
-## 3. Volle LSP im Fence — die eigentliche Ausbaustufe
+## 3. Full LSP in the fence — the real expansion stage
 
-Das ist der große, noch offene Brocken. Man kann einen echten Sprachserver
-**nicht** direkt auf einen Zeilenbereich einer Markdown-Datei richten. Nötig ist
-die klassische **„embedded / injected language LSP"**-Architektur:
+This is the large, still-open chunk. One **cannot** point a real language
+server directly at a line range of a markdown file. What is needed is the
+classic **"embedded / injected language LSP"** architecture:
 
-1. **Versteckte Proxy-Buffer** pro eingebetteter Sprache, in die der
-   Fence-Inhalt gespiegelt wird (korrekter Filetype, damit z.B. `ts_ls`/`pyright`
-   attached).
-2. **Synchronisation** Markdown-Buffer ↔ Proxy-Buffer bei jeder Änderung.
-3. **Positions-Remapping** in beide Richtungen (Cursor/Range im MD-Buffer ↔
-   Zeile im Proxy-Buffer) für jede LSP-Anfrage/Antwort.
-4. **Request-Proxy**: `hover`, `completion`, `definition`, `references`,
-   `diagnostics`, `rename`, `formatting` durchreichen und Ergebnisse zurückmappen
-   (Diagnostics als Extmarks/virtual an die richtige MD-Zeile).
-5. Mehrere Blöcke derselben Sprache zusammenführen.
+1. **Hidden proxy buffers** per embedded language, into which the fence
+   content is mirrored (with the correct filetype, so that e.g. `ts_ls`/
+   `pyright` attach).
+2. **Synchronisation** of markdown buffer ↔ proxy buffer on every change.
+3. **Position remapping** in both directions (cursor/range in the MD buffer ↔
+   line in the proxy buffer) for every LSP request/response.
+4. **Request proxying**: pass `hover`, `completion`, `definition`,
+   `references`, `diagnostics`, `rename` and `formatting` through and map the
+   results back (diagnostics as extmarks/virtual text on the right MD line).
+5. Merging several blocks of the same language.
 
-Dafür gibt es zwei realistische Wege:
+There are two realistic roads to that:
 
-### Variante A — Integration von otter.nvim (empfohlen)
+### Option A — integrating otter.nvim (recommended)
 
-[otter.nvim](https://github.com/jmbuhr/otter.nvim) ist genau dafür gebaut (die
-Engine hinter quarto-nvim) und implementiert Punkte 1–5 bereits robust.
+[otter.nvim](https://github.com/jmbuhr/otter.nvim) is built for exactly this
+(it is the engine behind quarto-nvim) and already implements points 1–5
+robustly.
 
-- **Aufwand:** niedrig. Optional ein dünner Adapter, der otter unsere
-  Fence-Ranges (`require("color_my_ascii").fences.list_blocks`) übergibt bzw.
-  `otter.activate()` für die aktiven Sprachen aufruft.
-- **Vorteil:** Volle LSP-Features sofort, bewährt.
-- **Nachteil:** Fremd-Dependency; otter findet Regionen sonst über
-  TS-Injections. Unser Mehrwert: `list_blocks` liefert `(lang, range)` **auch
-  ohne** konfigurierte TS-Injection → funktioniert in mehr Setups.
+- **Effort:** low. Optionally a thin adapter that hands otter our fence ranges
+  (`require("color_my_ascii").fences.list_blocks`), or calls
+  `otter.activate()` for the active languages.
+- **Advantage:** full LSP features immediately, and proven.
+- **Disadvantage:** a third-party dependency; otherwise otter finds regions
+  through TS injections. Our added value: `list_blocks` delivers
+  `(lang, range)` **even without** a configured TS injection → it works in
+  more setups.
 
-### Variante B — Eigene Embedded-LSP-Engine (self-contained)
+### Option B — our own embedded LSP engine (self-contained)
 
-Punkte 1–5 selbst bauen, auf Basis unserer Fence-API.
+Build points 1–5 ourselves, on top of our fence API.
 
-- **Aufwand:** sehr hoch (mehrere Wochen für eine robuste Version) — im Kern eine
-  Neuimplementierung von otter.
-- **Vorteil:** keine Fremd-Dependency; nutzt unsere robuste Fence-Erkennung
-  (heuristik + treesitter) als Regionsquelle, auch ohne TS-Injections.
-- **Empfohlenes Vorgehen, falls gewählt:** MVP klein halten —
-  **eine** Sprache, nur `diagnostics` + `hover` + `completion`, als Modul
-  `color_my_ascii.embedded` über der Fence-API. Erst danach weitere
-  Requests/Sprachen.
+- **Effort:** very high (several weeks for a robust version) — at its core a
+  reimplementation of otter.
+- **Advantage:** no third-party dependency; uses our robust fence detection
+  (heuristic plus treesitter) as the region source, even without TS
+  injections.
+- **Recommended approach, if chosen:** keep the MVP small —
+  **one** language, only `diagnostics` + `hover` + `completion`, as a module
+  `color_my_ascii.embedded` on top of the fence API. Further
+  requests/languages only after that.
 
-### Entscheidung
+### Decision
 
-Aktuell **vertagt**. Empfehlung: zuerst Variante A (otter-Adapter) evaluieren;
-Variante B nur, wenn bewusst self-contained gewünscht ist. Der Ort ist in beiden
-Fällen dort, wo die Fence-API liegt (aktuell `color_my_ascii`).
+Currently **deferred**. Recommendation: evaluate option A (an otter adapter)
+first; option B only if being self-contained is deliberately wanted. In both
+cases the place for it is where the fence API lives (currently
+`color_my_ascii`).

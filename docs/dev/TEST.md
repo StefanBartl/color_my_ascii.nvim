@@ -1,8 +1,8 @@
-# Test File für color_my_ascii.nvim
+# Test file for color_my_ascii.nvim
 
-Dieses Dokument testet alle Features des Plugins systematisch.
+This document tests all of the plugin's features systematically.
 
-## Test 1: Einfaches ASCII-Art ohne Sprache
+## Test 1: simple ASCII art without a language
 
 ```ascii
 ┌─────────────────────┐
@@ -10,14 +10,14 @@ Dieses Dokument testet alle Features des Plugins systematisch.
 └─────────────────────┘
 ```
 
-**Erwartung**: Box-Zeichen werden hervorgehoben (Keyword-Gruppe)
+**Expectation**: box characters get highlighted (keyword group)
 
 ---
 
-## Test 2: ASCII-Art mit expliziter Sprache (C)
+## Test 2: ASCII art with an explicit language (C)
 
 ```ascii-c
-Struct im Speicher:
+Struct in memory:
 ┌─────────────────────────────────────┐
 │ int id          (4 bytes)           │
 ├─────────────────────────────────────┤
@@ -27,11 +27,11 @@ Struct im Speicher:
 └─────────────────────────────────────┘
 ```
 
-**Erwartung**: Keywords `int`, `char`, `void` werden hervorgehoben (Function-Gruppe)
+**Expectation**: keywords `int`, `char`, `void` get highlighted (function group)
 
 ---
 
-## Test 3: ASCII-Art mit automatischer Sprach-Erkennung (Lua)
+## Test 3: ASCII art with automatic language detection (Lua)
 
 ```ascii
 Lua Closure:
@@ -46,11 +46,11 @@ Lua Closure:
 └─────────────────────┘
 ```
 
-**Erwartung**: Keywords `function`, `local`, `return`, `end` werden hervorgehoben
+**Expectation**: keywords `function`, `local`, `return`, `end` get highlighted
 
 ---
 
-## Test 4: Pfeile und Symbole
+## Test 4: arrows and symbols
 
 ```ascii
 Process Flow:
@@ -61,13 +61,13 @@ Process Flow:
   ★ OK         ● Running      ✓ Done
 ```
 
-**Erwartung**:
-- Pfeile `→`, `↓` werden hervorgehoben (Special-Gruppe)
-- Symbole `★`, `●`, `✓` werden hervorgehoben (Delimiter-Gruppe)
+**Expectation**:
+- arrows `→`, `↓` get highlighted (special group)
+- symbols `★`, `●`, `✓` get highlighted (delimiter group)
 
 ---
 
-## Test 5: Go mit Operatoren
+## Test 5: Go with operators
 
 ```ascii go
 Channel Communication:
@@ -81,13 +81,13 @@ Channel Communication:
 └─────────────────────┘
 ```
 
-**Erwartung**:
-- Keywords `chan`, `int`, `func` hervorgehoben
-- Operator `:=` und `<-` hervorgehoben
+**Expectation**:
+- keywords `chan`, `int`, `func` highlighted
+- the operators `:=` and `<-` highlighted
 
 ---
 
-## Test 6: Leerer Fence (nur wenn treat_empty_fence_as_ascii = true)
+## Test 6: an empty fence (only with treat_empty_fence_as_ascii = true)
 
 ```
 ┌────────────┐
@@ -95,24 +95,24 @@ Channel Communication:
 └────────────┘
 ```
 
-**Erwartung**:
-- **Wenn aktiviert**: Box-Zeichen werden hervorgehoben
-- **Wenn deaktiviert**: Keine Hervorhebung
+**Expectation**:
+- **when enabled**: box characters get highlighted
+- **when disabled**: no highlighting
 
 ---
 
-## Test 7: Inline Code (nur wenn enable_inline_code = true)
+## Test 7: inline code (only with enable_inline_code = true)
 
-Man verwendet `func` für Funktionen in Go und `→` für Pfeile.
-Die `:=` Syntax ist eindeutig Go-spezifisch.
+One uses `func` for functions in Go and `→` for arrows.
+The `:=` syntax is unmistakably Go-specific.
 
-**Erwartung**:
-- **Wenn aktiviert**: `func`, `→`, `:=` werden hervorgehoben
-- **Wenn deaktiviert**: Keine Hervorhebung
+**Expectation**:
+- **when enabled**: `func`, `→`, `:=` get highlighted
+- **when disabled**: no highlighting
 
 ---
 
-## Test 8: Operatoren und Klammern
+## Test 8: operators and brackets
 
 ```ascii-c
 Expression Evaluation:
@@ -124,14 +124,14 @@ Expression Evaluation:
 └───────────────────────┘
 ```
 
-**Erwartung**:
-- Keywords `if`, `else` hervorgehoben
-- **Wenn enable_bracket_highlighting = true**: `()` hervorgehoben
-- Operatoren `>=`, `&&`, `!=`, `/` hervorgehoben (aus Operators-Gruppe)
+**Expectation**:
+- keywords `if`, `else` highlighted
+- **with enable_bracket_highlighting = true**: `()` highlighted
+- the operators `>=`, `&&`, `!=`, `/` highlighted (from the operators group)
 
 ---
 
-## Test 9: Funktionsnamen-Erkennung (nur wenn enable_function_names = true)
+## Test 9: function-name detection (only with enable_function_names = true)
 
 ```ascii-c
 Function Call Chain:
@@ -142,13 +142,13 @@ Function Call Chain:
 └─────────────────────────┘
 ```
 
-**Erwartung**:
-- **Wenn aktiviert**: `calculate`, `process`, `display` als Function hervorgehoben
-- **Wenn deaktiviert**: Nur normaler Text
+**Expectation**:
+- **when enabled**: `calculate`, `process`, `display` highlighted as functions
+- **when disabled**: plain text only
 
 ---
 
-## Test 10: Blöcke und Shading
+## Test 10: blocks and shading
 
 ```ascii
 Progress Bar:
@@ -157,13 +157,13 @@ Progress Bar:
 └──────────────────────┘
 ```
 
-**Erwartung**: Block-Zeichen `█`, `░` hervorgehoben (Type-Gruppe)
+**Expectation**: block characters `█`, `░` highlighted (type group)
 
 ---
 
 ## Test 11: Custom Highlights Testing
 
-Dieser Test funktioniert nur mit manueller Konfiguration:
+This test only works with a manual configuration:
 
 ```lua
 require('color_my_ascii').setup({
@@ -181,14 +181,14 @@ require('color_my_ascii').setup({
 └─────────────────────┘
 ```
 
-**Erwartung**:
-- Obere linke Ecke `┌` in rot und fett
-- Untere linke Ecke `└` in grün und fett
-- Normaler Text gedämpft in grau
+**Expectation**:
+- the top-left corner `┌` in red and bold
+- the bottom-left corner `└` in green and bold
+- ordinary text muted in grey
 
 ---
 
-## Test 12: Mehrsprachiger Block
+## Test 12: a multi-language block
 
 ```ascii
 Polyglot Example:
@@ -200,13 +200,13 @@ Polyglot Example:
 └──────────────────────────────────┘
 ```
 
-**Erwartung**:
-- `def` (Python), `func` (Go), `fn` (Rust), `void` (C++) alle hervorgehoben
-- Plugin nutzt erste gefundene Sprache oder alle Keywords
+**Expectation**:
+- `def` (Python), `func` (Go), `fn` (Rust), `void` (C++) all highlighted
+- the plugin uses the first language it finds, or all keywords
 
 ---
 
-## Test 13: Komplexe Diagramme
+## Test 13: complex diagrams
 
 ```ascii
 State Machine:
@@ -227,11 +227,11 @@ State Machine:
        └─────────┘
 ```
 
-**Erwartung**: Alle Linien und Pfeile korrekt hervorgehoben
+**Expectation**: all lines and arrows highlighted correctly
 
 ---
 
-## Test 14: Rust mit Type System
+## Test 14: Rust with the type system
 
 ```ascii rust
 Memory Layout:
@@ -247,31 +247,31 @@ Memory Layout:
 └────────────────────────────┘
 ```
 
-**Erwartung**:
-* Keywords `struct`, `impl`, `fn`, `u32` hervorgehoben
-* Function name `new` hervorgehoben (wenn enable_function_names = true)
+**Expectation**:
+* keywords `struct`, `impl`, `fn`, `u32` highlighted
+* the function name `new` highlighted (with enable_function_names = true)
 
 ---
 
-## Debug-Befehle
+## Debug commands
 
-Nach dem Öffnen dieser Datei in Neovim:
+After opening this file in Neovim:
 
 ```vim
-" Plugin-Informationen anzeigen
+" show plugin information
 :ColorMyAsciiDebug
 
-" Manuelles Highlighting erzwingen
+" force highlighting by hand
 :ColorMyAscii
 
-" Plugin an/aus schalten
+" switch the plugin on/off
 :ColorMyAsciiToggle
 
-" Health Check durchführen
+" run the health check
 :checkhealth color_my_ascii
 ```
 
-## Erwartete Debug-Ausgabe
+## Expected debug output
 
 ```
 === color_my_ascii.nvim Debug Info ===
@@ -289,17 +289,17 @@ Inline code enabled: false
 Empty fence as ASCII: false
 ```
 
-## Feature-Matrix
+## Feature matrix
 
-| Feature | Default | Getestet in |
+| Feature | Default | Tested in |
 |---------|---------|-------------|
-| Box-Zeichen | ✓ | Test 1 |
-| Sprach-Keywords | ✓ | Test 2, 3 |
-| Pfeile/Symbole | ✓ | Test 4 |
-| Operatoren | ✓ | Test 5, 8 |
-| Leere Fences | ✗ | Test 6 |
-| Inline-Code | ✗ | Test 7 |
-| Funktionsnamen | ✗ | Test 9 |
-| Klammern | ✗ | Test 8 |
-| Custom Highlights | ✗ | Test 11 |
-| Default Text HL | ✗ | Test 11 |
+| box characters | ✓ | Test 1 |
+| language keywords | ✓ | Test 2, 3 |
+| arrows/symbols | ✓ | Test 4 |
+| operators | ✓ | Test 5, 8 |
+| empty fences | ✗ | Test 6 |
+| inline code | ✗ | Test 7 |
+| function names | ✗ | Test 9 |
+| brackets | ✗ | Test 8 |
+| custom highlights | ✗ | Test 11 |
+| default text HL | ✗ | Test 11 |

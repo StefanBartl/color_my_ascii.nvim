@@ -5,16 +5,16 @@
 --- See docs/BINDINGS.md for the full list of action names.
 ---
 --- lib.nvim is a required dependency (the :ColorMyAscii command itself is
---- built on lib.nvim.usercmd.composer, see bindings/usrcmds.lua); lib.nvim.map
+--- built on lib.nvim.bindings.usercmd.composer, see bindings/usrcmds.lua); lib.nvim.bindings.keymap
 --- specifically stays soft-guarded here, falling back to vim.keymap.set.
 
 local M = {}
 
---- Resolve the keymap-setting function, preferring lib.nvim.map if installed
+--- Resolve the keymap-setting function, preferring lib.nvim.bindings.keymap if installed
 ---@internal
 ---@return fun(mode: string, lhs: string, rhs: function|string, opts: table)
 local function resolve_set()
-  local ok, lib_map = pcall(require, 'lib.nvim.map')
+  local ok, lib_map = pcall(require, 'lib.nvim.bindings.keymap')
   if ok then
     return lib_map
   end

@@ -8,7 +8,7 @@
 local M = {}
 
 local api = vim.api
-local usercmd = require('lib.nvim.usercmd')
+local usercmd = require('lib.nvim.bindings.usercmd')
 local notify = require('lib.nvim.notify').create('[color_my_ascii.fence]')
 
 --- Split a raw argument string into tokens, honouring single/double quotes so

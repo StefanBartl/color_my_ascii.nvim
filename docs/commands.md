@@ -17,7 +17,7 @@ command, keymap, and autocommand, see [Bindings Cheatsheet](BINDINGS.md).
 ---
 
 One command, `:ColorMyAscii <subcommand>` (built via
-[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
+[`lib.nvim.bindings.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
 `<Tab>` completion) — distinct from the separate buffer-local `:Fence`
 toolkit below.
 
@@ -199,7 +199,7 @@ it only adds behavior.
 Each mapping is set with a `desc`, so [which-key.nvim](https://github.com/folke/which-key.nvim)
 picks them up automatically without extra configuration.
 [lib.nvim](https://github.com/StefanBartl/lib.nvim) is a required dependency
-(the `:ColorMyAscii` command itself is built on it); `lib.nvim.map`
+(the `:ColorMyAscii` command itself is built on it); `lib.nvim.bindings.keymap`
 specifically stays soft-guarded for keymap registration, falling back to
 `vim.keymap.set` if that particular submodule isn't resolvable.
 

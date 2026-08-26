@@ -15,7 +15,7 @@ Machine-readable overview of every user command, keymap, and autocommand defined
 ## User Commands
 
 One command, `:ColorMyAscii <subcommand>` (built via
-[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
+[`lib.nvim.bindings.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
 `<Tab>` completion), registered in `lua/color_my_ascii/bindings/usrcmds.lua` —
 distinct from the separate buffer-local `:Fence` toolkit below.
 
@@ -56,7 +56,7 @@ distinct from the separate buffer-local `:Fence` toolkit below.
 All opt-in, disabled by default. Registered in
 `lua/color_my_ascii/bindings/keymaps.lua` via `setup({ keymaps = {...} })`.
 [lib.nvim](https://github.com/StefanBartl/lib.nvim) is a required dependency
-(the `:ColorMyAscii` command itself is built on it); `lib.nvim.map`
+(the `:ColorMyAscii` command itself is built on it); `lib.nvim.bindings.keymap`
 specifically stays soft-guarded here, falling back to `vim.keymap.set`. Every
 mapping sets `desc`, so which-key.nvim picks them up automatically — no
 separate which-key registration needed.

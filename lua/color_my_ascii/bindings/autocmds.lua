@@ -13,7 +13,7 @@
 
 local M = {}
 
-local autocmd = require('lib.nvim.autocmd')
+local autocmd = require('lib.nvim.bindings.autocmd')
 
 --- Register the plugin's static autocommands
 function M.enable()

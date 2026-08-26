@@ -18,7 +18,7 @@
 local M = {}
 
 local api = vim.api
-local autocmd = require('lib.nvim.autocmd')
+local autocmd = require('lib.nvim.bindings.autocmd')
 
 --- Default markdown-family fence tags treated as "a markdown sub-document".
 ---@type table<string, boolean>

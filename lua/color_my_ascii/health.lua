@@ -234,9 +234,9 @@ function M.check()
   end
 
   -- lib.nvim is required (the :ColorMyAscii command is built on
-  -- lib.nvim.usercmd.composer); lib.nvim.map specifically stays soft-guarded
+  -- lib.nvim.bindings.usercmd.composer); lib.nvim.bindings.keymap specifically stays soft-guarded
   -- for keymap/notify integration, falling back to vim.keymap.set/vim.notify.
-  local composer_ok = pcall(require, 'lib.nvim.usercmd.composer')
+  local composer_ok = pcall(require, 'lib.nvim.bindings.usercmd.composer')
   if composer_ok then
     health.ok('lib.nvim found - :ColorMyAscii command + keymap/notify integration available')
   else
@@ -299,7 +299,7 @@ function M.check()
     health.error('Some core modules failed to load - plugin may not function correctly')
   end
 
-  require('lib.nvim.usercmd.composer').checkhealth('ColorMyAscii')
+  require('lib.nvim.bindings.usercmd.composer').checkhealth('ColorMyAscii')
 end
 
 return M

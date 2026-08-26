@@ -16,7 +16,7 @@
 --- it whenever the buffer's delay tier changes.
 
 local lib_debounce = require('lib.nvim.debounce')
-local autocmd = require('lib.nvim.autocmd')
+local autocmd = require('lib.nvim.bindings.autocmd')
 local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
 local M = {}

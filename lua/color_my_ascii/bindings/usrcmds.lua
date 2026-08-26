@@ -10,7 +10,7 @@
 --- default at plugin-load time, before the user's own setup() has run) —
 --- there is no separate self-registration path to keep in sync.
 
-local composer = require('lib.nvim.usercmd.composer')
+local composer = require('lib.nvim.bindings.usercmd.composer')
 
 local M = {}
 

@@ -7,7 +7,7 @@ local M = {}
 
 local api = vim.api
 local notify = require('lib.nvim.notify').create('[color_my_ascii]')
-local autocmd = require('lib.nvim.autocmd')
+local autocmd = require('lib.nvim.bindings.autocmd')
 
 ---@type ColorMyAscii.State
 local state = {
@@ -137,7 +137,7 @@ function M.setup_buffer(bufnr)
   end
 
   -- Setup autocommands for this buffer. Both are buffer-scoped; these used to
-  -- call the raw API with a comment saying lib.nvim.autocmd.create did not
+  -- call the raw API with a comment saying lib.nvim.bindings.autocmd.create did not
   -- support `opts.buffer`. It does, so they go through the wrapper like
   -- everything else -- which also gets them the wrapper's error reporting.
   local group = autocmd.augroup.create.clear('ColorMyAsciiBuffer_' .. bufnr)

@@ -129,7 +129,7 @@ expects, in markdown buffers only. `:Fence *` entries beyond `wrap` are
 further gated on the cursor being inside a fenced block. No dependency on
 `menu` itself — a host (typically your own `<RightMouse>` dispatcher)
 composes the entries into its own menu. See
-[docs/features/FENCES.md#right-click-context-menu](features/FENCES.md#right-click-context-menu).
+[docs/FEATURES/FENCES.md#right-click-context-menu](FEATURES/FENCES.md#right-click-context-menu).
 `opts.menu.enable = false` opts out.
 
 ---

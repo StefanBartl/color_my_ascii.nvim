@@ -2,7 +2,7 @@
 
 No open items are recorded right now. When something is planned it goes here
 as a checklist entry until it ships; a shipped item is removed from this file
-and written up under [`docs/FEATURES.md`](FEATURES.md) instead of being ticked off.
+and written up under [`docs/FEATURE_LOG.md`](FEATURE_LOG.md) instead of being ticked off.
 
 ---
 

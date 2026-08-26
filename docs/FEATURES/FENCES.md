@@ -85,6 +85,8 @@ register, default `"` and `+`.
 ## Highlight export & copy — HTML & ANSI
 
 - **Tab:** true
+- **Module:** [`highlight_export.lua`](../../lua/color_my_ascii/highlight_export.lua)
+- **Usercmds:** `:Fence export --html [path]`, `:Fence yank [reg] --ansi`
 
 `:Fence export --html [path]` and `:Fence yank [reg] --ansi` export or copy a
 fenced block with its *applied* color_my_ascii highlighting, not just plain
@@ -152,6 +154,8 @@ tag. `:Fence select` visually selects the block interior.
 ## Box-drawing edge alignment
 
 - **Tab:** true
+- **Module:** [`box_align.lua`](../../lua/color_my_ascii/box_align.lua), command in [`commands/fence/align.lua`](../../lua/color_my_ascii/commands/fence/align.lua)
+- **Usercmds:** `:Fence align`
 
 `:Fence align` straightens a box-drawing box under the cursor whose right
 edge has drifted after hand-editing — content added or removed inside a
@@ -196,6 +200,9 @@ of color_my_ascii's own overlay for languages it recognizes — see
 [HIGHLIGHTING.md#treesitter-syntax-overlay](HIGHLIGHTING.md#treesitter-syntax-overlay).
 Full LSP inside fences (completion/hover/diagnostics) is on the roadmap, not
 built — see [ROADMAP/lsp_integration_fence.md](../ROADMAP/lsp_integration_fence.md).
+
+- **Config:** `treesitter.syntax_highlight` (default `true`, only applies when `treesitter.enabled`)
+- **Docs:** [HIGHLIGHTING.md#treesitter-syntax-overlay](HIGHLIGHTING.md#treesitter-syntax-overlay)
 
 ## Right-click context menu
 

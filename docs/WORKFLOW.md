@@ -4,7 +4,7 @@ How `color_my_ascii.nvim`'s pieces combine in real, daily use — a
 literate-programming-ish loop of writing ASCII art and diagrams inside
 Markdown fenced code blocks, coloring them for readability, and occasionally
 treating a block as real, runnable code. This complements
-[docs/features/](features/README.md) (what each piece does) with how they
+[docs/FEATURES/](FEATURES/README.md) (what each piece does) with how they
 chain together and where the sharp edges are.
 
 ## The core loop: write, color, verify
@@ -170,10 +170,12 @@ character/keyword/treesitter highlighting, never the fence chrome.
 
 ## See also
 
-- [docs/features/README.md](features/README.md) — the full feature catalog
+- [docs/FEATURES/README.md](FEATURES/README.md) — the full feature catalog
   this workflow draws its combos from.
 - [docs/BINDINGS.md](BINDINGS.md) — every command/keymap/autocommand in one
   compact table.
-- [docs/FEATURES.md](FEATURES.md) — a separate, personal roadmap-to-commit
-  changelog (not a feature catalog); useful for tracing a feature back to
-  the commit it landed in, not for learning how to use it.
+- [docs/FEATURE_LOG.md](FEATURE_LOG.md) — a separate, personal
+  roadmap-to-commit log (not a feature catalog); useful for tracing a feature
+  back to the commit it landed in, not for learning how to use it.
+- [docs/guides/](guides/README.md) — long-form manuals for single features,
+  the material the catalog was written from.

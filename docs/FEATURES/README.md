@@ -24,3 +24,9 @@ past a single-page catalog:
 
 For a compact machine-readable table of every command, keymap, and
 autocommand instead, see [../BINDINGS.md](../BINDINGS.md).
+
+For long-form walkthroughs of single features — character groups, keywords,
+function detection, brackets, inline code, custom colors and overrides — see
+[../guides/](../guides/README.md). Those are the manuals this catalogue was
+written from; they sit outside this folder because each is one feature
+explained at length, not a theme.

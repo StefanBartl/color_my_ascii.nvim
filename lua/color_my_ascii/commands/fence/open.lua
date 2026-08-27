@@ -98,25 +98,24 @@ function M.run(argv)
 
   sessions[tbuf] = { src = buf, start_id = start_id, end_id = end_id, tmpfile = tmp }
 
-  -- These two autocmds are buffer-scoped (opts.buffer), which
-  -- lib.nvim.bindings.autocmd.create does not support, so they stay on the raw API;
-  -- only augroup creation is routed through the lib.nvim wrapper.
-  local grp = autocmd.augroup.create.clear('ColorMyAsciiFenceOpen_' .. tbuf)
-  api.nvim_create_autocmd('BufWritePost', {
+  -- `group()` rather than `augroup.create.clear()`: clearing through the
+  -- module drops the previous session's records along with its autocmds, so
+  -- re-opening a fence in the same scratch buffer cannot leave a stale row in
+  -- the generated bindings table.
+  local grp = autocmd.group('ColorMyAsciiFenceOpen_' .. tbuf, true)
+  autocmd.create('BufWritePost', function()
+    M.sync(tbuf)
+  end, {
     group = grp,
     buffer = tbuf,
-    callback = function()
-      M.sync(tbuf)
-    end,
     desc = '[color_my_ascii] Sync fence edit back to the source buffer',
   })
-  api.nvim_create_autocmd({ 'BufWipeout', 'BufDelete', 'BufUnload' }, {
+  autocmd.create({ 'BufWipeout', 'BufDelete', 'BufUnload' }, function()
+    M.cleanup(tbuf)
+  end, {
     group = grp,
     buffer = tbuf,
     once = true,
-    callback = function()
-      M.cleanup(tbuf)
-    end,
     desc = '[color_my_ascii] Clean up fence edit session',
   })
 

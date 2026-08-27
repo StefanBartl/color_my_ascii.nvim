@@ -115,13 +115,14 @@ return function(H)
   end
 
   -- respect_indent: indented block -> highlight starts past the indent and is
-  -- a bounded range (hl_group), not a full-line line_hl_group.
+  -- a bounded range (hl_group), not a full-line line_hl_group; shorter rows get
+  -- win_col-pinned virtual padding out to the block's widest line.
   do
     local INDENT = {
       '- item', -- 0
-      '  ```lua', -- 1  indented 2
-      '  x = 1', -- 2
-      '  ```', -- 3
+      '  ```lua', -- 1  indented 2, dw 8
+      '  print("hello world")', -- 2  widest, dw 22
+      '  ```', -- 3  dw 5
     }
     require('color_my_ascii.config').setup({
       fence_line_highlight = { enable = true, preset = 'accent', apply_to = 'all' },
@@ -131,14 +132,23 @@ return function(H)
     local buf = H.scratch('markdown', INDENT)
     fence_hl.apply(buf, require('color_my_ascii.config').get())
     local marks = api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })
-    local open_mark
+    local open_hl, close_hl_mark, close_pad
     for _, m in ipairs(marks) do
       if m[2] == 1 and m[4].hl_group == 'ColorMyAsciiFenceOpen' then
-        open_mark = m
+        open_hl = m
+      elseif m[2] == 3 and m[4].hl_group == 'ColorMyAsciiFenceClose' then
+        close_hl_mark = m
+      elseif m[2] == 3 and m[4].virt_text ~= nil then
+        close_pad = m
       end
     end
-    ok(open_mark ~= nil, 'respect_indent: open line painted with a bounded hl_group range')
-    eq(open_mark[3], 2, 'respect_indent: highlight starts after the 2-col indent')
+    ok(open_hl ~= nil, 'respect_indent: open line painted with a bounded hl_group range')
+    eq(open_hl[3], 2, 'respect_indent: highlight starts after the 2-col indent')
+    ok(open_hl[4].line_hl_group == nil, 'respect_indent: no full-line line_hl_group')
+    eq(close_hl_mark[3], 2, 'respect_indent: close-line highlight also starts past the indent')
+    ok(close_pad ~= nil, 'respect_indent: short close line gets virtual padding')
+    eq(close_pad[4].virt_text_win_col, 5, 'respect_indent: padding pinned at the close line width (win_col)')
+    eq(close_pad[4].virt_text[1][1], string.rep(' ', 22 - 5), 'respect_indent: padding fills out to the widest line')
     api.nvim_buf_delete(buf, { force = true })
   end
 

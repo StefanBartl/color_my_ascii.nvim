@@ -195,8 +195,12 @@ end
 --- `left` (byte column, so the block's own indentation stays unpainted) and on
 --- the right by `right_dw` (display columns, so every row ends flush at the
 --- block's widest line and Neovim's natural right-edge gap is preserved instead
---- of flooding to the window border). Shorter/blank rows are completed with
---- virtual padding.
+--- of flooding to the window border).
+---
+--- Real text gets a bounded `hl_group` range; the remaining stretch out to
+--- `right_dw` is filled with virtual padding pinned to a fixed window column
+--- (`virt_text_win_col`, NOT `eol`) so a markdown renderer's own end-of-line
+--- virtual text can't shove the padding out of alignment.
 ---@internal
 local function paint_range(bufnr, row, line, group, priority, left, right_dw)
   local llen = #line
@@ -212,19 +216,13 @@ local function paint_range(bufnr, row, line, group, priority, left, right_dw)
     })
   end
 
-  local segs
-  if dw < left then
-    segs = {
-      { string.rep(' ', left - dw) },
-      { string.rep(' ', math.max(0, right_dw - left)), group },
-    }
-  elseif right_dw > dw then
-    segs = { { string.rep(' ', right_dw - dw), group } }
-  end
-  if segs then
-    pcall(api.nvim_buf_set_extmark, bufnr, ns, row, llen, {
-      virt_text = segs,
-      virt_text_pos = 'eol',
+  -- Fill from the end of the real text (or the left edge, for a blank/near-blank
+  -- row) out to the block's widest column. The left indentation stays untouched.
+  local fill_from = math.max(dw, left)
+  if right_dw > fill_from then
+    pcall(api.nvim_buf_set_extmark, bufnr, ns, row, lb, {
+      virt_text = { { string.rep(' ', right_dw - fill_from), group } },
+      virt_text_win_col = fill_from,
       priority = priority,
     })
   end

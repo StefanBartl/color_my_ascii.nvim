@@ -1,10 +1,13 @@
 ---@module 'color_my_ascii.fence_hl'
 --- Full-line highlight of fenced-block delimiter lines and interior.
 ---
---- Optional feature: paints the whole opening (```lang) and closing (```) line
---- of fenced code blocks, as a visual boundary. Uses `line_hl_group` extmarks
---- in its own namespace so it can be refreshed/cleared independently of the
---- ASCII character highlighting.
+--- Optional feature: paints the opening (```lang) and closing (```) line
+--- of fenced code blocks, as a visual boundary. Extmarks live in their own
+--- namespace so they can be refreshed/cleared independently of the ASCII
+--- character highlighting. By default (`respect_indent`) the paint is a bounded
+--- column range - kept out of an indented block's own indentation and stopped
+--- at the block's widest line, with virtual padding completing the rectangle;
+--- `respect_indent = false` falls back to a full-line `line_hl_group` extmark.
 ---
 --- Which blocks are painted is driven by `apply_to` ("all" fenced blocks or only
 --- "ascii" ones); the look by `preset` plus optional per-delimiter `open`/`close`
@@ -12,7 +15,8 @@
 --- attribute table forwarded to nvim_set_hl.
 ---
 --- A second, independent sub-feature (`fence_content_highlight`) paints the
---- block *interior* (every row between the delimiters) the same way, shaded
+--- block *interior* (every row between the delimiters) the same way (its own
+--- `respect_indent`), shaded
 --- darker/lighter than the resolved delimiter color so the whole block reads
 --- as one region while staying visually distinct from its boundary.
 
@@ -178,6 +182,54 @@ local function set_line(bufnr, row, group, priority)
   })
 end
 
+--- Byte length of a line's leading whitespace (indent).
+---@internal
+---@param line string
+---@return integer
+local function indent_bytes(line)
+  local ws = line:match('^[ \t]*') or ''
+  return #ws
+end
+
+--- Paint a single row as part of a fenced-block rectangle bounded on the left by
+--- `left` (byte column, so the block's own indentation stays unpainted) and on
+--- the right by `right_dw` (display columns, so every row ends flush at the
+--- block's widest line and Neovim's natural right-edge gap is preserved instead
+--- of flooding to the window border). Shorter/blank rows are completed with
+--- virtual padding.
+---@internal
+local function paint_range(bufnr, row, line, group, priority, left, right_dw)
+  local llen = #line
+  local dw = vim.fn.strdisplaywidth(line)
+  local lb = math.min(left, llen)
+
+  if llen > lb then
+    pcall(api.nvim_buf_set_extmark, bufnr, ns, row, lb, {
+      end_row = row,
+      end_col = llen,
+      hl_group = group,
+      priority = priority,
+    })
+  end
+
+  local segs
+  if dw < left then
+    segs = {
+      { string.rep(' ', left - dw) },
+      { string.rep(' ', math.max(0, right_dw - left)), group },
+    }
+  elseif right_dw > dw then
+    segs = { { string.rep(' ', right_dw - dw), group } }
+  end
+  if segs then
+    pcall(api.nvim_buf_set_extmark, bufnr, ns, row, llen, {
+      virt_text = segs,
+      virt_text_pos = 'eol',
+      priority = priority,
+    })
+  end
+end
+
 --- Refresh fence-line and fence-content highlights for a buffer according to
 --- config. Both sub-features are independently opt-out; each clears its own
 --- stale marks when disabled. No-op entirely if neither is enabled.
@@ -204,18 +256,53 @@ function M.apply(bufnr, cfg)
 
   local line_apply_to = (flh and flh.apply_to) or 'all'
   local content_apply_to = (fch and fch.apply_to) or 'all'
+  -- Opt-out: keep the highlight inside the block's indentation and stop it at
+  -- the widest line instead of flooding the whole screen line.
+  local line_respect = not (flh and flh.respect_indent == false)
+  local content_respect = not (fch and fch.respect_indent == false)
 
   for _, b in ipairs(blocks) do
-    if line_on and (line_apply_to == 'all' or (line_apply_to == 'ascii' and b.is_ascii)) then
-      -- below the character highlights (100+) so tokens stay visible
-      set_line(bufnr, b.open_row, OPEN_GROUP, 90)
-      if b.close_row ~= b.open_row then
-        set_line(bufnr, b.close_row, CLOSE_GROUP, 90)
+    local want_line = line_on and (line_apply_to == 'all' or (line_apply_to == 'ascii' and b.is_ascii))
+    local want_content = content_on and (content_apply_to == 'all' or (content_apply_to == 'ascii' and b.is_ascii))
+
+    if want_line or want_content then
+      local need_geom = (want_line and line_respect) or (want_content and content_respect)
+      local blk_lines, base_left, right_dw
+      if need_geom then
+        blk_lines = api.nvim_buf_get_lines(bufnr, b.open_row, b.close_row + 1, false)
+        base_left = indent_bytes(blk_lines[1] or '')
+        right_dw = 0
+        for _, l in ipairs(blk_lines) do
+          right_dw = math.max(right_dw, vim.fn.strdisplaywidth(l))
+        end
       end
-    end
-    if content_on and (content_apply_to == 'all' or (content_apply_to == 'ascii' and b.is_ascii)) then
-      for row = b.content_start, b.content_end - 1 do
-        set_line(bufnr, row, CONTENT_GROUP, 80) -- below the delimiter-line highlight (90)
+
+      if want_line then
+        -- below the character highlights (100+) so tokens stay visible
+        if line_respect then
+          paint_range(bufnr, b.open_row, blk_lines[1] or '', OPEN_GROUP, 90, base_left, right_dw)
+          if b.close_row ~= b.open_row then
+            local last = blk_lines[#blk_lines] or ''
+            paint_range(bufnr, b.close_row, last, CLOSE_GROUP, 90, base_left, right_dw)
+          end
+        else
+          set_line(bufnr, b.open_row, OPEN_GROUP, 90)
+          if b.close_row ~= b.open_row then
+            set_line(bufnr, b.close_row, CLOSE_GROUP, 90)
+          end
+        end
+      end
+
+      if want_content then
+        for row = b.content_start, b.content_end - 1 do
+          if content_respect then
+            local l = blk_lines[row - b.open_row + 1] or ''
+            local left = math.min(base_left, indent_bytes(l))
+            paint_range(bufnr, row, l, CONTENT_GROUP, 80, left, right_dw)
+          else
+            set_line(bufnr, row, CONTENT_GROUP, 80) -- below the delimiter-line highlight (90)
+          end
+        end
       end
     end
   end

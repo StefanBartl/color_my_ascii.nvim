@@ -23,7 +23,7 @@ return function(H)
   local function rows(buf)
     local set = {}
     for _, m in ipairs(api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })) do
-      set[m[2]] = m[4].line_hl_group or true
+      set[m[2]] = m[4].line_hl_group or m[4].hl_group or set[m[2]] or true
     end
     return set
   end

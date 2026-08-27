@@ -142,6 +142,10 @@ return {
     open = nil,
     close = nil,
     apply_to = 'all', -- "all" | "ascii"
+    -- Keep the highlight within an indented block's own left indentation and
+    -- stop it at the block's widest line (preserving Neovim's small right-edge
+    -- gap) instead of painting the entire screen line. Opt out with `false`.
+    respect_indent = true,
   },
   -- Full-width background highlight of a fenced block's *interior* (the lines
   -- between the delimiters), so the whole block reads as one visual region.
@@ -160,6 +164,9 @@ return {
     shade = 'auto', -- "auto" | "darken" | "lighten" | "none"
     amount = 6, -- 0-100
     apply_to = 'all', -- "all" | "ascii"
+    -- Same as fence_line_highlight.respect_indent, for the interior rows: keep
+    -- the tint inside the block's indentation and end it at the widest line.
+    respect_indent = true,
   },
   -- `:Fence export` behaviour (buffer-local command in markdown buffers).
   -- default_dir: where the suggested export path lives ("buffer" dir or "cwd").

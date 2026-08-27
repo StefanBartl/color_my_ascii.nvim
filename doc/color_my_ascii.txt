@@ -332,6 +332,12 @@ Configuration options:~
                               open     string|table|nil  per-delimiter override
                               close    string|table|nil  per-delimiter override
                               apply_to "all" | "ascii"  (default "all")
+                              respect_indent boolean  (default true) keep the
+                                       highlight inside an indented block's
+                                       own indentation and stop it at the
+                                       block's widest line (leaving Neovim's
+                                       right-edge gap); false paints the whole
+                                       screen line edge to edge
 
                             preset = "auto" matches vim.g.colors_name against a
                             set of bundled theme palettes (catppuccin,
@@ -387,6 +393,9 @@ Configuration options:~
                               amount   integer 0-100  (default 6) blend
                                        strength toward black/white
                               apply_to "all" | "ascii"  (default "all")
+                              respect_indent boolean  (default true) as
+                                       fence_line_highlight.respect_indent,
+                                       for the interior rows
 
                             The interior color is derived by resolving the
                             same preset/theme lookup as fence_line_highlight

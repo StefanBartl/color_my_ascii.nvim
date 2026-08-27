@@ -16,13 +16,21 @@ blocks or `"ascii"` only. `open`/`close` accept a full override (highlight
 group name or attribute table). See [COLORSCHEMES.md](COLORSCHEMES.md) for
 the bundled theme-matched palettes.
 
+For an indented block, `respect_indent` (default `true`) keeps the paint
+out of the leading indentation on every row and ends it at the block's
+widest line, so Neovim's small right-edge gap survives instead of the
+colour running to the window border. `respect_indent = false` restores the
+old edge-to-edge full-line paint.
+
 - **Config:** `opts.fence_line_highlight`
 
 ## Fence-content highlighting
 
-Paints the fenced block's **interior** full-width — every line between the
-delimiters, including trailing whitespace and blank lines, not just where
-characters are. On by default, independent of fence-line highlighting; by
+Paints the fenced block's **interior** — every line between the delimiters,
+including trailing whitespace and blank lines, not just where characters
+are. Bounded to the block's column span by default (`respect_indent`, as
+above); `respect_indent = false` paints full width. On by default,
+independent of fence-line highlighting; by
 default shades the *resolved* fence-line color darker or lighter
 (`shade = "auto"`, `amount` 0-100) so the interior reads as a related but
 distinguishable tint. `hl` bypasses shading with a direct override.

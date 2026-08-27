@@ -22,7 +22,7 @@ return function(H)
   local function rows(buf)
     local set = {}
     for _, m in ipairs(api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })) do
-      set[m[2]] = m[4].line_hl_group or true
+      set[m[2]] = m[4].line_hl_group or m[4].hl_group or set[m[2]] or true
     end
     return set
   end
@@ -112,6 +112,48 @@ return function(H)
 
     vim.g.colors_name = saved_name
     vim.o.background = saved_bg
+  end
+
+  -- respect_indent: indented block -> highlight starts past the indent and is
+  -- a bounded range (hl_group), not a full-line line_hl_group.
+  do
+    local INDENT = {
+      '- item', -- 0
+      '  ```lua', -- 1  indented 2
+      '  x = 1', -- 2
+      '  ```', -- 3
+    }
+    require('color_my_ascii.config').setup({
+      fence_line_highlight = { enable = true, preset = 'accent', apply_to = 'all' },
+      fence_content_highlight = { enable = false },
+    })
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+    local buf = H.scratch('markdown', INDENT)
+    fence_hl.apply(buf, require('color_my_ascii.config').get())
+    local marks = api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })
+    local open_mark
+    for _, m in ipairs(marks) do
+      if m[2] == 1 and m[4].hl_group == 'ColorMyAsciiFenceOpen' then
+        open_mark = m
+      end
+    end
+    ok(open_mark ~= nil, 'respect_indent: open line painted with a bounded hl_group range')
+    eq(open_mark[3], 2, 'respect_indent: highlight starts after the 2-col indent')
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
+  -- respect_indent = false -> classic full-line line_hl_group
+  do
+    require('color_my_ascii.config').setup({
+      fence_line_highlight = { enable = true, respect_indent = false, apply_to = 'all' },
+      fence_content_highlight = { enable = false },
+    })
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+    local buf = H.scratch('markdown', { '  ```lua', '  x = 1', '  ```' })
+    fence_hl.apply(buf, require('color_my_ascii.config').get())
+    local marks = api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })
+    ok(marks[1] and marks[1][4].line_hl_group == 'ColorMyAsciiFenceOpen', 'opt-out: full-line line_hl_group')
+    api.nvim_buf_delete(buf, { force = true })
   end
 
   require('color_my_ascii.config').setup({})

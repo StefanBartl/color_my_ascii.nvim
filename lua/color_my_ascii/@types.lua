@@ -71,7 +71,8 @@
 ---@field open? string|ColorMyAscii.CustomHighlight Override for the opening fence line (hl group name or attr table)
 ---@field close? string|ColorMyAscii.CustomHighlight Override for the closing fence line (hl group name or attr table)
 ---@field apply_to? "all"|"ascii" Which blocks get the highlight: every fenced block or only ASCII ones
----@field respect_indent? boolean Start the highlight at the block's own indent column (opening fence's first backtick) instead of column 0; the right side still runs to the window edge (default true); false paints the whole screen line from column 0
+---@field respect_indent? boolean Start the highlight at the block's own indent column (opening fence's first backtick) instead of column 0, and hold a gap off the window's right edge (default true); false paints the whole screen line from column 0
+---@field right_pad? integer Screen columns to leave between the highlight and the window's right edge when respect_indent is on (default 1, clamped 0-20; needs the buffer to be displayed in a window)
 
 --- Background-only highlight of a fenced block's interior (between the
 --- delimiter lines), painted full-width via `line_hl_group` extmarks so it
@@ -87,6 +88,7 @@
 ---@field amount? integer 0-100 blend strength toward black/white (default 6)
 ---@field apply_to? "all"|"ascii" Which blocks' interior gets painted (default "all")
 ---@field respect_indent? boolean Like FenceLineHighlight.respect_indent, for the interior rows (default true)
+---@field right_pad? integer Like FenceLineHighlight.right_pad, for the interior rows (default 1)
 
 ---@class ColorMyAscii.FenceRun
 ---@field runners? table<string, string|string[]> Interpreter per language tag (temp file appended)

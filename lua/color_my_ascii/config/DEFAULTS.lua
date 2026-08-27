@@ -143,9 +143,11 @@ return {
     close = nil,
     apply_to = 'all', -- "all" | "ascii"
     -- Start the highlight at the block's own indent column (the opening fence's
-    -- first backtick) instead of column 0. The right side still runs to the
-    -- window edge. Opt out with `false` (paints the whole screen line).
+    -- first backtick) instead of column 0, and hold `right_pad` columns off the
+    -- window's right edge so it never quite touches the border. Opt out with
+    -- `respect_indent = false` (paints the whole screen line).
     respect_indent = true,
+    right_pad = 1, -- 0-20; needs the buffer visible in a window
   },
   -- Full-width background highlight of a fenced block's *interior* (the lines
   -- between the delimiters), so the whole block reads as one visual region.
@@ -164,9 +166,10 @@ return {
     shade = 'auto', -- "auto" | "darken" | "lighten" | "none"
     amount = 6, -- 0-100
     apply_to = 'all', -- "all" | "ascii"
-    -- Same as fence_line_highlight.respect_indent, for the interior rows: start
-    -- the tint at the block's indent column instead of column 0.
+    -- Same as fence_line_highlight.respect_indent / .right_pad, for the interior
+    -- rows: start the tint at the block's indent column, hold a gap off the edge.
     respect_indent = true,
+    right_pad = 1,
   },
   -- `:Fence export` behaviour (buffer-local command in markdown buffers).
   -- default_dir: where the suggested export path lives ("buffer" dir or "cwd").

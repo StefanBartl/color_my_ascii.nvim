@@ -89,6 +89,25 @@ function M.setup(opts)
     desc = 'Re-apply color_my_ascii ASCII-art highlight groups after colorscheme change',
   })
 
+  -- fence_*_highlight.right_pad insets the fence background from the window's
+  -- text width, so it has to be recomputed when a window is resized.
+  autocmd.create({ 'WinResized', 'VimResized' }, function()
+    local c = require('color_my_ascii.config').get()
+    local flh, fch = c.fence_line_highlight, c.fence_content_highlight
+    if ((flh and flh.right_pad) or 0) <= 0 and ((fch and fch.right_pad) or 0) <= 0 then
+      return
+    end
+    for _, win in ipairs(api.nvim_list_wins()) do
+      local b = api.nvim_win_get_buf(win)
+      if state.enabled and state.buffers[b] then
+        pcall(fence_hl.apply, b, c)
+      end
+    end
+  end, {
+    group = autocmd.augroup.create.clear('ColorMyAsciiFenceResize'),
+    desc = 'Recompute fence right-edge padding after a window resize',
+  })
+
   -- Hot-reload: calling setup() again (e.g. after adding/editing a
   -- config.languages entry) invalidates the stale per-buffer parse cache and
   -- immediately re-highlights every already-managed buffer, so a changed

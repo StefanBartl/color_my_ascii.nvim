@@ -114,10 +114,9 @@ return function(H)
     vim.o.background = saved_bg
   end
 
-  -- respect_indent: indented block -> highlight starts at the block's own indent
-  -- column (not column 0) and runs to the window edge via hl_eol; a blank
-  -- interior row masks the would-be indent back to Normal so the left edge
-  -- stays aligned with the opening fence.
+  -- respect_indent: every row gets a full-line line_hl_group (so characters,
+  -- backticks and blank rows all share the fence background); a Normal overlay
+  -- at win_col 0 then masks the block's own indentation on every row.
   do
     local INDENT = {
       '- item', -- 0
@@ -127,8 +126,8 @@ return function(H)
       '  ```', -- 4
     }
     require('color_my_ascii.config').setup({
-      fence_line_highlight = { enable = true, preset = 'accent', apply_to = 'all' },
-      fence_content_highlight = { enable = true, apply_to = 'all' },
+      fence_line_highlight = { enable = true, preset = 'accent', apply_to = 'all', right_pad = 0 },
+      fence_content_highlight = { enable = true, apply_to = 'all', right_pad = 0 },
     })
     fence_hl.setup_hl(require('color_my_ascii.config').get())
     local buf = H.scratch('markdown', INDENT)
@@ -139,26 +138,59 @@ return function(H)
       by_row[m[2]] = by_row[m[2]] or {}
       table.insert(by_row[m[2]], m)
     end
-    local open_hl
-    for _, m in ipairs(by_row[1] or {}) do
-      if m[4].hl_group == 'ColorMyAsciiFenceOpen' then
-        open_hl = m
-      end
-    end
-    ok(open_hl ~= nil, 'respect_indent: open line painted with a bounded hl_group range (not line_hl_group)')
-    eq(open_hl[3], 2, 'respect_indent: highlight starts at the 2-col indent')
-    ok(open_hl[4].hl_eol == true, 'respect_indent: highlight runs to the window edge (hl_eol)')
-    ok(open_hl[4].line_hl_group == nil, 'respect_indent: no full-line line_hl_group')
 
-    local blank_mask
-    for _, m in ipairs(by_row[3] or {}) do
-      if m[4].virt_text ~= nil then
-        blank_mask = m
+    local function fill_of(row)
+      for _, m in ipairs(by_row[row] or {}) do
+        if m[4].line_hl_group then
+          return m[4].line_hl_group
+        end
       end
     end
-    ok(blank_mask ~= nil, 'respect_indent: blank interior row gets an indent mask')
-    eq(blank_mask[4].virt_text_win_col, 0, 'respect_indent: mask pinned at column 0')
-    eq(blank_mask[4].virt_text[1][1], '  ', 'respect_indent: mask covers the 2-col indent')
+    local function mask_of(row)
+      for _, m in ipairs(by_row[row] or {}) do
+        if m[4].virt_text ~= nil and m[4].virt_text_win_col == 0 then
+          return m
+        end
+      end
+    end
+
+    eq(fill_of(1), 'ColorMyAsciiFenceOpen', 'respect_indent: open line fill is line_hl_group')
+    eq(fill_of(2), 'ColorMyAsciiFenceContent', 'respect_indent: content line fill is line_hl_group')
+    eq(fill_of(3), 'ColorMyAsciiFenceContent', 'respect_indent: blank interior row still filled')
+    eq(fill_of(4), 'ColorMyAsciiFenceClose', 'respect_indent: close line fill is line_hl_group')
+
+    for _, row in ipairs({ 1, 2, 3, 4 }) do
+      local m = mask_of(row)
+      ok(m ~= nil, ('respect_indent: row %d gets an indent mask'):format(row))
+      eq(m[4].virt_text[1][1], '  ', ('respect_indent: row %d mask covers the 2-col indent'):format(row))
+      eq(m[4].hl_mode, 'replace', ('respect_indent: row %d mask replaces the fill'):format(row))
+    end
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
+  -- right_pad: a Normal overlay masks `right_pad` columns off the window edge.
+  do
+    require('color_my_ascii.config').setup({
+      fence_line_highlight = { enable = true, apply_to = 'all', right_pad = 3 },
+      fence_content_highlight = { enable = false },
+    })
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+    local buf = H.scratch('markdown', { '  ```lua', '  x = 1', '  ```' })
+    fence_hl.apply(buf, require('color_my_ascii.config').get())
+    local marks = api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })
+    local right_mask
+    for _, m in ipairs(marks) do
+      if m[2] == 0 and m[4].virt_text ~= nil and (m[4].virt_text_win_col or 0) > 0 then
+        right_mask = m
+      end
+    end
+    ok(right_mask ~= nil, 'right_pad: open line gets a right-edge mask')
+    eq(#right_mask[4].virt_text[1][1], 3, 'right_pad: mask is right_pad columns wide')
+    eq(
+      right_mask[4].virt_text_win_col,
+      api.nvim_win_get_width(0) - 3,
+      'right_pad: mask sits right_pad off the text edge'
+    )
     api.nvim_buf_delete(buf, { force = true })
   end
 

@@ -4,12 +4,12 @@
 --- Optional feature: paints the opening (```lang) and closing (```) line
 --- of fenced code blocks, as a visual boundary. Extmarks live in their own
 --- namespace so they can be refreshed/cleared independently of the ASCII
---- character highlighting. By default (`respect_indent`) the paint starts at the
---- block's own indent column (the opening fence's first backtick) rather than
---- column 0, and runs to the window's right edge via `hl_eol`; blank interior
---- rows are masked back to `Normal` over the indent so the left edge stays
---- aligned. `respect_indent = false` falls back to a full-line `line_hl_group`
---- extmark (painted from column 0).
+--- character highlighting. The fill is a `line_hl_group` extmark (covers every
+--- character cell and blank rows alike); by default (`respect_indent`) the
+--- block's own indentation on the left and `right_pad` columns off the window's
+--- right edge are then carved back to `Normal` so the paint reads as a rectangle
+--- from the opening fence's first backtick. `respect_indent = false` keeps the
+--- bare full-line `line_hl_group`.
 ---
 --- Which blocks are painted is driven by `apply_to` ("all" fenced blocks or only
 --- "ascii" ones); the look by `preset` plus optional per-delimiter `open`/`close`
@@ -193,42 +193,83 @@ local function indent_bytes(line)
   return #ws
 end
 
---- Paint one row of a fenced-block rectangle: background from `left` (byte
---- column of the block's opening fence, so the block's own indentation stays
---- unpainted) all the way to the window's right edge via `hl_eol`.
----
---- The start is never pushed right of where the row's own text begins, so a
---- content line that is less indented than the fence still gets fully painted.
---- On a fully-blank row `hl_eol` would colour the would-be indent, so that
---- stretch is masked back to `Normal` with an overlay to keep the block's left
---- edge aligned with the opening fence.
+--- Screen columns available for buffer text in a window currently showing
+--- `bufnr` (width minus the number/sign/fold gutter). Prefers the current
+--- window; nil when the buffer is not displayed anywhere.
 ---@internal
-local function paint_row(bufnr, row, line, group, priority, left)
-  local llen = #line
-  local blank = line:match('^%s*$') ~= nil
-  local text_start = blank and llen or (line:find('%S') - 1)
-  local start = math.min(left, text_start)
-
-  -- hl_eol needs the highlight to reach the EOL; spanning into the next row is
-  -- the robust way to get that, so clamp when `row` is the last buffer line.
-  local last = api.nvim_buf_line_count(bufnr) - 1
-  local end_row, end_col = row + 1, 0
-  if row >= last then
-    end_row, end_col = row, llen
+---@param bufnr integer
+---@return integer|nil
+local function win_text_width(bufnr)
+  local wins = vim.fn.win_findbuf(bufnr)
+  if #wins == 0 then
+    return nil
   end
+  local cur = api.nvim_get_current_win()
+  local win = vim.tbl_contains(wins, cur) and cur or wins[1]
+  local ok, info = pcall(vim.fn.getwininfo, win)
+  info = ok and info and info[1] or nil
+  if not info then
+    return nil
+  end
+  local w = (info.width or 0) - (info.textoff or 0)
+  return w > 0 and w or nil
+end
 
-  pcall(api.nvim_buf_set_extmark, bufnr, ns, row, start, {
-    end_row = end_row,
-    end_col = end_col,
-    hl_group = group,
-    hl_eol = true,
+--- Paint one row of a fenced block: `line_hl_group` fills the whole screen line
+--- (so every character cell - backticks, letters, digits, blank rows - shares
+--- the fence background, exactly like the non-indented case), then the block's
+--- own indentation on the left and `right_pad` columns off the window's right
+--- edge are carved back out so the paint reads as a rectangle from the opening
+--- fence's first backtick.
+---
+--- Left cut-out: over real indent characters a plain `hl_group` range wins over
+--- `line_hl_group` outright (Neovim layers `line_hl_group` below everything);
+--- a `virt_text` overlay handles the same span on a fully-blank row where there
+--- are no cells to re-highlight. Right cut-out: past the text there are no cells
+--- either, so it is always the overlay.
+---
+--- The left cut-out is never wider than the row's own indentation, so a content
+--- line that happens to be less indented than the fence keeps its text painted.
+---@internal
+---@param bufnr integer
+---@param row integer
+---@param line string the row's text
+---@param group string
+---@param priority integer
+---@param left integer byte/screen column of the opening fence's first backtick
+---@param right_col integer|nil screen column where the right-edge cut-out starts
+---@param right_pad integer width of the right-edge cut-out
+local function paint_row(bufnr, row, line, group, priority, left, right_col, right_pad)
+  left = left or 0
+  pcall(api.nvim_buf_set_extmark, bufnr, ns, row, 0, {
+    line_hl_group = group,
     priority = priority,
   })
 
-  if blank and left > start then
-    pcall(api.nvim_buf_set_extmark, bufnr, ns, row, start, {
-      virt_text = { { string.rep(' ', left - start), 'Normal' } },
-      virt_text_win_col = start,
+  local blank = line == '' or line:match('^%s*$') ~= nil
+  local mask = blank and left or math.min(left, indent_bytes(line))
+  if mask > 0 then
+    local real = math.min(mask, #line)
+    if real > 0 then
+      pcall(api.nvim_buf_set_extmark, bufnr, ns, row, 0, {
+        end_row = row,
+        end_col = real,
+        hl_group = 'Normal',
+        priority = priority + 5,
+      })
+    end
+    pcall(api.nvim_buf_set_extmark, bufnr, ns, row, 0, {
+      virt_text = { { string.rep(' ', mask), 'Normal' } },
+      virt_text_win_col = 0,
+      hl_mode = 'replace',
+      priority = priority,
+    })
+  end
+
+  if right_col and right_pad > 0 then
+    pcall(api.nvim_buf_set_extmark, bufnr, ns, row, 0, {
+      virt_text = { { string.rep(' ', right_pad), 'Normal' } },
+      virt_text_win_col = right_col,
       hl_mode = 'replace',
       priority = priority,
     })
@@ -263,9 +304,22 @@ function M.apply(bufnr, cfg)
   local content_apply_to = (fch and fch.apply_to) or 'all'
   -- Opt-out: start the highlight at the block's own indent column (the opening
   -- fence's first backtick) instead of flooding the whole screen line from
-  -- column 0. The right side still runs to the window edge (hl_eol).
+  -- column 0, and hold a small gap off the window's right edge.
   local line_respect = not (flh and flh.respect_indent == false)
   local content_respect = not (fch and fch.respect_indent == false)
+  local line_pad = math.max(0, math.min(tonumber(flh and flh.right_pad) or 0, 20))
+  local content_pad = math.max(0, math.min(tonumber(fch and fch.right_pad) or 0, 20))
+
+  -- Right-edge masks are measured from the window's text width; resolve it once.
+  local text_w = ((line_respect and line_pad > 0) or (content_respect and content_pad > 0)) and win_text_width(bufnr)
+    or nil
+  local function right_col(pad)
+    if not text_w or pad <= 0 then
+      return nil
+    end
+    return math.max(0, text_w - pad)
+  end
+  local line_right, content_right = right_col(line_pad), right_col(content_pad)
 
   for _, b in ipairs(blocks) do
     local want_line = line_on and (line_apply_to == 'all' or (line_apply_to == 'ascii' and b.is_ascii))
@@ -278,13 +332,16 @@ function M.apply(bufnr, cfg)
         blk_lines = api.nvim_buf_get_lines(bufnr, b.open_row, b.close_row + 1, false)
         base_left = indent_bytes(blk_lines[1] or '')
       end
+      local function row_text(row)
+        return (blk_lines and blk_lines[row - b.open_row + 1]) or ''
+      end
 
       if want_line then
         -- below the character highlights (100+) so tokens stay visible
         if line_respect then
-          paint_row(bufnr, b.open_row, blk_lines[1] or '', OPEN_GROUP, 90, base_left)
+          paint_row(bufnr, b.open_row, row_text(b.open_row), OPEN_GROUP, 90, base_left, line_right, line_pad)
           if b.close_row ~= b.open_row then
-            paint_row(bufnr, b.close_row, blk_lines[#blk_lines] or '', CLOSE_GROUP, 90, base_left)
+            paint_row(bufnr, b.close_row, row_text(b.close_row), CLOSE_GROUP, 90, base_left, line_right, line_pad)
           end
         else
           set_line(bufnr, b.open_row, OPEN_GROUP, 90)
@@ -297,8 +354,7 @@ function M.apply(bufnr, cfg)
       if want_content then
         for row = b.content_start, b.content_end - 1 do
           if content_respect then
-            local l = blk_lines[row - b.open_row + 1] or ''
-            paint_row(bufnr, row, l, CONTENT_GROUP, 80, base_left)
+            paint_row(bufnr, row, row_text(row), CONTENT_GROUP, 80, base_left, content_right, content_pad)
           else
             set_line(bufnr, row, CONTENT_GROUP, 80) -- below the delimiter-line highlight (90)
           end

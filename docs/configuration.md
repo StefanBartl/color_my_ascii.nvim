@@ -82,6 +82,7 @@ require('color_my_ascii').setup({
     apply_to = 'all',      -- 'all' fenced blocks | 'ascii' only
     respect_indent = true, -- start the paint at an indented block's own indent
                            -- column, not column 0; false paints the whole line
+    right_pad = 1,         -- columns to hold off the window's right edge
   },
 
   -- Full-width background highlight of a fenced block's interior (see
@@ -95,6 +96,7 @@ require('color_my_ascii').setup({
     amount   = 6,          -- 0-100
     apply_to = 'all',      -- 'all' fenced blocks | 'ascii' only
     respect_indent = true, -- as fence_line_highlight.respect_indent, for the interior
+    right_pad = 1,         -- as fence_line_highlight.right_pad, for the interior
   },
 })
 ````
@@ -254,19 +256,28 @@ require('color_my_ascii').setup({
     preset   = 'auto',     -- see the presets below
     apply_to = 'all',      -- 'all' fenced blocks, or 'ascii' only
     respect_indent = true, -- see "Indented blocks" below
+    right_pad = 1,         -- see "Indented blocks" below
   },
 })
 ````
 
 ### Indented blocks
 
-When a fenced block is itself indented (nested under a list item, say),
-`respect_indent = true` (the default) starts the highlight at the block's
-own indent column — the opening fence's first backtick — on every row,
-including the closing fence and any blank interior lines, instead of
-painting from column 0. The right side still runs to the window's edge.
-Set `respect_indent = false` to paint the whole screen line from column 0
-(blank lines and trailing whitespace included). The same option exists on
+The fill is a `line_hl_group` extmark, so every cell of every row — the
+backticks, the language tag, the code, blank interior lines, trailing
+whitespace — shares the fence background.
+
+`respect_indent = true` (the default) then carves the paint into a
+rectangle: it starts at the block's own indent column — the opening
+fence's first backtick — on every row (closing fence and blank interior
+lines included) rather than at column 0, and holds `right_pad` columns
+(default `1`) off the window's right edge so the highlight never quite
+touches the border. `right_pad` needs the buffer to be visible in a window
+and is recomputed when the window is resized; set it to `0` to run flush
+to the edge.
+
+Set `respect_indent = false` to skip the rectangle and paint the whole
+screen line from column 0. Both options also exist on
 `fence_content_highlight` for the interior rows.
 
 ### Presets
@@ -323,8 +334,9 @@ groups on `:colorscheme` changes.
 Paints the **interior** of a fenced block - every line between the delimiters,
 blank lines and trailing whitespace included (not just where there are
 characters). For an indented block the paint starts at the block's indent
-column by default (`respect_indent`, see "Indented blocks" above);
-`respect_indent = false` paints from column 0:
+column and holds `right_pad` off the window edge by default (`respect_indent`
+/ `right_pad`, see "Indented blocks" above); `respect_indent = false` paints
+from column 0:
 
 ```javascript
 // this whole region, incl. the blank line and the line's trailing space →
@@ -345,6 +357,7 @@ require('color_my_ascii').setup({
     amount   = 6,         -- 0-100 blend strength toward black/white
     apply_to = 'all',     -- 'all' fenced blocks, or 'ascii' only
     respect_indent = true, -- as fence_line_highlight; start at the indent column
+    right_pad = 1,          -- as fence_line_highlight; hold off the right edge
   },
 })
 ````

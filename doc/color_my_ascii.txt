@@ -335,10 +335,14 @@ Configuration options:~
                               respect_indent boolean  (default true) start the
                                        highlight at an indented block's own
                                        indent column (the opening fence's
-                                       first backtick) instead of column 0;
-                                       the right side still runs to the
-                                       window edge. false paints the whole
-                                       screen line from column 0
+                                       first backtick) instead of column 0.
+                                       false paints the whole screen line
+                                       from column 0
+                              right_pad integer  (default 1, clamp 0-20)
+                                       screen columns held off the window's
+                                       right edge when respect_indent is on;
+                                       needs the buffer visible in a window,
+                                       recomputed on resize
 
                             preset = "auto" matches vim.g.colors_name against a
                             set of bundled theme palettes (catppuccin,
@@ -397,6 +401,9 @@ Configuration options:~
                               respect_indent boolean  (default true) as
                                        fence_line_highlight.respect_indent,
                                        for the interior rows
+                              right_pad integer  (default 1) as
+                                       fence_line_highlight.right_pad, for
+                                       the interior rows
 
                             The interior color is derived by resolving the
                             same preset/theme lookup as fence_line_highlight

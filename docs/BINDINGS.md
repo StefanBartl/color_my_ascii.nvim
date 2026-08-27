@@ -147,7 +147,7 @@ Augroup: `ColorMyAscii`.
 | --- | --- | --- |
 | `FileType` | `markdown` | Setup ASCII art highlighting for markdown files |
 
-Two further `ColorScheme` autocommands are registered directly in `setup()`
+Three further autocommands are registered directly in `setup()`
 (`lua/color_my_ascii/init.lua`), since they only make sense once the plugin
 is configured:
 
@@ -155,6 +155,7 @@ is configured:
 | --- | --- | --- |
 | `ColorScheme` | `ColorMyAsciiFenceLineHl` | Re-resolve fence-line highlight groups after a colorscheme change |
 | `ColorScheme` | `ColorMyAsciiHl` | Re-apply dynamically created (fixed-hex) ASCII-art highlight groups after a colorscheme change, so highlighting doesn't go stale after Neovim's implicit `hi clear` |
+| `WinResized`, `VimResized` | `ColorMyAsciiFenceResize` | Recompute the `fence_*_highlight.right_pad` right-edge inset (measured from window width) after a resize; no-op unless a `right_pad` is set |
 
 ---
 

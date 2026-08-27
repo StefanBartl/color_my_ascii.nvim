@@ -114,41 +114,51 @@ return function(H)
     vim.o.background = saved_bg
   end
 
-  -- respect_indent: indented block -> highlight starts past the indent and is
-  -- a bounded range (hl_group), not a full-line line_hl_group; shorter rows get
-  -- win_col-pinned virtual padding out to the block's widest line.
+  -- respect_indent: indented block -> highlight starts at the block's own indent
+  -- column (not column 0) and runs to the window edge via hl_eol; a blank
+  -- interior row masks the would-be indent back to Normal so the left edge
+  -- stays aligned with the opening fence.
   do
     local INDENT = {
       '- item', -- 0
-      '  ```lua', -- 1  indented 2, dw 8
-      '  print("hello world")', -- 2  widest, dw 22
-      '  ```', -- 3  dw 5
+      '  ```lua', -- 1  indent 2
+      '  x = 1', -- 2
+      '', -- 3  blank interior row
+      '  ```', -- 4
     }
     require('color_my_ascii.config').setup({
       fence_line_highlight = { enable = true, preset = 'accent', apply_to = 'all' },
-      fence_content_highlight = { enable = false },
+      fence_content_highlight = { enable = true, apply_to = 'all' },
     })
     fence_hl.setup_hl(require('color_my_ascii.config').get())
     local buf = H.scratch('markdown', INDENT)
     fence_hl.apply(buf, require('color_my_ascii.config').get())
     local marks = api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })
-    local open_hl, close_hl_mark, close_pad
+    local by_row = {}
     for _, m in ipairs(marks) do
-      if m[2] == 1 and m[4].hl_group == 'ColorMyAsciiFenceOpen' then
+      by_row[m[2]] = by_row[m[2]] or {}
+      table.insert(by_row[m[2]], m)
+    end
+    local open_hl
+    for _, m in ipairs(by_row[1] or {}) do
+      if m[4].hl_group == 'ColorMyAsciiFenceOpen' then
         open_hl = m
-      elseif m[2] == 3 and m[4].hl_group == 'ColorMyAsciiFenceClose' then
-        close_hl_mark = m
-      elseif m[2] == 3 and m[4].virt_text ~= nil then
-        close_pad = m
       end
     end
-    ok(open_hl ~= nil, 'respect_indent: open line painted with a bounded hl_group range')
-    eq(open_hl[3], 2, 'respect_indent: highlight starts after the 2-col indent')
+    ok(open_hl ~= nil, 'respect_indent: open line painted with a bounded hl_group range (not line_hl_group)')
+    eq(open_hl[3], 2, 'respect_indent: highlight starts at the 2-col indent')
+    ok(open_hl[4].hl_eol == true, 'respect_indent: highlight runs to the window edge (hl_eol)')
     ok(open_hl[4].line_hl_group == nil, 'respect_indent: no full-line line_hl_group')
-    eq(close_hl_mark[3], 2, 'respect_indent: close-line highlight also starts past the indent')
-    ok(close_pad ~= nil, 'respect_indent: short close line gets virtual padding')
-    eq(close_pad[4].virt_text_win_col, 5, 'respect_indent: padding pinned at the close line width (win_col)')
-    eq(close_pad[4].virt_text[1][1], string.rep(' ', 22 - 5), 'respect_indent: padding fills out to the widest line')
+
+    local blank_mask
+    for _, m in ipairs(by_row[3] or {}) do
+      if m[4].virt_text ~= nil then
+        blank_mask = m
+      end
+    end
+    ok(blank_mask ~= nil, 'respect_indent: blank interior row gets an indent mask')
+    eq(blank_mask[4].virt_text_win_col, 0, 'respect_indent: mask pinned at column 0')
+    eq(blank_mask[4].virt_text[1][1], '  ', 'respect_indent: mask covers the 2-col indent')
     api.nvim_buf_delete(buf, { force = true })
   end
 

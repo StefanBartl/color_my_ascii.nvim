@@ -71,7 +71,7 @@
 ---@field open? string|ColorMyAscii.CustomHighlight Override for the opening fence line (hl group name or attr table)
 ---@field close? string|ColorMyAscii.CustomHighlight Override for the closing fence line (hl group name or attr table)
 ---@field apply_to? "all"|"ascii" Which blocks get the highlight: every fenced block or only ASCII ones
----@field respect_indent? boolean Keep the highlight within an indented block's own indentation and end it at the block's widest line, preserving Neovim's right-edge gap (default true); false paints the whole screen line
+---@field respect_indent? boolean Start the highlight at the block's own indent column (opening fence's first backtick) instead of column 0; the right side still runs to the window edge (default true); false paints the whole screen line from column 0
 
 --- Background-only highlight of a fenced block's interior (between the
 --- delimiter lines), painted full-width via `line_hl_group` extmarks so it

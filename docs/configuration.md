@@ -80,9 +80,8 @@ require('color_my_ascii').setup({
     open     = nil,        -- override: hl-group name (string) or attr table
     close    = nil,        -- override: hl-group name (string) or attr table
     apply_to = 'all',      -- 'all' fenced blocks | 'ascii' only
-    respect_indent = true, -- keep the paint inside an indented block's indent
-                           -- and stop it at the block's widest line; false
-                           -- paints the whole screen line
+    respect_indent = true, -- start the paint at an indented block's own indent
+                           -- column, not column 0; false paints the whole line
   },
 
   -- Full-width background highlight of a fenced block's interior (see
@@ -262,13 +261,13 @@ require('color_my_ascii').setup({
 ### Indented blocks
 
 When a fenced block is itself indented (nested under a list item, say),
-`respect_indent = true` (the default) keeps the highlight **out of** the
-leading indentation on every row and stops it at the block's widest line,
-so Neovim's usual right-edge gap is left intact instead of the colour
-flooding to the window border. Set `respect_indent = false` to go back to
-painting the whole screen line edge to edge (blank lines and trailing
-whitespace included). The same option exists on `fence_content_highlight`
-for the interior rows.
+`respect_indent = true` (the default) starts the highlight at the block's
+own indent column — the opening fence's first backtick — on every row,
+including the closing fence and any blank interior lines, instead of
+painting from column 0. The right side still runs to the window's edge.
+Set `respect_indent = false` to paint the whole screen line from column 0
+(blank lines and trailing whitespace included). The same option exists on
+`fence_content_highlight` for the interior rows.
 
 ### Presets
 
@@ -323,8 +322,9 @@ groups on `:colorscheme` changes.
 
 Paints the **interior** of a fenced block - every line between the delimiters,
 blank lines and trailing whitespace included (not just where there are
-characters). By default the paint is bounded to the block's own column span
-(see "Indented blocks" above); `respect_indent = false` makes it full width:
+characters). For an indented block the paint starts at the block's indent
+column by default (`respect_indent`, see "Indented blocks" above);
+`respect_indent = false` paints from column 0:
 
 ```javascript
 // this whole region, incl. the blank line and the line's trailing space →
@@ -344,7 +344,7 @@ require('color_my_ascii').setup({
     shade    = 'auto',   -- 'auto' | 'darken' | 'lighten' | 'none'
     amount   = 6,         -- 0-100 blend strength toward black/white
     apply_to = 'all',     -- 'all' fenced blocks, or 'ascii' only
-    respect_indent = true, -- as fence_line_highlight; keep out of the indent
+    respect_indent = true, -- as fence_line_highlight; start at the indent column
   },
 })
 ````

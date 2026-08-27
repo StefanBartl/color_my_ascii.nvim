@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `fence_line_highlight.respect_indent` / `fence_content_highlight.respect_indent` (both default `true`): for an indented fenced block, keep the delimiter/interior highlight out of the block's own left indentation and stop it at the block's widest line instead of flooding the whole screen line to the window's right edge. Set to `false` for the previous edge-to-edge behaviour.
+- `fence_line_highlight.respect_indent` / `fence_content_highlight.respect_indent` (both default `true`): for an indented fenced block, start the delimiter/interior highlight at the block's own indent column (the opening fence's first backtick) on every row — closing fence and blank interior lines included — instead of painting from column 0. The right side still runs to the window edge. Set to `false` for the previous full-line behaviour.
 - `ColorScheme` autocommand that re-applies color_my_ascii's dynamically created (fixed-hex) ASCII-art highlight groups, so highlighting no longer goes stale after a `:colorscheme` switch (Neovim's implicit `hi clear` used to wipe them silently).
 - Default keymap actions for the argument-less `:Fence` sub-commands: `fence_yank`, `fence_open`, `fence_run`, `fence_format`, `fence_select`, `fence_wrap`, `fence_unwrap`. Opt-in via `setup({ keymaps = {...} })` like the existing actions. See [BINDINGS.md](BINDINGS.md#keymaps).
 - Development tooling: `.stylua.toml` (formatter config matching the existing style), `.luacheckrc` (linter config), and a `.github/workflows/lint.yml` CI workflow that runs `stylua --check` and `luacheck` on pushes and pull requests. See [Contributing](contributing.md#development).

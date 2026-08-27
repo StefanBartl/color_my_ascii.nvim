@@ -42,21 +42,15 @@ function M.setup(opts)
     return false, tostring(err)
   end
 
-  -- Setup cache (user-overridable via cfg.cache)
-  cache_manager.configure(cfg.cache or {
-    timeout = 5000,
-    max_size = 50,
-    enable_stats = false,
-  })
-
-  -- Setup debouncing (user-overridable via cfg.debounce)
-  debounce_manager.configure(cfg.debounce or {
-    small_file_threshold = 500,
-    medium_file_threshold = 2000,
-    small_delay = 100,
-    medium_delay = 200,
-    large_delay = 500,
-  })
+  -- Setup cache / debouncing (user-overridable via cfg.cache / cfg.debounce).
+  --
+  -- `or {}`, not a fallback table repeating the defaults: both `configure`
+  -- functions already merge field by field over the module's own defaults, so
+  -- a copy of those defaults here was a second place for them to live -- and
+  -- the two were already one edit away from disagreeing without anything
+  -- noticing.
+  cache_manager.configure(cfg.cache or {})
+  debounce_manager.configure(cfg.debounce or {})
 
   -- Setup automatic cleanup
   debounce_manager.setup_auto_cleanup()

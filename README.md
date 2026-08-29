@@ -1,3 +1,5 @@
+> **Active development.** This repository is in its development phase — breaking changes are to be expected at any time. Pin a commit or tag if you depend on it.
+
 # color_my_ascii.nvim
 
 ```
@@ -15,8 +17,6 @@
 ![Lazy.nvim compatible](https://img.shields.io/badge/lazy.nvim-supported-success)
 ![Neovim](https://img.shields.io/badge/Neovim-0.9+-success.svg)
 ![Lua](https://img.shields.io/badge/language-Lua-yellow.svg)
-
-> Beta stage - under active development. Changes possible.
 
 A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks with automatic language detection, custom highlights, and predefined color schemes.
 

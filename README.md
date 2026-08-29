@@ -96,7 +96,6 @@ installation with packer.nvim.
 - [Contributing](docs/contributing.md) — dev setup (stylua/luacheck/CI), adding a new language or character group
 - [Features](docs/FEATURES/README.md) — full feature catalog, grouped by theme (highlighting, languages, fences, color schemes, tools)
 - [Test File](docs/dev/TEST.md) — test all features
-- [Roadmap](docs/ROADMAP.md) — planned and considered future work
 - [Changelog](docs/CHANGELOG.md) — version history
 - [Vim Help](doc/color_my_ascii.txt) — complete reference (`:h color_my_ascii`)
 

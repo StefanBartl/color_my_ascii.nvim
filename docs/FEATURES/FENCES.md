@@ -211,8 +211,7 @@ A `` ```javascript `` block also gets Neovim's native treesitter injection
 highlighting (`:TSInstall javascript` + `nvim-treesitter` highlight) on top
 of color_my_ascii's own overlay for languages it recognizes — see
 [HIGHLIGHTING.md#treesitter-syntax-overlay](HIGHLIGHTING.md#treesitter-syntax-overlay).
-Full LSP inside fences (completion/hover/diagnostics) is on the roadmap, not
-built — see [ROADMAP/lsp_integration_fence.md](../ROADMAP/lsp_integration_fence.md).
+Full LSP inside fences (completion/hover/diagnostics) is not built.
 
 - **Config:** `treesitter.syntax_highlight` (default `true`, only applies when `treesitter.enabled`)
 - **Docs:** [HIGHLIGHTING.md#treesitter-syntax-overlay](HIGHLIGHTING.md#treesitter-syntax-overlay)

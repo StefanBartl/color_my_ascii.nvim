@@ -462,7 +462,6 @@ Commands, Keymap-Aktionen und Autocommands.
 - [Test File](dev/TEST.md) - Alle Features testen
 - [Color Schemes](schemes.md) - Eigene Schemes erstellen
 - [Bindings-Übersicht](BINDINGS.md) - Alle Commands, Keymaps und Autocommands
-- [Roadmap](ROADMAP.md) - Geplante und erwogene zukünftige Arbeit
 
 ---
 

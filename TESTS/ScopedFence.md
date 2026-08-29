@@ -28,7 +28,7 @@ Inner Title
 
 **3. Anchor jump** (`mj`) — cursor on a `[text](#inner-a)` link inside the block → jumps to the inner heading.
 
-**4. Shift-all** (`<S-Right>`/`<S-Left>`) — cursor inside the block → shifts **only** the block's headings (the outer ones stay). *(Exactly what you already saw on the ROADMAP file.)*
+**4. Shift-all** (`<S-Right>`/`<S-Left>`) — cursor inside the block → shifts **only** the block's headings (the outer ones stay).
 
 **5. Toggle**
 - `:Markdown scope off` → everything falls back to the old behaviour (navigation then runs *into* fences). `:Markdown scope on` / `toggle` / `status`.

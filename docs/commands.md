@@ -139,8 +139,7 @@ injections** (install the parser with `:TSInstall javascript` and enable
 `treesitter.syntax_highlight` (on by default). `:checkhealth color_my_ascii`
 reports which fence languages in the buffer are missing a parser.
 
-Full LSP inside fences (completion/hover/diagnostics) is on the roadmap — see
-[docs/ROADMAP/lsp_integration_fence.md](ROADMAP/lsp_integration_fence.md).
+Full LSP inside fences (completion/hover/diagnostics) is not built.
 
 ---
 

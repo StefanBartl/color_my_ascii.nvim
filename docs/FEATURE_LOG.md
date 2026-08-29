@@ -2,9 +2,7 @@
 
 A running, detailed log of implemented roadmap items — one entry per feature,
 with the files touched, the commit it landed in, and where it's documented.
-Complements [ROADMAP.md](ROADMAP.md) (the terser public overview) with enough
-detail to trace a feature back to its origin and rationale. Source items get
-removed from the personal roadmap notes once logged here.
+Carries enough detail to trace a feature back to its origin and rationale.
 
 **Not the feature catalogue.** That is [`FEATURES/`](FEATURES/README.md) —
 what the plugin does, grouped by theme. This file answers "when did it land

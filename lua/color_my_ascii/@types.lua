@@ -204,9 +204,9 @@
 ---@field line_count integer Number of lines in buffer at cache time
 
 ---@class CacheConfig
----@field timeout integer Cache validity timeout in milliseconds
----@field max_size integer Maximum number of cached buffers
----@field enable_stats boolean Whether to collect statistics
+---@field timeout? integer Cache validity timeout in milliseconds
+---@field max_size? integer Maximum number of cached buffers
+---@field enable_stats? boolean Whether to collect statistics
 
 ---@class CacheStats
 ---@field hits integer Number of cache hits

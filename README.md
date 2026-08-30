@@ -9,14 +9,13 @@
     ╚══════════════════════════════════════════╝
 ```
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Neovim](https://img.shields.io/badge/Neovim-0.9%2B-57A143?logo=neovim&logoColor=white)](https://neovim.io)
+[![Lua](https://img.shields.io/badge/Lua-5.1%2FLuaJIT-2C2D72?logo=lua&logoColor=white)](https://www.lua.org)
+![Status](https://img.shields.io/badge/status-beta-orange)
+
 > See also: [markdown.nvim](https://github.com/StefanBartl/markdown.nvim) - a companion
 > plugin for working with Markdown files, pairs well with the ASCII highlighting here.
-
-![version](https://img.shields.io/badge/version-0.2-blue.svg)
-![State](https://img.shields.io/badge/status-beta-orange.svg)
-![Lazy.nvim compatible](https://img.shields.io/badge/lazy.nvim-supported-success)
-![Neovim](https://img.shields.io/badge/Neovim-0.9+-success.svg)
-![Lua](https://img.shields.io/badge/language-Lua-yellow.svg)
 
 A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks with automatic language detection, custom highlights, and predefined color schemes.
 

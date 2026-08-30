@@ -112,3 +112,7 @@ installation with packer.nvim.
 - [Neovim Documentation](https://neovim.io/doc/)
 - [Extmarks API](https://neovim.io/doc/user/api.html#api-extmarks)
 - [Markdown Syntax](https://www.markdownguide.org/basic-syntax/)
+
+## License
+
+MIT — see [LICENSE](LICENSE).

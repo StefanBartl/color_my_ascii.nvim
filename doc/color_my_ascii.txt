@@ -1183,6 +1183,44 @@ Or extend the fence_language_map:
     })
 <
 
+Characters shift or duplicate while editing~
+
+A line renders correctly, then garbles as soon as the cursor visits it: a
+character doubled, the next one swallowed, the cursor a cell beside the glyph
+it should be on, or a one-cell gap in the fence background at a line's end.
+E.g. "WARNING oil" rendering as "WWARNINGoil".
+
+This is not the highlighting. Neovim and the terminal disagree on how many
+cells a character occupies; the plugin only makes it visible, because a line
+with many highlight spans gets repainted in fragments and a fragment written
+at an absolute column lands one cell off.
+
+Check the suspect character:
+>vim
+    :echo strdisplaywidth("\u26A0\uFE0F")
+<
+Compare that with the number of cells the terminal actually paints. If they
+differ, that is the cause - it reproduces in `nvim --clean` with the plugin
+off.
+
+The usual culprits are East Asian "Ambiguous" codepoints, which this plugin's
+subject matter is full of: box drawing, arrows, and symbols carrying the emoji
+variation selector U+FE0F. Their width depends on which table each side uses -
+'ambiwidth' and 'emoji' on the Neovim side, the terminal's own setting on the
+other (WezTerm: `unicode_version`, default 9, where U+FE0F widens nothing).
+
+Fix by bringing both onto the same table - exactly one of them, since changing
+both moves the mismatch to the other side:
+>lua
+    vim.o.emoji = false            -- Neovim follows the terminal
+    -- vim.o.ambiwidth = "double"  -- if the terminal draws box drawing wide
+<
+or set `unicode_version = 14` in the terminal so it follows Neovim.
+
+Note that `:Fence align` counts UTF-8 codepoints rather than display cells, so
+a box holding double-width characters can still look crooked for the same
+reason.
+
 Performance issues~
 
 Disable features you don't need:

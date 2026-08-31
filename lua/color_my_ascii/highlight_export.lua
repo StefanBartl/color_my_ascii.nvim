@@ -51,10 +51,6 @@ local function collect_hl_map(bufnr, start_row, end_row)
   return map
 end
 
----@class ColorMyAscii.HlRun
----@field text string
----@field group string|nil nil = no color_my_ascii highlight on this run
-
 --- Build per-content-row runs of contiguous text sharing the same effective
 --- hl_group (nil = unhighlighted), byte-column aligned so multi-byte UTF-8
 --- characters are never split (extmark ranges are always char-aligned).
@@ -110,6 +106,27 @@ end
 ---@return integer b
 local function int_to_rgb(n)
   return math.floor(n / 65536) % 256, math.floor(n / 256) % 256, n % 256
+end
+
+--- Resolve a highlight group to renderable attributes: colors as "#rrggbb"
+--- strings, styles as booleans, `link=` chains followed. Absent attributes stay
+--- nil, so a consumer can tell "sets no background" from "sets a black one".
+---
+--- Public via `color_my_ascii.api.highlight.attrs_for_group` -- the form other
+--- plugins consume, while `to_html`/`to_ansi` below keep using the raw integer
+--- attributes they need for CSS declarations and ANSI codes.
+---@param group string
+---@return ColorMyAscii.HlAttrs
+function M.attrs_for_group(group)
+  local attrs = resolve_attrs(group)
+  return {
+    fg = attrs.fg and int_to_hex(attrs.fg) or nil,
+    bg = attrs.bg and int_to_hex(attrs.bg) or nil,
+    bold = attrs.bold or nil,
+    italic = attrs.italic or nil,
+    underline = attrs.underline or nil,
+    strikethrough = attrs.strikethrough or nil,
+  }
 end
 
 --- Sanitize a highlight-group name into a CSS class-name-safe token.

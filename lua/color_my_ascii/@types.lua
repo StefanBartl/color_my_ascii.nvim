@@ -169,6 +169,18 @@
 --- `parser`/`parser_ts`. Superset of ColorMyAscii.Block: the `start_line`/
 --- `end_line`/`lines`/`fence_line` fields are kept as aliases so existing
 --- ASCII-highlighting consumers keep working unchanged.
+---@class ColorMyAscii.HlRun
+---@field text string A stretch of text sharing one highlight group
+---@field group string|nil nil = no color_my_ascii highlight on this run
+
+---@class ColorMyAscii.HlAttrs
+---@field fg? string Foreground as "#rrggbb"
+---@field bg? string Background as "#rrggbb"
+---@field bold? boolean
+---@field italic? boolean
+---@field underline? boolean
+---@field strikethrough? boolean
+
 ---@class ColorMyAscii.FenceBlock
 ---@field open_row integer 0-indexed row of the opening fence delimiter
 ---@field close_row integer 0-indexed row of the closing fence delimiter

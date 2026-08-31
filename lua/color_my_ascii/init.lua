@@ -23,6 +23,12 @@ local fence_hl = require('color_my_ascii.fence_hl')
 --- Language-agnostic block detection with precise ranges + metadata; see
 --- `color_my_ascii.api.fences`. Available without calling M.setup().
 M.fences = require('color_my_ascii.api.fences')
+
+--- Public, stable API for reading back the highlighting this plugin applied --
+--- the extmark colors as data, so another plugin can reproduce the buffer's
+--- look in its own medium (mdview.nvim paints its browser preview with it).
+--- See `color_my_ascii.api.highlight`. Available without calling M.setup().
+M.highlight = require('color_my_ascii.api.highlight')
 local highlighter = require('color_my_ascii.highlighter')
 local cache_manager = require('color_my_ascii.cache_manager')
 local debounce_manager = require('color_my_ascii.debounce_manager')

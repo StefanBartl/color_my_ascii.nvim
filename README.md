@@ -36,6 +36,7 @@ A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks w
 - **Function name and bracket highlighting**, inline code highlighting, and configurable treatment of empty fenced blocks
 - **Fence-line and fence-content highlighting**: full-line/full-width highlight of fence delimiters and interiors, on by default and theme-matched
 - **Public Fence API** (`require("color_my_ascii").fences`) for other plugins to reuse fenced-block detection
+- **Public highlight read-back API** (`require("color_my_ascii").highlight`) — the applied colors as data, so another plugin can reproduce the buffer's look in its own medium (mdview.nvim paints its browser preview with it)
 - **`:Fence` actions**: a literate-programming toolkit for the block under the cursor — export (plain or HTML with its applied highlighting), yank (plain or ANSI-colored), open (edit-in-split + sync), run, format, import, change language, select, wrap/unwrap, align (straighten box-drawing edges)
 - **ASCII blocks in code comments** (opt-in, `config.comment_ascii`): explicitly-marked `-- ascii` … `-- /ascii` blocks get the same highlighting outside markdown
 - **`:ColorMyAscii hover`**: highlight/group/keyword info for the character under the cursor, in a float
@@ -88,7 +89,7 @@ installation with packer.nvim.
 - [Configuration](docs/configuration.md) — full `setup()` reference, treesitter integration, fence-line/fence-content highlighting
 - [Commands](docs/commands.md) — all user commands, the `:Fence` toolkit, and its configuration
 - [Supported Languages](docs/languages.md) — the 31 built-in languages and standard fence-tag support
-- [Fence API](docs/api.md) — public API for plugin authors to reuse fenced-block detection
+- [Fence API](docs/api.md) — public APIs for plugin authors: fenced-block detection, and reading back the applied highlighting
 - [Color Schemes](docs/schemes.md) — built-in schemes and how to create your own
 - [Bindings Cheatsheet](docs/BINDINGS.md) — compact table of all commands, keymaps, and autocommands
 - [Troubleshooting](docs/troubleshooting.md) — performance notes and common issues

@@ -14,9 +14,10 @@ past a single-page catalog:
   detection, standard fence-tag support, and the `config.languages`
   extension point.
 - [FENCES.md](FENCES.md) — everything about the fence itself: fence-line/
-  fence-content highlighting, `%`-jump, validation, the public Fence API, and
-  the full `:Fence` sub-command toolkit (export, yank, open, run, format,
-  import, lang, select, wrap/unwrap, align).
+  fence-content highlighting, `%`-jump, validation, the two public APIs (fence
+  detection, and reading the applied highlighting back out), and the full
+  `:Fence` sub-command toolkit (export, yank, open, run, format, import, lang,
+  select, wrap/unwrap, align).
 - [COLORSCHEMES.md](COLORSCHEMES.md) — the 10 built-in color schemes and how
   to build your own.
 - [TOOLS.md](TOOLS.md) — cursor-side introspection: hover, health check, and

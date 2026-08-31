@@ -78,6 +78,28 @@ buffer `changedtick`, so `block_at` is cheap to call on every keystroke.
 - **Module:** `api/fences.lua` (`list_blocks`, `block_at`, `is_markdown_lang`)
 - **Usage:** `require('color_my_ascii').fences` — available without calling `setup()`
 
+## Highlight read-back API (for plugin authors)
+
+The applied highlighting, handed out **as data**, so another plugin can
+reproduce the buffer's look in its own medium. The coloring lives in extmarks
+and therefore exists only inside the buffer; this is how it gets out.
+`runs_for_block` returns a block's painted spans, one array of runs per content
+row (concatenating a row's run texts reproduces it byte for byte);
+`attrs_for_group` resolves a highlight group to `#rrggbb` plus style flags,
+following `link=` chains, leaving unset attributes nil.
+
+**A block this plugin has not painted reports no groups at all** — the honest
+answer, and the consumer's cue to fall back to whatever it would otherwise have
+done. Not an edge case: `fence_language_map` covers 31 language tags.
+
+First consumer: [mdview.nvim](https://github.com/StefanBartl/mdview.nvim)'s
+`browser.highlighter = "nvim"`, which paints its browser preview with exactly
+what the buffer next to it shows and hands the rest to highlight.js.
+
+- **Module:** `api/highlight.lua` (`runs_for_block`, `attrs_for_group`), built on `highlight_export.lua`
+- **Usage:** `require('color_my_ascii').highlight` — available without calling `setup()`
+- **Docs:** [api.md](../api.md#highlight-read-back-api-for-plugin-authors)
+
 ## Fence export & yank
 
 `:Fence export [path] [--open] [--replace]` extracts the block under the

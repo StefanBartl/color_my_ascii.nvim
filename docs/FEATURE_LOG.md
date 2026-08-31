@@ -13,6 +13,7 @@ folder that means something else.
 
   - [Implemented - still to be split up](#implemented---still-to-be-split-up)
   - [Custom Language Definitions](#custom-language-definitions)
+  - [Highlight Read-Back API](#highlight-read-back-api)
   - [Export/Copy with Highlighting](#exportcopy-with-highlighting)
   - [Hover Info for Characters](#hover-info-for-characters)
   - [Box-Drawing Edge Alignment](#box-drawing-edge-alignment)
@@ -84,6 +85,49 @@ plugin itself — no way to extend it from `setup()`.
 **Tests:** `TESTS/config_languages_spec.lua`.
 
 ---
+
+## Highlight Read-Back API
+
+**Commit:** `08be52e` — `feat(api): read the applied highlighting back out, as a public API`
+
+color_my_ascii's coloring lives entirely in extmarks, so it exists only inside
+the buffer: copy a block out, render it somewhere else, and the colors are
+gone. `highlight_export` already reconstructed them for `:Fence export --html`
+and `:Fence yank --ansi`, but only for those two — a plugin wanting the same
+information had no declared surface to ask.
+
+- New module `api/highlight.lua`, reachable as `require('color_my_ascii').highlight`
+  without `setup()`, mirroring how `.fences` is exposed:
+  `runs_for_block(bufnr, block)` returns the painted spans of a fenced block,
+  one array of runs per content row; `attrs_for_group(group)` resolves a
+  highlight group to `{ fg?, bg?, bold?, italic?, underline?, strikethrough? }`
+  with colors as `"#rrggbb"` and `link=` chains followed.
+- `highlight_export.attrs_for_group` is the shared implementation behind the
+  second one, built on the resolver `to_html`/`to_ansi` already used — the
+  point of the whole exercise was **not** to have that computed twice.
+- `ColorMyAscii.HlRun` and the new `ColorMyAscii.HlAttrs` moved into
+  `@types.lua`, where the public shapes live.
+
+**The contract, and why it is in a spec** (`TESTS/api_highlight_spec.lua`): a
+consumer outside this repo cannot watch it break. Runs reassemble their source
+row byte for byte, an unset attribute stays nil rather than becoming a default,
+and **a block color_my_ascii has not painted reports no groups at all** — the
+honest answer, and the caller's cue to fall back. That last one is not an edge
+case: `fence_language_map` covers 31 language tags, so a consumer meets
+unpainted blocks routinely.
+
+**First consumer:** [mdview.nvim](https://github.com/StefanBartl/mdview.nvim)'s
+`browser.highlighter = "nvim"` — the browser preview paints code blocks with
+exactly what the buffer next to it shows, and hands the blocks this plugin does
+not paint to highlight.js.
+
+**Files:** `lua/color_my_ascii/api/highlight.lua` (new),
+`lua/color_my_ascii/highlight_export.lua`, `lua/color_my_ascii/init.lua`,
+`lua/color_my_ascii/@types.lua`, `TESTS/api_highlight_spec.lua` (new),
+`TESTS/run.lua`
+
+**Docs:** [api.md](api.md#highlight-read-back-api-for-plugin-authors),
+[README](../README.md)
 
 ## Export/Copy with Highlighting
 

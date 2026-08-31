@@ -168,6 +168,70 @@ return function(H)
     api.nvim_buf_delete(buf, { force = true })
   end
 
+  -- respect_indent with a TAB indent: the two cut-outs are measured in different
+  -- units and a tab is where they part ways - one byte, 'tabstop' screen cells.
+  -- The byte range must stay one byte (it addresses the tab character); the
+  -- overlay must be as wide as the tab actually renders, or the fence background
+  -- bleeds across the rest of the indent on rows that have no cells of their own.
+  do
+    local TABBED = {
+      '- item', -- 0
+      '\t```lua', -- 1  indent: one tab
+      '\tx = 1', -- 2
+      '', -- 3  blank interior row - the overlay is the only cut-out here
+      '\t```', -- 4
+    }
+    require('color_my_ascii.config').setup({
+      fence_line_highlight = { enable = true, preset = 'accent', apply_to = 'all', right_pad = 0 },
+      fence_content_highlight = { enable = true, apply_to = 'all', right_pad = 0 },
+    })
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+    local buf = H.scratch('markdown', TABBED)
+    vim.bo[buf].tabstop = 4
+
+    -- Painted from a *different* current buffer on purpose: the tab width that
+    -- decides the mask is the painted buffer's, not the current one's.
+    local other = H.scratch('markdown', { 'unrelated' })
+    vim.bo[other].tabstop = 8
+    fence_hl.apply(buf, require('color_my_ascii.config').get())
+
+    local by_row = {}
+    for _, m in ipairs(api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })) do
+      by_row[m[2]] = by_row[m[2]] or {}
+      table.insert(by_row[m[2]], m)
+    end
+    local function mask_of(row)
+      for _, m in ipairs(by_row[row] or {}) do
+        if m[4].virt_text ~= nil and m[4].virt_text_win_col == 0 then
+          return m
+        end
+      end
+    end
+    local function byte_cut_of(row)
+      for _, m in ipairs(by_row[row] or {}) do
+        if m[4].hl_group == 'Normal' and m[4].end_col ~= nil then
+          return m
+        end
+      end
+    end
+
+    for _, row in ipairs({ 1, 2, 3, 4 }) do
+      local m = mask_of(row)
+      ok(m ~= nil, ('tab indent: row %d gets an indent mask'):format(row))
+      eq(#m[4].virt_text[1][1], 4, ('tab indent: row %d mask is tabstop cells wide, not one byte'):format(row))
+    end
+
+    for _, row in ipairs({ 1, 2, 4 }) do
+      local m = byte_cut_of(row)
+      ok(m ~= nil, ('tab indent: row %d gets a byte-column cut-out over the tab'):format(row))
+      eq(m[4].end_col, 1, ('tab indent: row %d byte cut-out stays one byte wide'):format(row))
+    end
+    ok(byte_cut_of(3) == nil, 'tab indent: empty row has no cells to re-highlight, overlay only')
+
+    api.nvim_buf_delete(other, { force = true })
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
   -- right_pad: a Normal overlay masks `right_pad` columns off the window edge.
   do
     require('color_my_ascii.config').setup({

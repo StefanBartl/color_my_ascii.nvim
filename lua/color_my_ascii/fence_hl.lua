@@ -184,13 +184,40 @@ local function set_line(bufnr, row, group, priority)
   })
 end
 
---- Byte length of a line's leading whitespace (indent).
+--- A line's leading whitespace (indent), as a string.
+---
+--- Deliberately the substring and not a length: its byte count is an extmark
+--- column, its screen width is a virtual-text column, and the two part ways the
+--- moment the indent holds a tab (one byte, 'tabstop' cells). Both left
+--- cut-outs below are derived from this one string, so neither can end up
+--- measured in the other's unit.
 ---@internal
 ---@param line string
+---@return string
+local function indent_of(line)
+  return line:match('^[ \t]*') or ''
+end
+
+--- Screen width of an indent string, measured from column 0.
+---
+--- Spaces and tabs only, so this is plain 'tabstop' arithmetic rather than a
+--- `strdisplaywidth` call: that one measures tabs against the *current*
+--- buffer's 'tabstop', and the buffer being painted need not be current when a
+--- debounced refresh lands.
+---@internal
+---@param ws string
+---@param tabstop integer
 ---@return integer
-local function indent_bytes(line)
-  local ws = line:match('^[ \t]*') or ''
-  return #ws
+local function indent_cells(ws, tabstop)
+  local w = 0
+  for i = 1, #ws do
+    if ws:sub(i, i) == '\t' then
+      w = w + tabstop - (w % tabstop)
+    else
+      w = w + 1
+    end
+  end
+  return w
 end
 
 --- Screen columns available for buffer text in a window currently showing
@@ -236,20 +263,27 @@ end
 ---@param line string the row's text
 ---@param group string
 ---@param priority integer
----@param left integer byte/screen column of the opening fence's first backtick
+---@param indent string the opening fence's own leading whitespace
+---@param tabstop integer the buffer's 'tabstop', for measuring that indent in cells
 ---@param right_col integer|nil screen column where the right-edge cut-out starts
 ---@param right_pad integer width of the right-edge cut-out
-local function paint_row(bufnr, row, line, group, priority, left, right_col, right_pad)
-  left = left or 0
+local function paint_row(bufnr, row, line, group, priority, indent, tabstop, right_col, right_pad)
+  indent = indent or ''
   pcall(api.nvim_buf_set_extmark, bufnr, ns, row, 0, {
     line_hl_group = group,
     priority = priority,
   })
 
+  -- The span to carve back out, kept as a substring so it can be measured in
+  -- both units below: the fence's own indent on a blank row (there is nothing
+  -- of the row's own to clamp against), otherwise the row's leading whitespace
+  -- clamped to it - which is what keeps the cut-out inside whitespace and off
+  -- the text of a line less indented than its fence.
   local blank = line == '' or line:match('^%s*$') ~= nil
-  local mask = blank and left or math.min(left, indent_bytes(line))
-  if mask > 0 then
-    local real = math.min(mask, #line)
+  local mask = blank and indent or indent_of(line):sub(1, #indent)
+  local cells = indent_cells(mask, tabstop)
+  if cells > 0 then
+    local real = math.min(#mask, #line)
     if real > 0 then
       pcall(api.nvim_buf_set_extmark, bufnr, ns, row, 0, {
         end_row = row,
@@ -259,7 +293,7 @@ local function paint_row(bufnr, row, line, group, priority, left, right_col, rig
       })
     end
     pcall(api.nvim_buf_set_extmark, bufnr, ns, row, 0, {
-      virt_text = { { string.rep(' ', mask), 'Normal' } },
+      virt_text = { { string.rep(' ', cells), 'Normal' } },
       virt_text_win_col = 0,
       hl_mode = 'replace',
       priority = priority,
@@ -321,16 +355,24 @@ function M.apply(bufnr, cfg)
   end
   local line_right, content_right = right_col(line_pad), right_col(content_pad)
 
+  -- Left cut-outs are measured in screen cells, and a tab's width is a property
+  -- of the buffer being painted - not of whatever buffer happens to be current
+  -- when a debounced refresh lands here.
+  local ts_ok, tabstop = pcall(function()
+    return vim.bo[bufnr].tabstop
+  end)
+  tabstop = (ts_ok and type(tabstop) == 'number' and tabstop > 0) and tabstop or 8
+
   for _, b in ipairs(blocks) do
     local want_line = line_on and (line_apply_to == 'all' or (line_apply_to == 'ascii' and b.is_ascii))
     local want_content = content_on and (content_apply_to == 'all' or (content_apply_to == 'ascii' and b.is_ascii))
 
     if want_line or want_content then
       local need_geom = (want_line and line_respect) or (want_content and content_respect)
-      local blk_lines, base_left
+      local blk_lines, base_indent = nil, ''
       if need_geom then
         blk_lines = api.nvim_buf_get_lines(bufnr, b.open_row, b.close_row + 1, false)
-        base_left = indent_bytes(blk_lines[1] or '')
+        base_indent = indent_of(blk_lines[1] or '')
       end
       local function row_text(row)
         return (blk_lines and blk_lines[row - b.open_row + 1]) or ''
@@ -339,9 +381,19 @@ function M.apply(bufnr, cfg)
       if want_line then
         -- below the character highlights (100+) so tokens stay visible
         if line_respect then
-          paint_row(bufnr, b.open_row, row_text(b.open_row), OPEN_GROUP, 90, base_left, line_right, line_pad)
+          paint_row(bufnr, b.open_row, row_text(b.open_row), OPEN_GROUP, 90, base_indent, tabstop, line_right, line_pad)
           if b.close_row ~= b.open_row then
-            paint_row(bufnr, b.close_row, row_text(b.close_row), CLOSE_GROUP, 90, base_left, line_right, line_pad)
+            paint_row(
+              bufnr,
+              b.close_row,
+              row_text(b.close_row),
+              CLOSE_GROUP,
+              90,
+              base_indent,
+              tabstop,
+              line_right,
+              line_pad
+            )
           end
         else
           set_line(bufnr, b.open_row, OPEN_GROUP, 90)
@@ -354,7 +406,7 @@ function M.apply(bufnr, cfg)
       if want_content then
         for row = b.content_start, b.content_end - 1 do
           if content_respect then
-            paint_row(bufnr, row, row_text(row), CONTENT_GROUP, 80, base_left, content_right, content_pad)
+            paint_row(bufnr, row, row_text(row), CONTENT_GROUP, 80, base_indent, tabstop, content_right, content_pad)
           else
             set_line(bufnr, row, CONTENT_GROUP, 80) -- below the delimiter-line highlight (90)
           end

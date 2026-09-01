@@ -40,7 +40,7 @@ local function collect_hl_map(bufnr, start_row, end_row)
   for _, m in ipairs(marks) do
     local row, col, details = m[2], m[3], m[4]
     local hl_group = details and details.hl_group
-    if hl_group and row >= start_row and row < end_row then
+    if details and hl_group and row >= start_row and row < end_row then
       local end_col = details.end_col or (col + 1)
       map[row] = map[row] or {}
       for c = col, end_col - 1 do

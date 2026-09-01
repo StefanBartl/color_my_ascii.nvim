@@ -37,7 +37,7 @@ local function applied_hl_at(bufnr, row, col)
   for _, m in ipairs(marks) do
     local mcol, details = m[3], m[4]
     local hl_group = details and details.hl_group
-    if hl_group then
+    if details and hl_group then
       local end_col = details.end_col or (mcol + 1)
       if col >= mcol and col < end_col then
         found = hl_group -- later (higher id) mark wins, matching paint order

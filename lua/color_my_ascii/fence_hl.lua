@@ -233,8 +233,10 @@ local function win_text_width(bufnr)
   end
   local cur = api.nvim_get_current_win()
   local win = vim.tbl_contains(wins, cur) and cur or wins[1]
-  local ok, info = pcall(vim.fn.getwininfo, win)
-  info = ok and info and info[1] or nil
+  local ok, infos = pcall(vim.fn.getwininfo, win)
+  -- Its own local: `getwininfo` answers with a list, and reusing the same name
+  -- for one entry of it would turn the list variable into a nil-able item.
+  local info = ok and infos and infos[1] or nil
   if not info then
     return nil
   end

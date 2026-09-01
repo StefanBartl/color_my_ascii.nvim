@@ -146,7 +146,11 @@ local function write_content(bufnr, block, content, path, flags)
   end
   if flags.open or c.open_after then
     local open_cmd = c.open_cmd or 'vsplit'
-    pcall(vim.cmd, open_cmd .. ' ' .. vim.fn.fnameescape(path))
+    -- `vim.cmd` is a callable table, not a function: the closure form is what
+    -- `pcall` takes.
+    pcall(function()
+      vim.cmd(open_cmd .. ' ' .. vim.fn.fnameescape(path))
+    end)
   end
 end
 

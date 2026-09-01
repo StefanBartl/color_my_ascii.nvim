@@ -105,6 +105,7 @@ return function(H)
     local shaded = string.format('#%06x', hl.bg)
     ok(shaded ~= base, 'darken: shaded color differs from base')
     local color = require('color_my_ascii.utils.color')
+    ---@cast base -nil
     local br, bg_, bb = color.hex_to_rgb(base)
     local sr, sg, sb = color.hex_to_rgb(shaded)
     ok(

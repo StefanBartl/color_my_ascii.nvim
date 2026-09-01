@@ -47,8 +47,8 @@ end
 
 --- Subcommand table: name -> fun(argv: string[], ctx: table).
 local SUBCOMMANDS = {
-  export = function(argv, ctx)
-    require('color_my_ascii.commands.fence.export').run(argv, ctx)
+  export = function(argv, _)
+    require('color_my_ascii.commands.fence.export').run(argv)
   end,
   yank = function(argv, _)
     require('color_my_ascii.commands.fence.yank').run(argv)

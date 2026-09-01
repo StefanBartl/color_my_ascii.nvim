@@ -88,7 +88,10 @@ function M.run(_argv)
   local tmp = vim.fn.tempname() .. '.' .. util.ext_for(lang)
   vim.fn.writefile(content, tmp)
 
-  local cmd = type(runner) == 'table' and vim.deepcopy(runner) or vim.split(runner, '%s+')
+  -- Bound to a local first: `type(runner) == 'table'` narrows the local, not
+  -- the second read of the field in the `or` branch.
+  local declared = runner
+  local cmd = type(declared) == 'table' and vim.deepcopy(declared) or vim.split(declared --[[@as string]], '%s+')
   cmd[#cmd + 1] = tmp
 
   util.notify('running ' .. lang .. ' …')

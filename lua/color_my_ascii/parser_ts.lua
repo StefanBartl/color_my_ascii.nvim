@@ -92,8 +92,18 @@ function M.scan_blocks_ts(bufnr, opts)
   local is_ascii_fence = require('color_my_ascii.parser').is_ascii_fence
   local lines_mode = (opts and opts.lines) or 'none'
 
-  local ts_parser = vim.treesitter.get_parser(bufnr, 'markdown')
-  local root = ts_parser:parse()[1]:root()
+  -- `get_parser` answers nil when the markdown parser is not installed. The
+  -- caller checks `markdown_available()` first and wraps this call in a pcall,
+  -- so raising here is what hands the buffer to the heuristic scanner --
+  -- returning an empty list would look like "this buffer has no fences".
+  local ts_parser = assert(vim.treesitter.get_parser(bufnr, 'markdown'))
+  -- `parse()` answers with a list of trees; a parser that produced none has
+  -- nothing to walk, and that is a real state (an empty or unparsable buffer).
+  local tree = ts_parser:parse()[1]
+  if not tree then
+    return {}
+  end
+  local root = tree:root()
 
   ---@type TSNode[]
   local fenced_nodes = {}

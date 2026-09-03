@@ -19,9 +19,6 @@ them as 102 separate features instead of seven.
 | [custom-colors.md](custom-colors.md) | Building a palette by hand instead of taking a scheme |
 | [custom-highlights.md](custom-highlights.md) | Per-character and per-pattern overrides on top of everything else |
 
-German versions of three of them are in [`de/`](de/) — deliberate
-translations with an English counterpart, not stale copies.
-
 > **Known issue:** several of these link to files from an older documentation
 > layout that no longer exist (`./language-detection.md`,
 > `./character-groups.md`, `../groups/operators.md`). `:DocMap` flags them as

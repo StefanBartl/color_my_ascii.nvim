@@ -383,6 +383,6 @@ enable_bracket_highlighting = true,
 ## See Also
 
 - [Custom Highlights](./custom-highlights.md)
-- [Operators Group](../groups/operators.md)
+- [Group Configuration](./group-configuration.md) — the operators group, and every other one
 
 ---

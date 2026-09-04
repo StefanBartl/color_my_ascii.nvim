@@ -19,8 +19,10 @@ them as 102 separate features instead of seven.
 | [custom-colors.md](custom-colors.md) | Building a palette by hand instead of taking a scheme |
 | [custom-highlights.md](custom-highlights.md) | Per-character and per-pattern overrides on top of everything else |
 
-> **Known issue:** several of these link to files from an older documentation
-> layout that no longer exist (`./language-detection.md`,
-> `./character-groups.md`, `../groups/operators.md`). `:DocMap` flags them as
-> `dead-readme-link`. The prose is still accurate; only the cross-references
-> rotted.
+> **Cross-references, repaired 2026-09-04.** Several of these pointed at files
+> from an older layout that no longer exist (`./language-detection.md`,
+> `../groups/operators.md`, `../color-schemes.md`, `../performance.md`). Each
+> now points at the document that took the subject over — detection at
+> [`../FEATURES/LANGUAGES.md`](../FEATURES/LANGUAGES.md), schemes at
+> [`../schemes.md`](../schemes.md), performance at
+> [`../troubleshooting.md`](../troubleshooting.md).

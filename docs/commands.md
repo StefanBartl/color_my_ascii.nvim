@@ -8,7 +8,7 @@ command, keymap, and autocommand, see [Bindings Cheatsheet](BINDINGS.md).
 
   - [Core Commands](#core-commands)
   - [Fence Management](#fence-management)
-  - [Fence actions — `:Fence`](#fence-actions--fence)
+  - [Fence actions — `:Fence`](#fence-actions--fence-buffer-local-markdown)
     - [Syntax highlighting inside fences](#syntax-highlighting-inside-fences)
   - [Scheme Management](#scheme-management)
     - [Available Schemes](#available-schemes)

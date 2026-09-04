@@ -174,8 +174,5 @@ character/keyword/treesitter highlighting, never the fence chrome.
   this workflow draws its combos from.
 - [docs/BINDINGS.md](BINDINGS.md) — every command/keymap/autocommand in one
   compact table.
-- [docs/FEATURE_LOG.md](FEATURE_LOG.md) — a separate, personal
-  roadmap-to-commit log (not a feature catalog); useful for tracing a feature
-  back to the commit it landed in, not for learning how to use it.
 - [docs/guides/](guides/README.md) — long-form manuals for single features,
   the material the catalog was written from.

@@ -51,11 +51,12 @@ Features:~
 ==============================================================================
 2. REQUIREMENTS                                 *color_my_ascii-requirements*
 
-  • Neovim >= 0.9
+  • Neovim >= 0.10
+  • lib.nvim (github.com/StefanBartl/lib.nvim) - required, not optional:
+    the commands, keymaps, autocommands and notifications are built on it,
+    and every module requires it at the top level
   • Markdown files (filetype=markdown)
   • Optional: telescope.nvim for the scheme picker
-  • Optional: lib.nvim (github.com/StefanBartl/lib.nvim) for graceful
-    keymap/notify integration - falls back to vim.keymap.set/vim.notify
   • Optional: nvim-treesitter with the "markdown" parser (and a parser for
     the relevant language) for treesitter integration
 
@@ -1293,7 +1294,7 @@ Telescope scheme picker not working~
 
 1. Check if Telescope is installed:
 >vim
-    :echo has('nvim-0.9') && luaeval('pcall(require, "telescope")')
+    :echo luaeval('pcall(require, "telescope")')
 <
 
 2. Install Telescope:

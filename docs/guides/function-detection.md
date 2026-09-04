@@ -397,8 +397,8 @@ result = calculate(x);
 
 ## See Also
 
-- [Language Detection](./language-detection.md)
-- [Keyword Highlighting](./keyword-highlighting.md)
+- [Language Detection](../FEATURES/LANGUAGES.md#automatic-language-detection)
+- [Keyword Highlighting](./keyword-configuration.md)
 - [Custom Highlights](./custom-highlights.md)
 
 ---

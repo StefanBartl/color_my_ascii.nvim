@@ -314,8 +314,8 @@ Empty fence as ASCII: true
 
 ## See Also
 
-- [TEST.md](./TEST.md) - Test document with examples
-- [QUICKSTART.md](../QUICKSTART.md) - Quick start guide
-- [README.md](../../README.md) - Full documentation
+- [FIXTURE.md](./FIXTURE.md) - the document this configuration is meant to be read with
+- [QUICKSTART.md](../docs/QUICKSTART.md) - Quick start guide
+- [README.md](../README.md) - Full documentation
 
 ---

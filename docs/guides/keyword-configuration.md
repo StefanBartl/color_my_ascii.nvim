@@ -370,7 +370,7 @@ Verify syntax:
 
 ## See Also
 
-- [Language Detection](language-detection.md) - How detection works
+- [Language Detection](../FEATURES/LANGUAGES.md#automatic-language-detection) — how detection works
 - [Custom Colors](custom-colors.md) - Styling keywords
 - [Built-in Languages](../languages.md) - Default language support
 

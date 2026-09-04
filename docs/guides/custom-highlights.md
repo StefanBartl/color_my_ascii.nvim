@@ -327,7 +327,7 @@ Custom highlights are created once at setup and cached:
 
 ## See Also
 
-- [Language Detection](./language-detection.md)
-- [Color Schemes](../color-schemes.md)
+- [Language Detection](../FEATURES/LANGUAGES.md#automatic-language-detection)
+- [Color Schemes](../schemes.md)
 
 ---

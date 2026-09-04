@@ -15,7 +15,6 @@ The plugin can highlight keywords and symbols in inline code (`` `...` ``).
   - [Priority](#priority)
   - [Use Cases](#use-cases)
     - [Documentation](#documentation)
-  - [API Reference](#api-reference)
     - [Code Explanations](#code-explanations)
     - [Inline Diagrams](#inline-diagrams)
   - [Configuration](#configuration)
@@ -424,8 +423,8 @@ vim.api.nvim_create_autocmd('BufEnter', {
 
 ## See Also
 
-- [Language Detection](./language-detection.md)
+- [Language Detection](../FEATURES/LANGUAGES.md#automatic-language-detection)
 - [Function Detection](./function-detection.md)
-- [Performance](../performance.md)
+- [Performance](../troubleshooting.md#performance)
 
 ---

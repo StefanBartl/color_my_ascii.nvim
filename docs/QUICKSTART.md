@@ -101,7 +101,7 @@ require('color_my_ascii').setup()
 ```
 
 Automatically loads:
-- 31 languages, auto-detected via their standard fence tag (C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS - see [README.md](../README.md#supported-languages) for the full list)
+- 31 languages, auto-detected via their standard fence tag (C, C++, C#, Lua, Go, Rust, TypeScript, JavaScript, Python, Bash, Zig, LLVM, Vimscript, Java, PHP, Ruby, Kotlin, Swift, Scala, Dart, Elixir, Haskell, Perl, R, Clojure, Groovy, PowerShell, SQL, JSON, HTML, CSS - see [languages.md](languages.md) for the full list)
 - 5 character groups (Box-Drawing, Blocks, Arrows, Symbols, Operators)
 
 ---
@@ -159,7 +159,7 @@ require('color_my_ascii').setup({
 })
 ```
 
-See [README.md](../README.md#treesitter-integration) for details.
+See [configuration.md](configuration.md#treesitter-integration) for details.
 
 ---
 
@@ -437,7 +437,7 @@ require('color_my_ascii').setup({
    - [Features](FEATURES/README.md)
 
 2. **Try test file**:
-   - Open [TEST.md](dev/TEST.md)
+   - Open [TESTS/FIXTURE.md](../TESTS/FIXTURE.md)
    - Test all features systematically
 
 3. **Create custom scheme**:
@@ -446,7 +446,7 @@ require('color_my_ascii').setup({
    - Save as own file
 
 4. **Add new language**:
-   - See [README.md](../README.md#contributing)
+   - See [contributing.md](contributing.md)
 
 ---
 
@@ -463,7 +463,7 @@ require('color_my_ascii').setup({
 ## See Also
 
 - [README.md](../README.md) - Complete documentation
-- [TEST.md](dev/TEST.md) - Test all features
+- [TESTS/FIXTURE.md](../TESTS/FIXTURE.md) - a markdown file that exercises every feature, with [FIXTURE-CONFIG.md](../TESTS/FIXTURE-CONFIG.md) to turn them all on
 - [doc/color_my_ascii.txt](../doc/color_my_ascii.txt) - Vim help
 
 ---

@@ -152,7 +152,7 @@ groups — exactly what Neovim's implicit `:hi clear` on `:colorscheme`
 wipes. A `ColorScheme` autocommand re-applies them right after every switch,
 so changing colorschemes mid-session is safe by default; if you're building
 a *custom* colorscheme preset (see
-[COLORSCHEMES.md](features/COLORSCHEMES.md)) and see it vanish on a
+[COLORSCHEMES.md](FEATURES/COLORSCHEMES.md)) and see it vanish on a
 `:colorscheme` reload during development, that autocommand not having fired
 yet (a manual `:hi clear` outside a real `:colorscheme` command, for
 instance) is the first thing to check, not a bug in the preset itself.

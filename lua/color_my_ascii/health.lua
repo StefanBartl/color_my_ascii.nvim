@@ -131,7 +131,9 @@ function M.check()
     local lang_file_count = count_files(lang_path, '*.lua')
     health.ok(string.format('Languages directory found with %d file(s)', lang_file_count))
   else
-    health.error(string.format('Languages directory not found at: %s', lang_path))
+    health.error(string.format('Languages directory not found at: %s', lang_path), {
+      'Reinstall color_my_ascii.nvim -- this directory ships with the plugin',
+    })
   end
 
   -- Check groups directory
@@ -140,7 +142,9 @@ function M.check()
     local group_file_count = count_files(group_path, '*.lua')
     health.ok(string.format('Groups directory found with %d file(s)', group_file_count))
   else
-    health.error(string.format('Groups directory not found at: %s', group_path))
+    health.error(string.format('Groups directory not found at: %s', group_path), {
+      'Reinstall color_my_ascii.nvim -- this directory ships with the plugin',
+    })
   end
 
   -- Check for color schemes
@@ -158,7 +162,7 @@ function M.check()
   if vim.g.loaded_color_my_ascii == 1 then
     health.ok('Plugin initialized successfully')
   else
-    health.warn('Plugin not initialized - may not be loaded yet')
+    health.info('Plugin not initialized - may not be loaded yet')
   end
 
   -- Check current buffer
@@ -240,7 +244,7 @@ function M.check()
   if composer_ok then
     health.ok('lib.nvim found - :ColorMyAscii command + keymap/notify integration available')
   else
-    health.error('lib.nvim not found - :ColorMyAscii will fail to load; install "StefanBartl/lib.nvim"')
+    health.error('lib.nvim not found - :ColorMyAscii will fail to load', { 'Install "StefanBartl/lib.nvim"' })
   end
 
   -- Public fence API (consumed by other plugins, e.g. markdown.nvim's fenced_scope)

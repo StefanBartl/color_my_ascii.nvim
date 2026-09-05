@@ -168,6 +168,11 @@ Augroup: `ColorMyAsciiBuffer_<bufnr>`.
 | --- | --- | --- |
 | `TextChanged`, `TextChangedI` | — | Re-highlight ASCII art on text change with debouncing |
 | `BufDelete` | — | Cleanup ASCII art highlighting on buffer delete |
+| `BufDelete` | `ColorMyAsciiDebounce` | Cancel any pending debounce timer for the deleted buffer |
+| `BufDelete`, `BufWipeout` | `ColorMyAsciiFenceApiCache` | Invalidate the fences-API range-cache entry for the deleted buffer — consumed by other plugins, e.g. markdown.nvim, via `require("color_my_ascii.api.fences")` |
+| `BufWritePost` | `ColorMyAsciiFenceOpen_<tbuf>` (temp scratch buffer) | Sync `:Fence open`'s edited content back into the source buffer |
+| `BufWipeout`, `BufDelete`, `BufUnload` (once) | `ColorMyAsciiFenceOpen_<tbuf>` | Clean up `:Fence open`'s temp file/extmarks/session state |
+| `CursorMoved` | (no augroup — Telescope wipes the prompt buffer itself on close) | Live-apply the scheme under cursor to all managed buffers during `:ColorMyAscii schemes pick` |
 
 ---
 

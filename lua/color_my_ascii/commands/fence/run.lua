@@ -95,7 +95,7 @@ function M.run(_argv)
   cmd[#cmd + 1] = tmp
 
   util.notify('running ' .. lang .. ' …')
-  vim.system(cmd, { text = true }, function(res)
+  vim.system(cmd, { text = true, cwd = util.cwd_for(buf) }, function(res)
     vim.schedule(function()
       pcall(vim.fn.delete, tmp)
       show_output(lang, res)

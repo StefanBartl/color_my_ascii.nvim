@@ -63,7 +63,7 @@ function M.run(_argv)
   local start_id = api.nvim_buf_set_extmark(buf, ns, block.content_start, 0, {})
   local end_id = api.nvim_buf_set_extmark(buf, ns, block.content_end, 0, {})
 
-  vim.system(vim.deepcopy(cmd), { stdin = input, text = true }, function(res)
+  vim.system(vim.deepcopy(cmd), { stdin = input, text = true, cwd = util.cwd_for(buf) }, function(res)
     vim.schedule(function()
       if not api.nvim_buf_is_valid(buf) then
         return

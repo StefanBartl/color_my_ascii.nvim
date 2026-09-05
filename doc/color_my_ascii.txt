@@ -1,4 +1,5 @@
 *color_my_ascii.txt*  Highlight ASCII art in markdown code blocks
+                                                         *color_my_ascii.nvim*
 
                         COLOR MY ASCII~
                     ASCII Art Highlighter for Neovim

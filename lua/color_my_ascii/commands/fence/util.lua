@@ -33,6 +33,22 @@ function M.notify(msg, level)
   notify.notify(msg, level or vim.log.levels.INFO)
 end
 
+--- Explicit `cwd` for a child process spawned on behalf of a buffer (SEC-02:
+--- never let a subprocess implicitly inherit whatever the global editor cwd
+--- happens to be — resolve it from the buffer being acted on instead, so a
+--- stray `:cd` in an unrelated window can't redirect where `:Fence run`/
+--- `:Fence format` execute). Falls back to the editor cwd, captured explicitly
+--- at call time, for unnamed buffers.
+---@param bufnr integer
+---@return string
+function M.cwd_for(bufnr)
+  local name = api.nvim_buf_get_name(bufnr)
+  if name ~= '' then
+    return vim.fn.fnamemodify(name, ':p:h')
+  end
+  return vim.fn.getcwd()
+end
+
 --- Fence-language tag -> file extension. Shared by export/open/run.
 ---@type table<string, string>
 local EXT = {

@@ -1,6 +1,6 @@
 # color_my_ascii.nvim — Binding Cheatsheet
 
-Machine-readable overview of every user command, keymap, and autocommand defined by `color_my_ascii.nvim`. This file is documentation only and is not required or loaded by the plugin.
+Every user command, keymap, and autocommand `color_my_ascii.nvim` defines.
 
 ## Table of content
 

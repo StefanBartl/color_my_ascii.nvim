@@ -237,9 +237,10 @@ function M.check()
     end
   end
 
-  -- lib.nvim is required (the :ColorMyAscii command is built on
-  -- lib.nvim.bindings.usercmd.composer); lib.nvim.bindings.keymap specifically stays soft-guarded
-  -- for keymap/notify integration, falling back to vim.keymap.set/vim.notify.
+  -- lib.nvim is required: the :ColorMyAscii command is built on
+  -- lib.nvim.bindings.usercmd.composer, the opt-in keymaps go through
+  -- lib.nvim.bindings.keymap's registry, and notifications through
+  -- lib.nvim.notify -- none of it has a fallback.
   local composer_ok = pcall(require, 'lib.nvim.bindings.usercmd.composer')
   if composer_ok then
     health.ok('lib.nvim found - :ColorMyAscii command + keymap/notify integration available')

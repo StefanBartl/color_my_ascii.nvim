@@ -12,7 +12,6 @@
 
 local M = {}
 
---- Resolve the keymap-setting function, preferring lib.nvim.bindings.keymap if installed
 --- Action name -> { command, description }. `cmd` is the full :ColorMyAscii
 --- invocation (subcommand included where applicable).
 ---@type table<string, {cmd: string, desc: string}>

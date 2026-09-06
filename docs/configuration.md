@@ -105,7 +105,7 @@ require('color_my_ascii').setup({
 
 ## Custom Languages
 
-The plugin ships ~30 languages as `languages/*.lua` files (see
+The plugin ships 31 languages as `languages/*.lua` files (see
 [Supported Languages](languages.md)). `languages` in `setup()` is the
 extension point for adding your own without forking the plugin - same entry
 shape as those files:

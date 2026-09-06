@@ -10,7 +10,7 @@ jobs:
     name: stylua
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check formatting
         uses: JohnnyMorganz/stylua-action@v4
         with:
@@ -22,9 +22,9 @@ jobs:
     name: luacheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run luacheck
-        uses: lunarmodules/luacheck@v1
+        uses: lunarmodules/luacheck@v1.2.0
         with:
           args: lua/ plugin/ TESTS/
 
@@ -32,14 +32,14 @@ jobs:
     name: tests (headless)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: color_my_ascii.nvim
 
       # lib.nvim is a runtime dependency (debounce_manager), checked out as a
       # sibling -- the layout TESTS/run.lua's own resolver looks for after
       # $LIB_NVIM_PATH.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: StefanBartl/lib.nvim
           path: lib.nvim

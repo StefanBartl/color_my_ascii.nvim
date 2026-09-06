@@ -90,7 +90,7 @@ following `link=` chains, leaving unset attributes nil.
 
 **A block this plugin has not painted reports no groups at all** — the honest
 answer, and the consumer's cue to fall back to whatever it would otherwise have
-done. Not an edge case: `fence_language_map` covers 31 language tags.
+done. Not an edge case: `fence_language_map` covers all 31 built-in languages.
 
 First consumer: [mdview.nvim](https://github.com/StefanBartl/mdview.nvim)'s
 `browser.highlighter = "nvim"`, which paints its browser preview with exactly

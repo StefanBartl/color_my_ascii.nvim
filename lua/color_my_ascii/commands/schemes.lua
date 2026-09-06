@@ -5,15 +5,11 @@ local M = {}
 
 local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
---- Available schemes
+--- Available scheme names, sorted. Sourced from `scheme_loader`'s registry so
+--- this stays in step with `schemes/*.lua` instead of being a second list to
+--- keep updated by hand.
 ---@type string[]
-local SCHEME_NAMES = {
-  'default',
-  'matrix',
-  'nord',
-  'gruvbox',
-  'dracula',
-}
+local SCHEME_NAMES = require('color_my_ascii.scheme_loader').get_available_schemes()
 
 --- Get list of scheme names
 ---@return string[]

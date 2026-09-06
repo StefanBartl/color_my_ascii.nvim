@@ -71,7 +71,8 @@ Both functions are read-only and side-effect free; neither triggers a highlight
 pass. **A block color_my_ascii has not painted yields runs whose `group` is nil
 throughout** — the honest answer, and the caller's cue to fall back to whatever
 it would otherwise have done. Which blocks get painted follows
-`fence_language_map` in the configuration (31 language tags by default), so a
+`fence_language_map` in the configuration (all 31 built-in languages by
+default, under their common fence tags and aliases), so a
 consumer should always have that fallback.
 
 ---

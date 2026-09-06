@@ -56,10 +56,11 @@ distinct from the separate buffer-local `:Fence` toolkit below.
 All opt-in, disabled by default. Registered in
 `lua/color_my_ascii/bindings/keymaps.lua` via `setup({ keymaps = {...} })`.
 [lib.nvim](https://github.com/StefanBartl/lib.nvim) is a required dependency
-(the `:ColorMyAscii` command itself is built on it); `lib.nvim.bindings.keymap`
-specifically stays soft-guarded here, falling back to `vim.keymap.set`. Every
-mapping sets `desc`, so which-key.nvim picks them up automatically — no
-separate which-key registration needed.
+(the `:ColorMyAscii` command itself is built on it); the keymaps are declared
+through `lib.nvim.bindings.keymap`'s registry, which also reports a mistyped
+action name instead of silently binding nothing. Every mapping sets `desc`,
+so which-key.nvim picks them up automatically — no separate which-key
+registration needed.
 
 | action key | maps to command | example lhs |
 | --- | --- | --- |
@@ -120,11 +121,13 @@ require('color_my_ascii').setup({
 
 ## Right-click context menu
 
-`color_my_ascii.integrations.menu` contributes the actions above (except
-`ensure_blank_lines`, `show_config`, `debug`, `check_fences`, `fence_jump`,
-`fence_select`, `fence_import`, `fence_lang`, `fence_export` — commands
-needing arguments or acting on a range aren't a great fit for a no-argument
-menu click) as entries in the shape [nvzone/menu](https://github.com/nvzone/menu)
+`color_my_ascii.integrations.menu` contributes `toggle` (global), `schemes`,
+`hover`, and the `fence_yank`/`fence_open`/`fence_run`/`fence_format`/`fence_align`/
+`fence_unwrap`/`fence_wrap` actions above. It leaves out `highlight`,
+`toggle_buffer`, `ensure_blank_lines`, `show_config`, `debug`, `check_fences`,
+`fence_jump`, `fence_select`, `fence_export`, and `:Fence import`/`:Fence lang` —
+commands needing arguments or acting on a range aren't a great fit for a
+no-argument menu click. Entries are in the shape [nvzone/menu](https://github.com/nvzone/menu)
 expects, in markdown buffers only. `:Fence *` entries beyond `wrap` are
 further gated on the cursor being inside a fenced block. No dependency on
 `menu` itself — a host (typically your own `<RightMouse>` dispatcher)
@@ -145,7 +148,8 @@ Augroup: `ColorMyAscii`.
 
 | event | pattern | desc |
 | --- | --- | --- |
-| `FileType` | `markdown` | Setup ASCII art highlighting for markdown files |
+| `FileType` | `markdown` | Setup ASCII art highlighting + buffer-local `:Fence` command for markdown files |
+| `FileType` | `comment_ascii.filetypes` | Setup comment_ascii highlighting for the configured filetypes — only registered when `comment_ascii.enable` is set and `comment_ascii.filetypes` is non-empty |
 
 Three further autocommands are registered directly in `setup()`
 (`lua/color_my_ascii/init.lua`), since they only make sense once the plugin

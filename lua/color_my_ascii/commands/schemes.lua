@@ -20,37 +20,37 @@ end
 --- List all available schemes
 function M.list_schemes()
   local lines = {}
-  table.insert(lines, '=== Available Color Schemes ===')
-  table.insert(lines, '')
+  lines[#lines + 1] = '=== Available Color Schemes ==='
+  lines[#lines + 1] = ''
 
   for _, name in ipairs(SCHEME_NAMES) do
     local scheme = require('color_my_ascii.schemes.' .. name)
 
-    table.insert(lines, string.format('• %s', name))
+    lines[#lines + 1] = string.format('• %s', name)
 
     -- Show enabled features
     local features = {}
     if scheme.enable_keywords then
-      table.insert(features, 'keywords')
+      features[#features + 1] = 'keywords'
     end
     if scheme.enable_function_names then
-      table.insert(features, 'functions')
+      features[#features + 1] = 'functions'
     end
     if scheme.enable_bracket_highlighting then
-      table.insert(features, 'brackets')
+      features[#features + 1] = 'brackets'
     end
     if scheme.enable_inline_code then
-      table.insert(features, 'inline')
+      features[#features + 1] = 'inline'
     end
 
     if #features > 0 then
-      table.insert(lines, string.format('  Features: %s', table.concat(features, ', ')))
+      lines[#lines + 1] = string.format('  Features: %s', table.concat(features, ', '))
     end
   end
 
-  table.insert(lines, '')
-  table.insert(lines, 'Usage: :ColorMyAscii schemes switch <name>')
-  table.insert(lines, '   or: :ColorMyAscii schemes pick (Telescope)')
+  lines[#lines + 1] = ''
+  lines[#lines + 1] = 'Usage: :ColorMyAscii schemes switch <name>'
+  lines[#lines + 1] = '   or: :ColorMyAscii schemes pick (Telescope)'
 
   notify.info(table.concat(lines, '\n'))
 end
@@ -119,24 +119,24 @@ function M.telescope_picker()
 
     local features = {}
     if scheme.enable_keywords then
-      table.insert(features, 'kw')
+      features[#features + 1] = 'kw'
     end
     if scheme.enable_function_names then
-      table.insert(features, 'fn')
+      features[#features + 1] = 'fn'
     end
     if scheme.enable_bracket_highlighting then
-      table.insert(features, 'br')
+      features[#features + 1] = 'br'
     end
     if scheme.enable_inline_code then
-      table.insert(features, 'in')
+      features[#features + 1] = 'in'
     end
 
-    table.insert(entries, {
+    entries[#entries + 1] = {
       value = name,
       display = string.format('%-10s  %s', name, table.concat(features, ' ')),
       ordinal = name,
       scheme = scheme,
-    })
+    }
   end
 
   pickers

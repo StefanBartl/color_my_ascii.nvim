@@ -2,7 +2,11 @@
 --- Caching system for parsed blocks and highlighting data.
 ---
 --- Implements a memory-efficient caching system with:
---- - Weak table for automatic memory reclamation
+--- - Size-capped storage with LRU-style eviction (`M.set`'s `max_size` check)
+--- - Periodic active cleanup of dead/expired entries (`M.cleanup`,
+---   `M.setup_auto_cleanup`) -- not weak-table GC: `bufnr` is a plain Lua
+---   number, and numbers are never a collectible type, so
+---   `setmetatable(cache, { __mode = 'k' })` would have been a no-op here
 --- - Timestamp-based cache invalidation
 --- - Per-buffer cache management
 --- - Cache statistics for monitoring
@@ -12,9 +16,12 @@
 
 local M = {}
 
---- Cache storage with weak keys for automatic cleanup
+--- Cache storage, keyed by bufnr. Bounded by `config.max_size` (eviction in
+--- `M.set`) and actively swept by `M.cleanup`/`M.setup_auto_cleanup` --
+--- not by table GC (see module doc: a bufnr key can never be weakly
+--- collected).
 ---@type table<integer, CacheEntry>
-local cache = setmetatable({}, { __mode = 'k' })
+local cache = {}
 
 --- Cache configuration
 ---@type CacheConfig

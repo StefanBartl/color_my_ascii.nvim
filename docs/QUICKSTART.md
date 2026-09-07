@@ -446,7 +446,7 @@ require('color_my_ascii').setup({
    - Save as own file
 
 4. **Add new language**:
-   - See [contributing.md](contributing.md)
+   - See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 

@@ -80,7 +80,7 @@ require('color_my_ascii').setup({
 ````
 
 Additional languages can be added to the plugin itself (see
-[Contributing](contributing.md)), or - without forking anything - through
+[Contributing](CONTRIBUTING.md)), or - without forking anything - through
 `config.languages` below.
 
 ---
@@ -126,4 +126,4 @@ Vim help.
 
 - [../README.md](../README.md) — project overview and quickstart
 - [Configuration](configuration.md) — full `setup()` reference
-- [Contributing](contributing.md) — how to add a new language
+- [Contributing](CONTRIBUTING.md) — how to add a new language

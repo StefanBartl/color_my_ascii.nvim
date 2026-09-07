@@ -55,7 +55,7 @@ The ones people open first:
 - [Bindings cheatsheet](./docs/BINDINGS.md) — every command, keymap and autocommand in one table.
 - [Features](./docs/FEATURES/README.md) — the full catalog, grouped by theme: highlighting, languages, fences, schemes, tools.
 - [Troubleshooting](./docs/troubleshooting.md) — performance notes and common issues.
-- [Contributing](./docs/contributing.md) — dev setup (stylua/luacheck/CI), adding a language or a character group.
+- [Contributing](./docs/CONTRIBUTING.md) — dev setup (stylua/luacheck/CI), adding a language or a character group.
 - [Manual fixture](./TESTS/FIXTURE.md) — a Markdown file that exercises every feature by hand, with [FIXTURE-CONFIG.md](./TESTS/FIXTURE-CONFIG.md) to turn them all on.
 - [Changelog](./docs/CHANGELOG.md) — version history.
 
@@ -223,7 +223,7 @@ groups could be created. Common issues and the performance notes are in
 ## Contributing
 
 Clone the repository and either symlink it or add it to your runtime path.
-[docs/contributing.md](./docs/contributing.md) has the dev setup (stylua,
+[docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) has the dev setup (stylua,
 luacheck, CI) and walks adding a new language or character group;
 [TESTS/FIXTURE.md](./TESTS/FIXTURE.md) is the by-hand check that every feature
 still renders.

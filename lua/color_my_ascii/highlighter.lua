@@ -11,6 +11,7 @@ local safe_api = require('color_my_ascii.utils.safe_api')
 local highlighter_ts = require('color_my_ascii.highlighter_ts')
 
 local api = vim.api
+---@type fun(msg: string, level?: integer, opts?: table)
 local notify = vim.notify
 local levels = vim.log.levels
 

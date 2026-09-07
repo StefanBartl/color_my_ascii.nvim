@@ -6,6 +6,7 @@
 
 local M = {}
 
+---@type fun(msg: string, level?: integer, opts?: table)
 local notify = vim.notify
 local fn = vim.fn
 

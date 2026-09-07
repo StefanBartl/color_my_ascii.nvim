@@ -11,6 +11,7 @@
 --- This implements a simple state machine: outside block / inside block.
 
 local api = vim.api
+---@type fun(msg: string, level?: integer, opts?: table)
 local notify = vim.notify
 local levels = vim.log.levels
 

@@ -4,6 +4,7 @@
 local M = {}
 
 local api = vim.api
+---@type fun(msg: string, level?: integer, opts?: table)
 local notify = vim.notify
 local levels = vim.log.levels
 

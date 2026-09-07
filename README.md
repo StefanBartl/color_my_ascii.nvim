@@ -16,20 +16,9 @@
 
 A Neovim plugin for colorful highlighting of ASCII art in Markdown code blocks with automatic language detection, custom highlights, and predefined color schemes.
 
-## Where it sits in the collection
-
-- **[lib.nvim]** — required, and not a nicety: the `:ColorMyAscii` command tree, the
-  keymaps, the autocommands and the notifications are all built on it. Every module
-  requires it at the top level, so the plugin does not start without it.
-- **[markdown.nvim]** — the rest of the Markdown editing surface. This plugin only
-  paints what is inside a fence; that one is about everything around it.
-- **[mdview.nvim]** — renders a Markdown buffer in the browser, and paints the fenced
-  blocks there by reading this plugin's applied colours back out through
-  [`require("color_my_ascii").highlight`](docs/api.md).
-
 ## Table of Contents
 
-- [Where it sits in the collection](#where-it-sits-in-the-collection)
+- [Where it sits in the collection](#table-of-contents)
 - [Features](#features)
 - [Quickstart](#quickstart)
 - [Documentation](#documentation)
@@ -85,36 +74,34 @@ The plugin activates automatically for Markdown files:
 
 → Box-drawing characters are automatically highlighted in color.
 
-See [docs/QUICKSTART.md](docs/QUICKSTART.md) for the full guide, including
+See [docs/QUICKSTART.md](./docs/QUICKSTART.md) for the full guide, including
 installation with packer.nvim.
 
 ---
 
 ## Documentation
 
-[docs/README.md](docs/README.md) names every page and the question it answers.
+[docs/README.md](./docs/README.md) names every page and the question it answers.
 The ones people open first:
 
-- [Quickstart](docs/QUICKSTART.md) — getting started, first steps, and typical configurations
-- [Configuration](docs/configuration.md) — full `setup()` reference, treesitter integration, fence-line/fence-content highlighting
-- [Commands](docs/commands.md) — all user commands, the `:Fence` toolkit, and its configuration
-- [Supported Languages](docs/languages.md) — the 31 built-in languages and standard fence-tag support
-- [Fence API](docs/api.md) — public APIs for plugin authors: fenced-block detection, and reading back the applied highlighting
-- [Color Schemes](docs/schemes.md) — built-in schemes and how to create your own
-- [Bindings Cheatsheet](docs/BINDINGS.md) — compact table of all commands, keymaps, and autocommands
-- [Troubleshooting](docs/troubleshooting.md) — performance notes and common issues
-- [Contributing](docs/contributing.md) — dev setup (stylua/luacheck/CI), adding a new language or character group
-- [Features](docs/FEATURES/README.md) — full feature catalog, grouped by theme (highlighting, languages, fences, color schemes, tools)
-- [Manual fixture](TESTS/FIXTURE.md) — a markdown file that exercises every feature by hand, with [FIXTURE-CONFIG.md](TESTS/FIXTURE-CONFIG.md) to turn them all on
-- [Changelog](docs/CHANGELOG.md) — version history
-- [Vim Help](doc/color_my_ascii.txt) — complete reference (`:h color_my_ascii`)
+- [Quickstart](./docs/QUICKSTART.md) — getting started, first steps, and typical configurations
+- [Configuration](./docs/configuration.md) — full `setup()` reference, treesitter integration, fence-line/fence-content highlighting
+- [Commands](./docs/commands.md) — all user commands, the `:Fence` toolkit, and its configuration
+- [Supported Languages](./docs/languages.md) — the 31 built-in languages and standard fence-tag support
+- [Fence API](./docs/api.md) — public APIs for plugin authors: fenced-block detection, and reading back the applied highlighting
+- [Color Schemes](./docs/schemes.md) — built-in schemes and how to create your own
+- [Bindings Cheatsheet](./docs/BINDINGS.md) — compact table of all commands, keymaps, and autocommands
+- [Troubleshooting](./docs/troubleshooting.md) — performance notes and common issues
+- [Contributing](./docs/contributing.md) — dev setup (stylua/luacheck/CI), adding a new language or character group
+- [Features](./docs/FEATURES/README.md) — full feature catalog, grouped by theme (highlighting, languages, fences, color schemes, tools)
+- [Manual fixture](./TESTS/FIXTURE.md) — a markdown file that exercises every feature by hand, with [FIXTURE-CONFIG.md](./TESTS/FIXTURE-CONFIG.md) to turn them all on
+- [Changelog](./docs/CHANGELOG.md) — version history
+- [Vim Help](./doc/color_my_ascii.txt) — complete reference (`:h color_my_ascii`)
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](./LICENSE).
 
-[lib.nvim]: https://github.com/StefanBartl/lib.nvim
-[markdown.nvim]: https://github.com/StefanBartl/markdown.nvim
-[mdview.nvim]: https://github.com/StefanBartl/mdview.nvim
+---

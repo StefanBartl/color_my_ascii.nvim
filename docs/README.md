@@ -28,8 +28,13 @@ short version of all of it; `:help color_my_ascii` is the same ground offline.
 | --- | --- |
 | [FEATURES/](FEATURES/README.md) | The feature catalogue, grouped by theme — painting, languages, fences, schemes, tools |
 | [guides/](guides/README.md) | One long-form manual per feature: character groups, keywords, function detection, brackets, inline code, custom colours, custom highlights. The material the catalogue was written from |
-| [contributing.md](contributing.md) | The dev setup (stylua, luacheck, CI), and what adding a language or a character group actually touches |
 | [CHANGELOG.md](CHANGELOG.md) | What changed between versions, and the migration notes for the changes that need them |
+
+## Working on it
+
+| Page | Answers |
+| --- | --- |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | The dev setup (stylua, luacheck, CI), and what adding a language or a character group actually touches |
 
 ## Not here
 

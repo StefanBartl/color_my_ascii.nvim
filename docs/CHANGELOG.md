@@ -64,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ### Fixed
+- Fixed `setup()` re-globbing and re-`require`-ing every file under `groups/` and `languages/` on every call. `plugin/color_my_ascii.lua` calls `setup()` eagerly with no options before any buffer setup; a user's own `config = function() require('color_my_ascii').setup({...}) end` then called it again, redoing that disk I/O and module loading a second time on every single startup even though the bundled groups/languages never depend on user options. The load is now cached after the first call; merging user options, resolving highlights and rebuilding the lookup tables still happens on every `setup()` call, since those *do* depend on the passed options.
 - Fixed incorrect highlighting of text outside ASCII blocks when `treat_empty_fence_as_ascii = true`
 - Fixed closing fences of non-ASCII blocks being misinterpreted as ASCII block starts
 - Fixed parser treating all empty fences as opening fences

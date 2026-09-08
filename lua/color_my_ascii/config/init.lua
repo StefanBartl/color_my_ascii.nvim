@@ -138,6 +138,30 @@ local function load_groups()
   return groups, errors
 end
 
+--- Cached result of load_groups()/load_languages(): both read the plugin's own
+--- bundled groups/ and languages/ directories, never anything user-supplied,
+--- so re-globbing and re-requiring every file on a second setup() call (e.g.
+--- plugin/color_my_ascii.lua's eager call, followed by the user's own
+--- config = function() ... setup(opts) end) would just repeat the same result.
+---@type { groups: table<string, ColorMyAscii.KeywordGroup>, group_errors: string[], languages: table<string, ColorMyAscii.CharGroup>, language_errors: string[] }|nil
+local _bundled_defs = nil
+
+---@internal
+---@return { groups: table<string, ColorMyAscii.KeywordGroup>, group_errors: string[], languages: table<string, ColorMyAscii.CharGroup>, language_errors: string[] }
+local function bundled_defs()
+  if not _bundled_defs then
+    local loaded_groups, group_errors = load_groups()
+    local loaded_languages, language_errors = load_languages()
+    _bundled_defs = {
+      groups = loaded_groups,
+      group_errors = group_errors,
+      languages = loaded_languages,
+      language_errors = language_errors,
+    }
+  end
+  return _bundled_defs
+end
+
 --- Default configuration (mutable copy; groups/keywords get populated at setup time)
 ---@type ColorMyAscii.Config
 local defaults = vim.deepcopy(DEFAULTS)
@@ -320,11 +344,13 @@ end
 --- Setup the configuration with user options
 ---@param opts? ColorMyAscii.Config|{scheme: string} User configuration to merge with defaults
 function M.setup(opts)
-  -- Load modular definitions. Both loaders return non-fatal error/warning
-  -- lists rather than notifying themselves - setup() is the boundary that
-  -- decides whether and how to surface them to the user.
-  local loaded_groups, group_errors = load_groups()
-  local loaded_languages, language_errors = load_languages()
+  -- Load modular definitions (cached after the first call, see bundled_defs).
+  -- Both loaders return non-fatal error/warning lists rather than notifying
+  -- themselves - setup() is the boundary that decides whether and how to
+  -- surface them to the user.
+  local defs = bundled_defs()
+  local loaded_groups, group_errors = defs.groups, defs.group_errors
+  local loaded_languages, language_errors = defs.languages, defs.language_errors
 
   local function notify_load_error(err)
     local level = err:match('^CRITICAL') and vim.log.levels.ERROR or vim.log.levels.WARN

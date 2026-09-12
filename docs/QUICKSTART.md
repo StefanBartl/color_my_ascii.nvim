@@ -42,17 +42,25 @@ Quick introduction to color_my_ascii.nvim with all important features.
 
 ## Installation
 
+Requires [lib.nvim](https://github.com/StefanBartl/lib.nvim) — declare it as a
+dependency in whichever manager you use; see [requirements.md](requirements.md)
+for the full list.
+
 ### With lazy.nvim
 
 ```lua
 {
-  'StefanBartl/color_my_ascii.nvim',
-  ft = 'markdown',
-  config = function()
-    require('color_my_ascii').setup()
-  end
+  "StefanBartl/color_my_ascii.nvim",
+  ft = "markdown",
+  dependencies = { "StefanBartl/lib.nvim" }, -- required
+  opts = {},
 }
 ```
+
+`ft = "markdown"` rather than a blanket `event = "VeryLazy"`: there is nothing to
+do until a Markdown file is actually open. `opts` is all that is needed — lazy
+calls `setup()` with it; call `require("color_my_ascii").setup()` yourself only
+if your plugin manager does not.
 
 ---
 
@@ -61,6 +69,7 @@ Quick introduction to color_my_ascii.nvim with all important features.
 ```lua
 use {
   'StefanBartl/color_my_ascii.nvim',
+  requires = { 'StefanBartl/lib.nvim' }, -- required
   ft = 'markdown',
   config = function()
     require('color_my_ascii').setup()

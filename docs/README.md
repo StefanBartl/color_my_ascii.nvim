@@ -7,9 +7,10 @@ short version of all of it; `:help color_my_ascii` is the same ground offline.
 
 | Page | Answers |
 | --- | --- |
+| [requirements.md](requirements.md) | Neovim version, the required lib.nvim dependency, and what's optional |
 | [QUICKSTART.md](QUICKSTART.md) | Installation with lazy.nvim and packer.nvim, the first coloured block, and the handful of settings most people change first |
 | [configuration.md](configuration.md) | Every option `setup()` takes, with its default: the treesitter overlay, colour schemes, custom highlights, fence-line and fence-content painting, and ASCII in code comments |
-| [troubleshooting.md](troubleshooting.md) | Nothing is coloured, the wrong language was detected, characters shift while typing — and what the plugin costs on a large buffer |
+| [troubleshooting.md](troubleshooting.md) | Nothing is coloured, the wrong language was detected, characters shift while typing, what `:checkhealth` reports — and what the plugin costs on a large buffer |
 
 ## Using it
 
@@ -21,6 +22,7 @@ short version of all of it; `:help color_my_ascii` is the same ground offline.
 | [languages.md](languages.md) | The 31 built-in languages, which fence tags reach them, and how to add one without a fork |
 | [schemes.md](schemes.md) | The built-in colour schemes, how to modify one, and how to write your own |
 | [api.md](api.md) | The two public APIs: fenced-block detection, and reading the applied highlighting back out as data |
+| [integrations.md](integrations.md) | The optional context-menu integration for nvzone/menu |
 
 ## Why it is the way it is
 

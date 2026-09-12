@@ -330,15 +330,30 @@ function M.cleanup()
   return cleaned
 end
 
+---@type uv.uv_timer_t|nil
+local auto_cleanup_timer
+
 --- Setup periodic cleanup timer
---- Automatically cleans expired entries every interval
+--- Automatically cleans expired entries every interval.
+---
+--- Idempotent: a call while a previous timer is still running stops and
+--- replaces it first, so a second `M.setup()` (see init.lua -- the plugin/
+--- bootstrap calls it once with defaults, then a lazy-manager `opts`-driven
+--- config call runs it again with the real options) cannot leak a duplicate
+--- timer ticking `M.cleanup()` forever alongside the first one.
 ---@param interval integer|nil Cleanup interval in milliseconds
 ---@return uv.uv_timer_t|nil timer Timer handle or nil on failure
 function M.setup_auto_cleanup(interval)
   interval = interval or 30000 -- Default 30 seconds
 
+  if auto_cleanup_timer and not auto_cleanup_timer:is_closing() then
+    auto_cleanup_timer:stop()
+    auto_cleanup_timer:close()
+  end
+
   local timer = vim.uv.new_timer()
   if timer == nil then
+    auto_cleanup_timer = nil
     return nil
   end
 
@@ -352,6 +367,7 @@ function M.setup_auto_cleanup(interval)
     end)
   )
 
+  auto_cleanup_timer = timer
   return timer
 end
 

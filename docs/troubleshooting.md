@@ -2,11 +2,26 @@
 
 ## Table of content
 
+  - [Health check](#health-check)
   - [Performance](#performance)
   - [No Highlights Visible](#no-highlights-visible)
   - [Wrong Language Detected](#wrong-language-detected)
   - [Characters Shift or Duplicate While Editing](#characters-shift-or-duplicate-while-editing)
   - [Performance Issues](#performance-issues)
+
+---
+
+## Health check
+
+```vim
+:checkhealth color_my_ascii
+```
+
+Reports whether `lib.nvim` resolved, whether a Markdown Treesitter parser is
+available, which color scheme is active, and whether the configured highlight
+groups could be created.
+
+`:ColorMyAscii check-fences` validates the fences in the current buffer.
 
 ---
 

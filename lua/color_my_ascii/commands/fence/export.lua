@@ -73,7 +73,7 @@ end
 ---@param question string
 ---@param on_answer fun(yes: boolean)
 local function confirm(question, on_answer)
-  local ok_kit, kit = pcall(require, 'lib.nvim.ui.kit')
+  local ok_kit, kit = pcall(require, 'ui.kit')
   if ok_kit then
     kit.confirm({ question = question, on_answer = on_answer })
     return
@@ -90,7 +90,7 @@ end
 ---@param default string
 ---@param on_input fun(path: string|nil)  # nil on cancel or an empty submit
 local function prompt_path(prompt, default, on_input)
-  local ok_kit, kit = pcall(require, 'lib.nvim.ui.kit')
+  local ok_kit, kit = pcall(require, 'ui.kit')
   if ok_kit then
     kit.input({
       prompt = prompt,

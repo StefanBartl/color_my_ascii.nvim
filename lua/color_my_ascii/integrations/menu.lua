@@ -3,7 +3,7 @@
 ---@description
 --- color_my_ascii.nvim does not depend on a menu plugin. It *provides* a
 --- list of entries in the shape nvzone/menu expects, built with
---- `lib.nvim.contextmenu`'s helpers, and a host — typically the user's own
+--- `ui.contextmenu`'s helpers, and a host — typically the user's own
 --- RightMouse dispatcher — composes them into its own menu, e.g.:
 --- >
 ---   local items = require("color_my_ascii.integrations.menu").items()
@@ -17,7 +17,7 @@
 --- `:Fence` subcommand — so right-click never offers a fence action with
 --- nothing under the cursor to apply it to. Opt-out via `config.menu.enable`.
 
-local contextmenu = require('lib.nvim.contextmenu')
+local contextmenu = require('ui.contextmenu')
 
 local M = {}
 
@@ -25,7 +25,7 @@ local M = {}
 --- Returns an empty list when the integration is disabled or the buffer
 --- isn't markdown, so a host can safely `vim.list_extend` it unconditionally.
 ---@param bufnr? integer defaults to the current buffer
----@return Lib.ContextMenu.Item[]
+---@return Ui.ContextMenu.Item[]
 function M.items(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
@@ -100,7 +100,7 @@ end
 --- instead of inline entries. Returns nil when there is nothing to show.
 ---@param label? string submenu label (default "  Color My ASCII")
 ---@param bufnr? integer
----@return Lib.ContextMenu.Item|nil
+---@return Ui.ContextMenu.Item|nil
 function M.submenu(label, bufnr)
   return contextmenu.submenu(label or '  Color My ASCII', M.items(bufnr))
 end

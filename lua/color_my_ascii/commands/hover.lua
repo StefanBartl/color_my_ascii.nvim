@@ -172,7 +172,7 @@ function M.show()
   vim.fn.setreg('"', text)
   pcall(vim.fn.setreg, '+', text)
 
-  local ok_kit, kit = pcall(require, 'lib.nvim.ui.kit')
+  local ok_kit, kit = pcall(require, 'ui.kit')
   if ok_kit and type(kit.note) == 'function' then
     kit.note({
       title = 'color_my_ascii',

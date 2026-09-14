@@ -94,7 +94,7 @@ return function(H)
   vim.fn.writefile({ 'OLD' }, existing)
 
   local captured_question
-  package.loaded['lib.nvim.ui.kit'] = {
+  package.loaded['ui.kit'] = {
     confirm = function(opts)
       captured_question = opts.question
       opts.on_answer(false) -- Cancel: must not overwrite
@@ -117,7 +117,7 @@ return function(H)
 
   local prompted = tmp .. '/prompted.js'
   local captured_opts
-  package.loaded['lib.nvim.ui.kit'] = {
+  package.loaded['ui.kit'] = {
     input = function(opts)
       captured_opts = opts
       opts.on_submit(prompted)
@@ -134,7 +134,7 @@ return function(H)
   -- <Esc> (on_cancel) -> nothing written, no error.
   api.nvim_win_set_cursor(0, { 2, 0 })
   local not_written = tmp .. '/not_written.js'
-  package.loaded['lib.nvim.ui.kit'] = {
+  package.loaded['ui.kit'] = {
     input = function(opts)
       opts.on_cancel()
     end,
@@ -149,7 +149,7 @@ return function(H)
   -- Drop both from the module cache so the next spec gets a copy that has not
   -- seen this one's stubbed `kit`. Clearing the entry is the whole reset; the
   -- re-require that used to stand here assigned to a local nothing read again.
-  package.loaded['lib.nvim.ui.kit'] = nil
+  package.loaded['ui.kit'] = nil
   package.loaded['color_my_ascii.commands.fence.export'] = nil
 
   api.nvim_buf_delete(buf3, { force = true })

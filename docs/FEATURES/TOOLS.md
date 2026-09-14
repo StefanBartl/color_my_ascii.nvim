@@ -19,7 +19,7 @@ same text is copied to the unnamed register (and system clipboard, where
 available) for pasting into a bug report. Not gated behind `debug_enabled` —
 useful any time.
 
-Displayed via `lib.nvim.ui.kit`'s `note` popup when installed, falling back
+Displayed via `ui.nvim`'s `ui.kit` `note` popup when installed, falling back
 to a plain floating window (`q`/`<Esc>`/`<C-c>` to close) otherwise.
 
 - **Module:** `commands/hover.lua` (`M.show`, `M.info_at_cursor`)

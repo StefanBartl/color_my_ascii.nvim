@@ -757,7 +757,7 @@ Fence Management~
     answer (which character groups it belongs to per config, and whether
     it's an override - independent of whether anything is painted right
     now). If the cursor sits on a recognized keyword, also shows which
-    language(s) it maps to. Uses lib.nvim.ui.kit's `note` popup when
+    language(s) it maps to. Uses ui.nvim's `ui.kit` `note` popup when
     available, else a plain floating window (q/<Esc>/<C-c> to close).
 
 *:Fence*                                        *color_my_ascii-fence-command*

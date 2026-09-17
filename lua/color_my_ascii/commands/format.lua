@@ -21,38 +21,40 @@ function M.ensure_blank_lines()
 
   local changes = 0
   local new_lines = {}
-  local i = 1
 
-  while i <= line_count do
+  -- Which side a blank line belongs on depends on whether a fence opens or
+  -- closes a block, so the walk has to track that. It used to treat every
+  -- fence alike and, for each one, consume the *following* line before adding
+  -- a blank after it -- for an opening fence that following line is the first
+  -- line of content, so the blank was inserted INSIDE the block and the
+  -- command mangled the very ASCII art this plugin exists to highlight.
+  local in_block = false
+
+  for i = 1, line_count do
     local line = lines[i]
     local is_fence = line:match('^%s*```') or line:match('^%s*~~~')
 
-    if is_fence then
-      -- Check if this is an opening or closing fence
-      local prev_line = i > 1 and lines[i - 1] or nil
-      local next_line = i < line_count and lines[i + 1] or nil
-
-      -- Add blank line before fence if missing
-      if i > 1 and prev_line and prev_line ~= '' then
+    if is_fence and not in_block then
+      -- Opening fence: the blank line belongs before it. Looking at what was
+      -- already emitted (rather than at `lines[i - 1]`) keeps this idempotent
+      -- when a blank was just inserted.
+      if i > 1 and new_lines[#new_lines] ~= '' then
         table.insert(new_lines, '')
         changes = changes + 1
       end
-
-      -- Add current fence line
       table.insert(new_lines, line)
-
-      -- Add blank line after fence if missing
-      if i < line_count and next_line and next_line ~= '' then
-        i = i + 1
-        table.insert(new_lines, lines[i])
+      in_block = true
+    elseif is_fence then
+      -- Closing fence: the blank line belongs after it.
+      table.insert(new_lines, line)
+      if i < line_count and lines[i + 1] ~= '' then
         table.insert(new_lines, '')
         changes = changes + 1
       end
+      in_block = false
     else
       table.insert(new_lines, line)
     end
-
-    i = i + 1
   end
 
   if changes > 0 then

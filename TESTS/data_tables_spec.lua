@@ -85,28 +85,37 @@ return function(H)
     'FINDING: exactly these keywords are declared twice in their own file'
   )
 
-  -- ------------------------------------------------- BUG: "unique" is not
+  -- --------------------------------------- regression: "unique" is not always
   --
   -- `build_unique_keyword_lookup` is a flat word -> language map, filled by
-  -- iterating `pairs(config.keywords)`. Eight words are claimed as
-  -- `unique_words` by TWO languages, so which language each of them identifies
-  -- is decided by Lua's table iteration order -- i.e. it is not decided at
-  -- all. A block containing `elif` is detected as bash or as python depending
-  -- on hash order, and the two paint their keywords with different highlight
-  -- groups.
+  -- iterating `pairs(config.keywords)`. Eight shipped words are claimed as
+  -- `unique_words` by TWO languages, so which language each of them used to
+  -- identify was decided by Lua's table iteration order -- i.e. not decided at
+  -- all: a block containing `elif` came out as bash or as python depending on
+  -- hash order, and the two paint with different highlight groups. A word two
+  -- languages both claim identifies neither, so it is dropped from the lookup
+  -- now; the ordinary keyword lists still count it.
+  --
+  -- The list itself is still pinned: a ninth collision should be a deliberate
+  -- decision in the data, not a silent loss of one more detection hint.
   table.sort(unique_clashes)
   eq(
     table.concat(unique_clashes, ', '),
     'elif (bash + python), i128 (llvm + rust), isize (rust + zig), namespace (cpp + typescript), '
       .. 'readonly (bash + typescript), self (php + python), trait (rust + scala), usize (rust + zig)',
-    'BUG: exactly these eight words are claimed as unique by two languages each'
+    'exactly these eight words are claimed as unique by two languages each'
   )
   local config_for_unique = require('color_my_ascii.config')
   config_for_unique.setup({})
   for _, clash in ipairs({ 'elif', 'self', 'namespace', 'readonly' }) do
-    local resolved = config_for_unique.get_unique_language(clash)
-    ok(resolved ~= nil, ('BUG: "%s" still resolves to a single language (%s)'):format(clash, tostring(resolved)))
+    eq(
+      config_for_unique.get_unique_language(clash),
+      nil,
+      ('"%s" identifies no language, rather than a hash-order one'):format(clash)
+    )
   end
+  -- A word only one language claims still resolves, so the shortcut works.
+  ok(config_for_unique.get_unique_language('elseif') ~= nil, 'a genuinely unique word still resolves')
 
   -- ------------------------------- FINDING: unique words outside `words`
   --

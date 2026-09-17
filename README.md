@@ -65,6 +65,7 @@ each page answers.
 - [Integrations](./docs/integrations.md) — the context-menu integration.
 - [Troubleshooting](./docs/troubleshooting.md) — what `:checkhealth` reports, performance notes, and common issues.
 - [Contributing](./docs/CONTRIBUTING.md) — dev setup (stylua/luacheck/CI), adding a language or a character group.
+- [Tests](./TESTS/README.md) — how to run the headless suite, what it covers, and the behaviour currently pinned as a known bug.
 - [Manual fixture](./TESTS/FIXTURE.md) — a Markdown file that exercises every feature by hand, with [FIXTURE-CONFIG.md](./TESTS/FIXTURE-CONFIG.md) to turn them all on.
 - [Changelog](./docs/CHANGELOG.md) — version history.
 - Feedback — the [issue tracker](https://github.com/StefanBartl/color_my_ascii.nvim/issues) for bugs, features and usage questions; [discussions](https://github.com/StefanBartl/color_my_ascii.nvim/discussions) for anything more open-ended.

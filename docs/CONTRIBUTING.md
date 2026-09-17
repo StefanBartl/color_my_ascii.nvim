@@ -5,6 +5,7 @@ Issues and pull requests are welcome. For major changes, please open an issue fi
 ## Table of content
 
   - [Development](#development)
+  - [Tests](#tests)
   - [Add a New Language](#add-a-new-language)
   - [Add a New Character Group](#add-a-new-character-group)
 
@@ -20,14 +21,38 @@ at the repo root (`.stylua.toml`, `.luacheckrc`) and are enforced in CI
 Before opening a PR, run both locally:
 
 ```sh
-stylua lua/ plugin/          # format (use --check to only verify)
-luacheck lua/ plugin/        # lint
+stylua lua/ plugin/ TESTS/          # format (use --check to only verify)
+luacheck lua/ plugin/ TESTS/        # lint
 ```
+
+`TESTS/` is inside both gates, so spec files are held to the same style as
+`lua/`.
 
 - **Style**: 2-space indent, single quotes, 120-column width. `stylua` owns line
   width, so `luacheck`'s length check is disabled to avoid conflicts.
 - **`vim` global**: `.luacheckrc` declares `vim` as a writable global, so plugin
   code may set `vim.g.*`, `vim.bo[b].*`, etc. without warnings.
+
+---
+
+## Tests
+
+The headless suite runs in Neovim, with no test framework and no network or
+subprocess access:
+
+```sh
+nvim --headless -u NONE -c "set rtp+=." -l TESTS/run.lua
+```
+
+It needs [lib.nvim](https://github.com/StefanBartl/lib.nvim) — set
+`$LIB_NVIM_PATH`, or check it out next to this repository. CI runs the same
+command as a third job alongside stylua and luacheck.
+
+`TESTS/run.lua` holds an explicit spec list, so a new `*_spec.lua` file has to
+be added there to run at all. [`TESTS/README.md`](../TESTS/README.md) describes
+the harness, the seams used to keep subprocesses and soft dependencies out of
+the suite, what is covered, what is deliberately left out and why, and the
+behaviour that is currently pinned as a known bug.
 
 ---
 

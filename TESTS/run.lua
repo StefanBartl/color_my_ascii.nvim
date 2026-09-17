@@ -71,6 +71,21 @@ local specs = {
   'box_align_spec.lua',
   'comment_ascii_spec.lua',
   'toggle_buffer_spec.lua',
+  -- Coverage round: the layers below the fence toolkit (positions, parsing,
+  -- config/highlight-group lifecycle, cache, wiring, commands, health).
+  'byte_offsets_spec.lua',
+  'parser_spec.lua',
+  'fence_api_contract_spec.lua',
+  'highlighter_spec.lua',
+  'config_spec.lua',
+  'cache_manager_spec.lua',
+  'language_detector_spec.lua',
+  'scheme_loader_spec.lua',
+  'lifecycle_spec.lua',
+  'bindings_spec.lua',
+  'commands_spec.lua',
+  'health_menu_spec.lua',
+  'data_tables_spec.lua',
 }
 
 local failed = 0

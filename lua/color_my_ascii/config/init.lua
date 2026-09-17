@@ -290,13 +290,29 @@ local function build_unique_keyword_lookup()
   end
 
   local lookup = {}
+  -- A word that two languages both claim as "unique" identifies neither, so it
+  -- is dropped rather than handed to whichever language `pairs()` happened to
+  -- visit last. That made detection of a block containing e.g. `elif` (bash
+  -- and python) or `namespace` (cpp and typescript) depend on table iteration
+  -- order, and the two candidates paint with different highlight groups. The
+  -- ordinary keyword lists still count these words; only the unique-word
+  -- shortcut ignores them.
+  local claimed_twice = {}
 
   for lang_name, lang_config in pairs(current_config.keywords) do
     if lang_config.unique_words then
       for _, word in ipairs(lang_config.unique_words) do
-        lookup[word] = lang_name
+        if lookup[word] ~= nil and lookup[word] ~= lang_name then
+          claimed_twice[word] = true
+        else
+          lookup[word] = lang_name
+        end
       end
     end
+  end
+
+  for word in pairs(claimed_twice) do
+    lookup[word] = nil
   end
 
   return lookup

@@ -80,40 +80,35 @@ return function(H)
   result = ensure_blank({ '```ascii', 'x', '```' })
   eq(result[1], '```ascii', 'a fence on the very first line gets no blank line above it')
 
-  -- ------------------------------------------------------------------- BUG
+  -- ------------------------------------------------------------ regression
   --
-  -- The command promises blank lines *around* a fenced block. It inserts them
-  -- INSIDE it as well, and thereby edits the block's content: the scanner
-  -- treats every fence line on its own and, for each, consumes the following
-  -- line and appends a blank after it. For an opening fence that following
-  -- line is the block's FIRST CONTENT LINE -- so a blank row is pushed into
-  -- the middle of the art, and a second one in front of the closing fence.
-  --
-  -- This is a destructive edit of the very blocks the plugin exists to
-  -- highlight, reachable from `:ColorMyAscii ensure-blank-lines` and from the
-  -- optional `ensure_blank_lines` keymap. Pinned, not fixed: the repair is a
-  -- rewrite of the state machine (it has no notion of open vs. close), not a
-  -- one-line change.
+  -- The command promises blank lines *around* a fenced block. It used to
+  -- insert them INSIDE it as well, editing the block's content: the scanner
+  -- treated every fence line alike and, for each, consumed the following line
+  -- and appended a blank after it. For an opening fence that following line is
+  -- the block's FIRST CONTENT LINE, so a blank row was pushed into the middle
+  -- of the art and a second one in front of the closing fence -- a destructive
+  -- edit of the very blocks this plugin exists to highlight, reachable from
+  -- `:ColorMyAscii ensure-blank-lines` and from the optional keymap. The walk
+  -- tracks open vs. close now.
 
   result = ensure_blank({ 'before', '```ascii', '+-+', '|x|', '+-+', '```', 'after' })
   eq(
     table.concat(result, '|'),
-    'before||```ascii|+-+||\124x\124|+-+||```|after|',
-    'BUG: blank rows are inserted into the block, splitting the ASCII art'
+    'before||```ascii|+-+|\124x\124|+-+|```||after',
+    'the art is spaced from its surroundings and otherwise untouched'
   )
-  eq(result[4], '+-+', 'BUG: the first content line survives...')
-  eq(result[5], '', 'BUG: ...and is then followed by a blank row that was not there')
-  eq(result[8], '', 'BUG: and another one right before the closing fence')
+  eq(result[4], '+-+', 'the first content line stays put...')
+  eq(result[5], '|x|', '...and is still followed by the next one')
+  eq(result[7], '```', 'the closing fence directly follows the last content line')
 
-  -- Consequently the command is not idempotent and never reports "nothing to
-  -- do" for a block with content: running it on an already-spaced block adds
-  -- two more rows.
+  -- And it is idempotent: an already-spaced block is a no-op, not two more
+  -- rows.
   result, messages = ensure_blank({ '', '```ascii', 'x', '```', '' })
-  eq(table.concat(result, '|'), '|```ascii|x|||```|', 'BUG: an already-spaced block is edited again')
-  ok(H.notified(messages, 'Added'), 'BUG: and reported as a change rather than a no-op')
+  eq(table.concat(result, '|'), '|```ascii|x|```|', 'an already-spaced block is left alone')
+  ok(H.notified(messages, 'No changes needed'), 'and reported as a no-op')
 
-  -- In practice the "no changes needed" branch is only reached by a buffer
-  -- with no fence line in it at all.
+  -- A buffer with no fence line at all needs nothing either.
   result, messages = ensure_blank({ 'just prose', 'and more prose' })
   ok(H.notified(messages, 'No changes needed'), 'a buffer without fences needs nothing')
   eq(table.concat(result, '|'), 'just prose|and more prose', 'and is left untouched')

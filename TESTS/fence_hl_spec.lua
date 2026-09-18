@@ -114,6 +114,50 @@ return function(H)
     vim.o.background = saved_bg
   end
 
+  -- preset = "auto" with a light background -> theme_presets.resolve_auto
+  -- bails out before matching at all (the hand-tuned presets are dark-surface
+  -- tints), so this also falls back to "subtle", same as no match.
+  do
+    local saved_name, saved_bg = vim.g.colors_name, vim.o.background
+    vim.g.colors_name = 'tokyonight-storm'
+    vim.o.background = 'light'
+    require('color_my_ascii.config').setup({
+      fence_line_highlight = { enable = true, preset = 'auto', apply_to = 'all' },
+    })
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+    local fallback = api.nvim_get_hl(0, { name = 'ColorMyAsciiFenceOpen', link = true })
+    ok(fallback.link == 'CursorLine', 'auto on a light background falls back to subtle, even with a name match')
+    vim.g.colors_name = saved_name
+    vim.o.background = saved_bg
+  end
+
+  -- preset = "auto" matches the LONGEST key first: "gruvbox-material" and
+  -- "gruvbox" are both substrings of a "gruvbox-material-*" variant name, and
+  -- picking the shorter one first would resolve every gruvbox-material
+  -- variant to plain gruvbox's palette instead of its own.
+  do
+    local themes = require('color_my_ascii.theme_presets')
+    local saved_name, saved_bg = vim.g.colors_name, vim.o.background
+    vim.g.colors_name = 'gruvbox-material-hard'
+    vim.o.background = 'dark'
+    require('color_my_ascii.config').setup({
+      fence_line_highlight = { enable = true, preset = 'auto', apply_to = 'all' },
+    })
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+    local open_hl = api.nvim_get_hl(0, { name = 'ColorMyAsciiFenceOpen' })
+    eq(
+      string.format('#%06x', open_hl.fg),
+      themes.presets['gruvbox-material'].fg,
+      'the longer, more specific key wins over the shorter "gruvbox" it also contains'
+    )
+    ok(
+      string.format('#%06x', open_hl.fg) ~= themes.presets.gruvbox.fg,
+      'and does not fall through to the plainer palette'
+    )
+    vim.g.colors_name = saved_name
+    vim.o.background = saved_bg
+  end
+
   -- respect_indent: every row gets a full-line line_hl_group (so characters,
   -- backticks and blank rows all share the fence background); a Normal overlay
   -- at win_col 0 then masks the block's own indentation on every row.

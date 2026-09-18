@@ -202,17 +202,20 @@ Assertions marked `BUG:` or `FINDING:` pin behaviour that is *wrong* — they
 document it so it cannot change unnoticed, and they will fail loudly when it is
 fixed (which is the point).
 
-1. **`:ColorMyAscii ensure-blank-lines` edits block content**
-   (`commands_spec`). The command promises blank lines *around* a fenced block;
-   it also inserts them *inside* one. The scanner treats each fence line on its
-   own and, for every fence, consumes the following line and appends a blank
-   after it — for an opening fence that following line is the block's first
-   content line. `+-+ / |x| / +-+` comes back as `+-+ / <blank> / |x| / +-+ /
-   <blank>`. It is also not idempotent, and never reports "no changes needed"
-   for a block that has content. Reachable from the command and from the
-   optional `ensure_blank_lines` keymap.
+Two defects that used to be pinned here are fixed as of commit `0437fe0`, and
+the specs that pinned them now assert the fix instead (`regression` comments,
+not `BUG:`):
 
-2. **comment_ascii highlights land `#prefix + 1` bytes too far left**
+- `:ColorMyAscii ensure-blank-lines` promised blank lines *around* a fenced
+  block and inserted them *inside* one too (`commands_spec`).
+- `build_unique_keyword_lookup` resolved an eight-word `unique_words` clash
+  between two languages by table iteration order instead of dropping it
+  (`data_tables_spec`). The clash list itself is still pinned, so a ninth
+  collision is a deliberate decision in the data, not a silent loss.
+
+Four remain open:
+
+1. **comment_ascii highlights land `#prefix + 1` bytes too far left**
    (`byte_offsets_spec`). `comment_ascii.find_blocks` strips the buffer's
    comment prefix from every content line, and the highlighter then uses those
    stripped strings *both* as the text to scan *and* as the coordinate system
@@ -220,7 +223,7 @@ fixed (which is the point).
    an arrow at byte 9 of the real line is painted at byte 6, and the
    default-text span stops three bytes short of the line's end.
 
-3. **`parser.get_byte_offset` raises for every column > 0**
+2. **`parser.get_byte_offset` raises for every column > 0**
    (`byte_offsets_spec`). It drives `vim.str_utf_pos(line)` as a generic-for
    iterator, but that function answers with a *table* of byte positions:
    "attempt to call a table value". Only `col == 0` survives, via the early
@@ -228,25 +231,14 @@ fixed (which is the point).
    only reason it has never been seen — but it is a public, documented function
    on a module other code requires.
 
-4. **Eight words are claimed as `unique_words` by two languages each**
-   (`data_tables_spec`): `elif` (bash + python), `self` (php + python), `i128`
-   (llvm + rust), `trait` (rust + scala), `namespace` (cpp + typescript),
-   `readonly` (bash + typescript), `usize` and `isize` (rust + zig).
-   `build_unique_keyword_lookup` is a flat word → language map filled by
-   iterating `pairs(config.keywords)`, so which language each of them
-   identifies is decided by table iteration order — i.e. not decided at all.
-   Heuristic language detection for a block containing one of them is
-   non-deterministic, and the two candidate languages paint with different
-   highlight groups.
-
-5. **`enable_bracket_highlighting` cannot switch bracket highlighting off**
+3. **`enable_bracket_highlighting` cannot switch bracket highlighting off**
    (`highlighter_spec`). The lookup adds the six brackets in a step that skips
    any character a *group* already claims — and the bundled
    `groups/operators.lua` claims all six. Its own comment there calls them
    "optional, can be controlled by enable_bracket_highlighting"; they are not.
    The flag only takes effect once the groups stop covering them.
 
-6. **Twelve keywords are listed twice inside their own language file**
+4. **Twelve keywords are listed twice inside their own language file**
    (`data_tables_spec`): `bash:unset`, `cpp:constexpr`, `cpp:decltype`,
    `llvm:label`, `llvm:uge`, `llvm:ugt`, `llvm:ule`, `llvm:ult`, `lua:goto`,
    `typescript:default`, `vim:map`, `zig:volatile`. Harmless to the character
@@ -261,6 +253,16 @@ defects: the inline-code default-text span starts after the opening backtick
 but ends past the closing one (`byte_offsets_spec`), and the `Empty buffer`
 guard in `commands/format.lua` is unreachable, because a Neovim buffer always
 has at least one line (`commands_spec`).
+
+A fifth defect was found and fixed directly during a re-audit rather than
+pinned, because the fix carries no behaviour-change risk for the healthy case:
+`:checkhealth` reported "lib.nvim not found" via `health.error` and then
+unconditionally re-required the exact same module to hand the report over to
+it — raising and aborting the report right after the warning that was supposed
+to explain why. `health.lua` now reuses the module it already tried to load
+instead of requiring it a second time, and only hands off when that succeeded.
+`health_menu_spec` simulates a missing lib.nvim at the require seam and asserts
+the report completes and still names the missing dependency.
 
 ## The manual fixtures
 

@@ -147,6 +147,30 @@ return function(H)
   ok(says(report.ok, 'Plugin initialized successfully'), 'and a loaded one')
   vim.g.loaded_color_my_ascii = loaded_before
 
+  -- Regression: a missing lib.nvim used to crash the whole report rather than
+  -- just reporting it. `composer_ok` from the "lib.nvim found" check above was
+  -- discarded, and the report ended by unconditionally re-requiring the exact
+  -- module just reported missing to hand off to it -- raising, and aborting
+  -- the report right after the health.error that was supposed to explain why.
+  -- Simulated at the require seam (composer is a real sibling checkout here,
+  -- same as the rest of this suite) rather than by actually uninstalling
+  -- lib.nvim.
+  do
+    local PATH = 'lib.nvim.bindings.usercmd.composer'
+    local saved = package.loaded[PATH]
+    package.loaded[PATH] = nil
+    package.preload[PATH] = function()
+      error('synthetic: lib.nvim not installed')
+    end
+    local run_ok, run_err = pcall(function()
+      report = checkhealth()
+    end)
+    package.preload[PATH] = nil
+    package.loaded[PATH] = saved
+    ok(run_ok, ('checkhealth completes rather than raising when lib.nvim is missing (%s)'):format(tostring(run_err)))
+    ok(says(report.error, 'lib.nvim not found'), 'and still reports the missing dependency')
+  end
+
   vim.api.nvim_buf_delete(md, { force = true })
   config.setup({})
 

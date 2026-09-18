@@ -114,5 +114,43 @@ return function(H)
     )
   end
 
+  -- shade = "auto" (the default -- `fch.shade or 'auto'`) picks the direction
+  -- from 'background': dark backgrounds shade toward black, light ones toward
+  -- white. Neither direction is exercised by the explicit shade='darken' case
+  -- above, which bypasses this decision entirely.
+  do
+    local saved_bg = vim.o.background
+    local color = require('color_my_ascii.utils.color')
+
+    vim.o.background = 'dark'
+    require('color_my_ascii.config').setup({
+      fence_line_highlight = { enable = true, preset = 'catppuccin' },
+      fence_content_highlight = { enable = true, amount = 20 }, -- shade omitted -> 'auto'
+    })
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+    local themes = require('color_my_ascii.theme_presets')
+    local base = themes.presets.catppuccin.bg
+    local dark_hl = api.nvim_get_hl(0, { name = 'ColorMyAsciiFenceContent' })
+    local dark_shaded = string.format('#%06x', dark_hl.bg)
+    local br, bg_, bb = color.hex_to_rgb(base)
+    local dr, dg, db = color.hex_to_rgb(dark_shaded)
+    ok(
+      dr ~= nil and dr <= br and dg <= bg_ and db <= bb,
+      "auto on a dark background darkens, same as an explicit shade = 'darken'"
+    )
+
+    vim.o.background = 'light'
+    fence_hl.setup_hl(require('color_my_ascii.config').get())
+    local light_hl = api.nvim_get_hl(0, { name = 'ColorMyAsciiFenceContent' })
+    local light_shaded = string.format('#%06x', light_hl.bg)
+    local lr, lg, lb = color.hex_to_rgb(light_shaded)
+    ok(
+      lr ~= nil and lr >= br and lg >= bg_ and lb >= bb,
+      "auto on a light background lightens instead, same as an explicit shade = 'lighten'"
+    )
+
+    vim.o.background = saved_bg
+  end
+
   require('color_my_ascii.config').setup({})
 end

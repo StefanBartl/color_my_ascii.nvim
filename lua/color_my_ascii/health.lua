@@ -241,7 +241,7 @@ function M.check()
   -- lib.nvim.bindings.usercmd.composer, the opt-in keymaps go through
   -- lib.nvim.bindings.keymap's registry, and notifications through
   -- lib.nvim.notify -- none of it has a fallback.
-  local composer_ok = pcall(require, 'lib.nvim.bindings.usercmd.composer')
+  local composer_ok, composer = pcall(require, 'lib.nvim.bindings.usercmd.composer')
   if composer_ok then
     health.ok('lib.nvim found - :ColorMyAscii command + keymap/notify integration available')
   else
@@ -304,7 +304,13 @@ function M.check()
     health.error('Some core modules failed to load - plugin may not function correctly')
   end
 
-  require('lib.nvim.bindings.usercmd.composer').checkhealth('ColorMyAscii')
+  -- Only hand off to the composer if it actually loaded above -- otherwise
+  -- this would re-require the exact module just reported as missing and
+  -- raise, aborting the report right after the warning that was supposed to
+  -- explain why (see health_menu_spec's "lib.nvim missing" case).
+  if composer_ok then
+    composer.checkhealth('ColorMyAscii')
+  end
 end
 
 return M

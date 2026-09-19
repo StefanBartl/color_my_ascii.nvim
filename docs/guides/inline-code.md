@@ -412,8 +412,10 @@ vim.api.nvim_create_autocmd('BufEnter', {
   callback = function()
     local lines = vim.api.nvim_buf_line_count(0)
     if lines < 1000 then
-      -- Only activate for small files
-      require('color_my_ascii.config').get().enable_inline_code = true
+      -- Only activate for small files. Through setup(), not by mutating
+      -- config.get()'s result in place -- that table is a live reference
+      -- shared by every consumer for the rest of the session, not a copy.
+      require('color_my_ascii').setup({ enable_inline_code = true })
     end
   end
 })

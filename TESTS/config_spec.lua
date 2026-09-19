@@ -118,6 +118,58 @@ return function(H)
 
   config.setup({})
 
+  -- ----------------------------------------------- unknown/mistyped options
+  --
+  -- Validation runs before the merge (ERR-50): a misspelled key must not
+  -- silently land in current_config as dead data next to the untouched
+  -- default, and must not survive as a typo'd key either.
+  --
+  -- Assertions run *inside* the reload_notify callback, against `mods`'s
+  -- fresh instance -- same rule as the "unknown scheme" case above: the
+  -- outer `config` local was not touched by that inner setup() call.
+
+  do
+    local seen_typo = H.reload_notify({ 'color_my_ascii.config' }, function(mods)
+      local c = mods['color_my_ascii.config']
+      c.setup({ fence_line_higlight = { enable = false } })
+      eq(c.get().fence_line_highlight.enable, true, 'the real option keeps its default')
+      eq(c.get().fence_line_higlight, nil, 'and the typo does not survive into current_config')
+      ok(#c.issues() > 0, 'the rejection is recorded for :checkhealth')
+    end)
+    ok(H.notified(seen_typo, "did you mean 'fence_line_highlight'"), 'a close top-level typo gets a suggestion')
+  end
+
+  do
+    local seen_nested_typo = H.reload_notify({ 'color_my_ascii.config' }, function(mods)
+      local c = mods['color_my_ascii.config']
+      c.setup({ comment_ascii = { enabled = true } })
+      eq(c.get().comment_ascii.enable, false, 'the real nested option keeps its default')
+    end)
+    ok(H.notified(seen_nested_typo, "did you mean 'comment_ascii.enable'"), 'a nested typo names its parent key too')
+  end
+
+  -- A typo'd sub-key must not wipe its siblings: only the rejected key is
+  -- dropped, the rest of the table is still merged.
+  do
+    config.setup({ fence_line_highlight = { enable = false, presett = 'accent' } })
+    eq(config.get().fence_line_highlight.enable, false, 'the valid sibling key is still applied')
+    eq(config.get().fence_line_highlight.preset, 'auto', 'the typo does not fall back to clobbering the whole table')
+  end
+
+  -- A non-table value for an option table degrades to the default instead of
+  -- replacing the whole table (and throwing on the first nested read).
+  do
+    local seen_bad_type = H.reload_notify({ 'color_my_ascii.config' }, function(mods)
+      local c = mods['color_my_ascii.config']
+      c.setup({ treesitter = false })
+      eq(c.get().treesitter.enabled, true, 'and degrades to the default rather than aborting setup()')
+    end)
+    ok(H.notified(seen_bad_type, 'must be a table'), 'a wrong-type option table is reported')
+  end
+
+  config.setup({})
+  eq(#config.issues(), 0, 'a clean setup() reports no issues')
+
   -- ------------------------------------------------- generated highlight groups
   --
   -- A `{ fg = ..., bold = ... }` highlight spec is turned into a real, named

@@ -73,7 +73,9 @@ this to scope a `` ```markdown `` block as its own document. `list_blocks`
 returns every block in document order (open/close rows, content range,
 language, fence character/length, `is_ascii`); `block_at` finds the
 innermost block containing a given row. Range-only queries are cached per
-buffer `changedtick`, so `block_at` is cheap to call on every keystroke.
+buffer `changedtick` (and invalidated on `setup()`/scheme changes, since
+`is_ascii` and block detection depend on config), so `block_at` is cheap to
+call on every keystroke.
 
 - **Module:** `api/fences.lua` (`list_blocks`, `block_at`, `is_markdown_lang`)
 - **Usage:** `require('color_my_ascii').fences` — available without calling `setup()`

@@ -151,6 +151,14 @@ return function(H)
   fences.invalidate()
   ok(fences.list_blocks(buf) ~= before_all, 'invalidate() drops every buffer')
 
+  -- `is_ascii` and the detection backend both depend on config
+  -- (fence_language_map, treat_empty_fence_as_ascii, treesitter.*), so a
+  -- config change must invalidate the cache too, even though changedtick
+  -- alone would still read as a hit.
+  local before_setup = fences.list_blocks(buf)
+  config.setup({})
+  ok(fences.list_blocks(buf) ~= before_setup, "setup() bumps the config generation, so it isn't served stale")
+
   -- The API installs its own augroup for this; a wiped buffer must not keep a
   -- stale entry alive under a bufnr Neovim may hand out again.
   local cached = fences.list_blocks(buf)

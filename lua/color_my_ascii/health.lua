@@ -19,14 +19,30 @@ local function check_module(module_name)
   return true, nil
 end
 
---- Count files in a directory
+--- Count files with a given extension directly inside a directory.
+---
+--- `vim.fn.readdir` takes `path` as an actual filesystem path, not a glob
+--- pattern, so a metacharacter in the install path (`[`, `]`, `*`, `?`, `{}`,
+--- a comma) can never be misread as pattern syntax the way `vim.fn.globpath`
+--- would read it (XP-01) -- which would otherwise report 0 files found for a
+--- directory that is not actually empty.
 ---@internal
 ---@param path string Path to directory
----@param pattern string File pattern (e.g., '*.lua')
+---@param ext string File extension without the dot (e.g. 'lua')
 ---@return integer count Number of files found
-local function count_files(path, pattern)
-  local files = fn.globpath(path, pattern, false, true)
-  return #files
+local function count_files(path, ext)
+  local ok, entries = pcall(fn.readdir, path)
+  if not ok or type(entries) ~= 'table' then
+    return 0
+  end
+  local suffix = '.' .. ext
+  local count = 0
+  for _, name in ipairs(entries) do
+    if name:sub(-#suffix) == suffix then
+      count = count + 1
+    end
+  end
+  return count
 end
 
 --- Main health check function
@@ -115,6 +131,18 @@ function M.check()
     health.info(string.format('  Inline code: %s', cfg.enable_inline_code and 'enabled' or 'disabled'))
     health.info(string.format('  Empty fence as ASCII: %s', cfg.treat_empty_fence_as_ascii and 'enabled' or 'disabled'))
     health.info(string.format('  Default text highlight: %s', cfg.default_text_hl or 'none'))
+
+    -- Unknown/mistyped setup() options never reach the merge (ERR-50); report
+    -- what the last call had to reject so a typo doesn't just look like a
+    -- feature that silently does nothing.
+    local cfg_issues = type(config.issues) == 'function' and config.issues() or {}
+    if #cfg_issues == 0 then
+      health.ok('Configuration options: all recognized')
+    else
+      for _, issue in ipairs(cfg_issues) do
+        health.warn(issue, { "Fix the option in require('color_my_ascii').setup({ ... })" })
+      end
+    end
   else
     health.error('Failed to load configuration module')
   end
@@ -128,7 +156,7 @@ function M.check()
   -- Check languages directory
   local lang_path = dir .. '/languages'
   if fn.isdirectory(lang_path) == 1 then
-    local lang_file_count = count_files(lang_path, '*.lua')
+    local lang_file_count = count_files(lang_path, 'lua')
     health.ok(string.format('Languages directory found with %d file(s)', lang_file_count))
   else
     health.error(string.format('Languages directory not found at: %s', lang_path), {
@@ -139,7 +167,7 @@ function M.check()
   -- Check groups directory
   local group_path = dir .. '/groups'
   if fn.isdirectory(group_path) == 1 then
-    local group_file_count = count_files(group_path, '*.lua')
+    local group_file_count = count_files(group_path, 'lua')
     health.ok(string.format('Groups directory found with %d file(s)', group_file_count))
   else
     health.error(string.format('Groups directory not found at: %s', group_path), {
@@ -150,7 +178,7 @@ function M.check()
   -- Check for color schemes
   local schemes_path = dir .. '/schemes'
   if fn.isdirectory(schemes_path) == 1 then
-    local scheme_file_count = count_files(schemes_path, '*.lua')
+    local scheme_file_count = count_files(schemes_path, 'lua')
     health.ok(string.format('Color schemes directory found with %d scheme(s)', scheme_file_count))
   else
     health.info('Color schemes directory not found (optional)')

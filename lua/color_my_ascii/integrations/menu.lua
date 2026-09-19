@@ -17,16 +17,33 @@
 --- `:Fence` subcommand — so right-click never offers a fence action with
 --- nothing under the cursor to apply it to. Opt-out via `config.menu.enable`.
 
-local contextmenu = require('ui.contextmenu')
-
 local M = {}
 
+--- Lazily resolve the optional nvzone/menu helper module. This integration is
+--- a soft dependency (see module header): `ui.contextmenu` is only required
+--- when a caller actually asks for the entries, so a host without it
+--- installed never sees a `require` failure just from loading this module.
+---@return table|nil
+local function get_contextmenu()
+  local ok, contextmenu = pcall(require, 'ui.contextmenu')
+  if ok then
+    return contextmenu
+  end
+  return nil
+end
+
 --- Build the color_my_ascii.nvim menu entries for `bufnr`.
---- Returns an empty list when the integration is disabled or the buffer
---- isn't markdown, so a host can safely `vim.list_extend` it unconditionally.
+--- Returns an empty list when the integration is disabled, `ui.contextmenu`
+--- isn't installed, or the buffer isn't markdown, so a host can safely
+--- `vim.list_extend` it unconditionally.
 ---@param bufnr? integer defaults to the current buffer
 ---@return Ui.ContextMenu.Item[]
 function M.items(bufnr)
+  local contextmenu = get_contextmenu()
+  if not contextmenu then
+    return {}
+  end
+
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
   local cfg = require('color_my_ascii.config').get()
@@ -102,6 +119,10 @@ end
 ---@param bufnr? integer
 ---@return Ui.ContextMenu.Item|nil
 function M.submenu(label, bufnr)
+  local contextmenu = get_contextmenu()
+  if not contextmenu then
+    return nil
+  end
   return contextmenu.submenu(label or '  Color My ASCII', M.items(bufnr))
 end
 

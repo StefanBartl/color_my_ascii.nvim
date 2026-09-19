@@ -12,11 +12,169 @@ local fn = vim.fn
 
 local DEFAULTS = require('color_my_ascii.config.DEFAULTS')
 
+--- List the *.lua file names (bare, no directory) directly inside `path`.
+---
+--- `vim.fn.readdir` takes `path` as an actual filesystem path, not a glob
+--- pattern, so a metacharacter in the plugin's own install path (`[`, `]`,
+--- `*`, `?`, `{}`, a comma -- `globpath` also splits its {path} argument on
+--- commas) can never be misread as pattern syntax the way it would be by
+--- `vim.fn.glob`/`globpath` (XP-01).
+---@internal
+---@param path string
+---@return boolean ok
+---@return string[] names
+local function list_lua_files(path)
+  local ok, entries = pcall(fn.readdir, path)
+  if not ok or type(entries) ~= 'table' then
+    return false, {}
+  end
+  local out = {}
+  for _, name in ipairs(entries) do
+    if name:sub(-4) == '.lua' then
+      out[#out + 1] = name
+    end
+  end
+  return true, out
+end
+
 --- Cache for dynamically created highlight groups: name -> the attrs table
 --- passed to nvim_set_hl, so the group can be re-applied verbatim later (see
 --- M.reapply_custom_highlights).
 ---@type table<string, table>
 local created_highlight_groups = {}
+
+---@internal
+--- What the last `setup()` had to reject, one human-readable line each, for
+--- `:checkhealth` (ERR-50). Empty when every key was recognized.
+---@type string[]
+local _issues = {}
+
+---@internal
+--- Top-level keys `M.setup()` accepts and, for the fixed-schema tables among
+--- them, their own direct keys (one level, not recursive -- see `sanitize()`).
+--- `true` means "any key goes": `groups`/`keywords`/`languages`/`overrides`/
+--- `fence_language_map` are name-keyed extension points (a language or group
+--- name, a character, a fence tag), not a fixed option schema, so their own
+--- keys are never known in advance. `keymaps`/`cache`/`debounce` are nil or
+--- false by default and validated by their own modules at configure() time.
+---@type table<string, true|table<string, true>>
+local KNOWN = {
+  debug_enabled = true,
+  debug_verbose = true,
+  scheme = true,
+  groups = true,
+  keywords = true,
+  languages = true,
+  overrides = true,
+  default_hl = true,
+  default_text_hl = true,
+  enable_keywords = true,
+  enable_language_detection = true,
+  language_detection_threshold = true,
+  treesitter = { enabled = true, block_detection = true, syntax_highlight = true },
+  comment_ascii = { enable = true, filetypes = true },
+  treat_empty_fence_as_ascii = true,
+  enable_inline_code = true,
+  enable_function_names = true,
+  enable_bracket_highlighting = true,
+  fence_language_map = true,
+  fence_line_highlight = {
+    enable = true,
+    preset = true,
+    open = true,
+    close = true,
+    apply_to = true,
+    respect_indent = true,
+    right_pad = true,
+  },
+  fence_content_highlight = {
+    enable = true,
+    preset = true,
+    hl = true,
+    shade = true,
+    amount = true,
+    apply_to = true,
+    respect_indent = true,
+    right_pad = true,
+  },
+  fence_export = {
+    default_dir = true,
+    open_after = true,
+    open_cmd = true,
+    replace = true,
+    replace_format = true,
+    ext_map = true,
+  },
+  fence_run = { runners = true },
+  fence_format = { formatters = true },
+  keymaps = true,
+  cache = true,
+  debounce = true,
+  menu = { enable = true },
+}
+
+---@internal
+--- `key` with the nearest known one as a hint when there is a plausible one
+--- (edit distance <= 3).
+---@param key any
+---@param known table<string, any>
+---@param prefix string
+---@return string
+local function describe_unknown(key, known, prefix)
+  local levenshtein = require('lib.lua.strings.distance').levenshtein
+  local name = tostring(key)
+  local best, best_distance = nil, nil
+  for candidate in pairs(known) do
+    local d = levenshtein(name, candidate)
+    if d <= 3 and (best_distance == nil or d < best_distance) then
+      best, best_distance = candidate, d
+    end
+  end
+  if best then
+    return ("unknown option '%s%s' (did you mean '%s%s'?)"):format(prefix, name, prefix, best)
+  end
+  return ("unknown option '%s%s'"):format(prefix, name)
+end
+
+---@internal
+--- Drop what cannot be merged, and say so, before the merge (ERR-50): a
+--- misspelled key would otherwise land in the active config as a dead field
+--- while the real option keeps its default, with no diagnostic anywhere.
+---@param user_opts table
+---@return table clean
+---@return string[] issues
+local function sanitize(user_opts)
+  local clean, issues = {}, {}
+  for key, value in pairs(user_opts) do
+    local known = KNOWN[key]
+    if known == nil then
+      issues[#issues + 1] = describe_unknown(key, KNOWN, '')
+    elseif type(DEFAULTS[key]) == 'table' and type(value) ~= 'table' then
+      issues[#issues + 1] = ("option '%s' must be a table, got %s -- using the default"):format(key, type(value))
+    elseif type(known) == 'table' and type(value) == 'table' then
+      local nested = {}
+      for sub_key, sub_value in pairs(value) do
+        if known[sub_key] then
+          nested[sub_key] = sub_value
+        else
+          issues[#issues + 1] = describe_unknown(sub_key, known, key .. '.')
+        end
+      end
+      -- An empty table is what `config_to_merge`'s deep-extend would replace
+      -- the whole key with -- if every sub-key the user gave was rejected
+      -- above (e.g. a single typo'd sub-key), that would wipe every *other*
+      -- default under `key` instead of leaving them alone. Only set the key
+      -- at all when there is a real override left to apply.
+      if next(nested) ~= nil then
+        clean[key] = nested
+      end
+    else
+      clean[key] = value
+    end
+  end
+  table.sort(issues)
+  return clean, issues
+end
 
 --- Load all language definitions from the languages/ directory
 --- Implements safe loading with error recovery and validation
@@ -46,9 +204,9 @@ local function load_languages()
     return languages, errors
   end
 
-  -- Safe file globbing
-  local glob_ok, files = pcall(fn.globpath, lang_path, '*.lua', false, true)
-  if not glob_ok then
+  -- Safe file listing (path-based, not glob-pattern-based -- see XP-01)
+  local list_ok, files = list_lua_files(lang_path)
+  if not list_ok then
     table.insert(errors, 'Failed to list language files')
     return languages, errors
   end
@@ -106,9 +264,9 @@ local function load_groups()
     return groups, errors
   end
 
-  -- Safe file globbing
-  local glob_ok, files = pcall(fn.globpath, group_path, '*.lua', false, true)
-  if not glob_ok then
+  -- Safe file listing (path-based, not glob-pattern-based -- see XP-01)
+  local list_ok, files = list_lua_files(group_path)
+  if not list_ok then
     table.insert(errors, 'Failed to list group files')
     return groups, errors
   end
@@ -169,6 +327,14 @@ local defaults = vim.deepcopy(DEFAULTS)
 --- Current configuration
 ---@type ColorMyAscii.Config
 local current_config = vim.deepcopy(defaults)
+
+--- Incremented on every M.setup() call. Consumers that cache data derived
+--- from the config but keyed only on e.g. (bufnr, changedtick) -- such as the
+--- fence API's block-range cache, whose `is_ascii` classification depends on
+--- `fence_language_map`/`treat_empty_fence_as_ascii`/`treesitter` -- fold this
+--- into their own cache key so a config/scheme change invalidates them too.
+---@type integer
+local generation = 0
 
 --- Create or get a custom highlight group
 ---@internal
@@ -360,6 +526,8 @@ end
 --- Setup the configuration with user options
 ---@param opts? ColorMyAscii.Config|{scheme: string} User configuration to merge with defaults
 function M.setup(opts)
+  generation = generation + 1
+
   -- Load modular definitions (cached after the first call, see bundled_defs).
   -- Both loaders return non-fatal error/warning lists rather than notifying
   -- themselves - setup() is the boundary that decides whether and how to
@@ -382,19 +550,35 @@ function M.setup(opts)
   defaults.groups = loaded_groups
   defaults.keywords = loaded_languages
 
+  -- Validate user options before anything is merged (ERR-50): an unknown or
+  -- mistyped key would otherwise land in current_config as dead data next to
+  -- the default it was meant to override, with no diagnostic anywhere.
+  local clean_opts, issues
+  if opts == nil then
+    clean_opts, issues = nil, {}
+  elseif type(opts) ~= 'table' then
+    clean_opts, issues = nil, { ('setup() expects a table, got %s -- using defaults'):format(type(opts)) }
+  else
+    clean_opts, issues = sanitize(opts)
+  end
+  _issues = issues
+  for _, issue in ipairs(issues) do
+    notify('color_my_ascii: ' .. issue, vim.log.levels.WARN)
+  end
+
   -- Handle scheme parameter
-  local config_to_merge = opts
-  if opts and opts.scheme then
+  local config_to_merge = clean_opts
+  if clean_opts and clean_opts.scheme then
     local scheme_loader = require('color_my_ascii.scheme_loader')
-    local scheme_config, err = scheme_loader.load_scheme(opts.scheme)
+    local scheme_config, err = scheme_loader.load_scheme(clean_opts.scheme)
 
     if not scheme_config then
       notify(string.format('color_my_ascii: %s', err), vim.log.levels.ERROR)
-      config_to_merge = vim.tbl_extend('force', {}, opts)
+      config_to_merge = vim.tbl_extend('force', {}, clean_opts)
       config_to_merge.scheme = nil -- Remove invalid scheme parameter
     else
       -- Merge user opts with scheme config (user opts take precedence)
-      local user_opts = vim.tbl_extend('force', {}, opts)
+      local user_opts = vim.tbl_extend('force', {}, clean_opts)
       user_opts.scheme = nil -- Remove scheme key from merge
       config_to_merge = vim.tbl_deep_extend('force', scheme_config, user_opts)
     end
@@ -430,10 +614,32 @@ function M.setup(opts)
   end
 end
 
---- Get the current configuration
+--- Get the current configuration.
+---
+--- Returns the module's live, shared table by reference, not a copy -- this
+--- runs once per character in the highlight hot path, so copying on every
+--- call is not the right trade-off (ERR-54). Treat the result as read-only:
+--- sort/append/mutate a nested value (e.g. `cfg.keywords.lua.words`) and the
+--- change sticks for the rest of the session, for every other consumer, and
+--- a re-`require` of this module will not undo it (`package.loaded` caches
+--- the same table). Copy it yourself first if you need to mutate.
 ---@return ColorMyAscii.Config
 function M.get()
   return current_config
+end
+
+--- Get the current config generation, incremented on every M.setup() call.
+---@return integer
+function M.generation()
+  return generation
+end
+
+--- What the last `setup()` rejected: unknown/mistyped option keys, one
+--- human-readable line each. Empty when every key was recognized. For
+--- `:checkhealth color_my_ascii`.
+---@return string[]
+function M.issues()
+  return vim.list_extend({}, _issues)
 end
 
 --- Get the highlight group for a specific character

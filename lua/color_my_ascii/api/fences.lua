@@ -30,8 +30,13 @@ local DEFAULT_MARKDOWN_LANGS = {
   ['ascii-md'] = true,
 }
 
---- Range-only block cache: bufnr -> { tick = changedtick, blocks = FenceBlock[] }.
----@type table<integer, { tick: integer, blocks: ColorMyAscii.FenceBlock[] }>
+--- Range-only block cache: bufnr -> { tick, gen, blocks }. `gen` is the config
+--- generation the blocks were computed under (see config.generation()):
+--- `is_ascii` and the detection backend both depend on config
+--- (fence_language_map, treat_empty_fence_as_ascii, treesitter.*), so a cache
+--- keyed on changedtick alone would keep serving blocks classified under the
+--- previous config after a scheme switch or re-setup().
+---@type table<integer, { tick: integer, gen: integer, blocks: ColorMyAscii.FenceBlock[] }>
 local cache = {}
 
 local cache_augroup = autocmd.augroup.create.clear('ColorMyAsciiFenceApiCache')
@@ -91,12 +96,13 @@ end
 ---@return ColorMyAscii.FenceBlock[]
 local function scan_cached(bufnr)
   local tick = api.nvim_buf_get_changedtick(bufnr)
+  local gen = require('color_my_ascii.config').generation()
   local entry = cache[bufnr]
-  if entry and entry.tick == tick then
+  if entry and entry.tick == tick and entry.gen == gen then
     return entry.blocks
   end
   local blocks = require('color_my_ascii.parser').find_all_blocks(bufnr, { lines = 'none' })
-  cache[bufnr] = { tick = tick, blocks = blocks }
+  cache[bufnr] = { tick = tick, gen = gen, blocks = blocks }
   return blocks
 end
 

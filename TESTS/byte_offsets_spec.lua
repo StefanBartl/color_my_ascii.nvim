@@ -141,24 +141,17 @@ return function(H)
   ok(H.has_mark(inline_marks, 0, 8, 13, 'Comment'), 'default_text_hl covers content plus the closing backtick')
   vim.api.nvim_buf_delete(inline_buf, { force = true })
 
-  -- ------------------------------------------------------------------- BUG
+  -- --------------------------------------------------------------- regression
   --
   -- `parser.get_byte_offset` is the module's own character-column -> byte-offset
-  -- converter, and it cannot convert anything: `vim.str_utf_pos` answers with a
-  -- TABLE of byte positions, and the function drives it as a generic-for
-  -- iterator ("attempt to call a table value"). Only `col == 0` survives, via
-  -- the early return above the loop. Nothing in the plugin calls it today --
-  -- which is the only reason this has never been seen -- but it is a public,
-  -- documented function on a module other code requires.
+  -- converter. `vim.str_utf_pos` answers with a TABLE of each character's
+  -- 1-based byte start, not an iterator function -- indexing into it directly
+  -- (instead of driving it as a generic-for) is what makes the conversion work.
 
-  eq(parser.get_byte_offset('äbc', 0), 0, 'get_byte_offset(0) short-circuits before the loop')
-  local conv_ok, conv_err = pcall(parser.get_byte_offset, 'äbc', 1)
-  ok(not conv_ok, 'BUG: get_byte_offset raises for every column > 0')
-  ok(
-    tostring(conv_err):find('attempt to call a table value', 1, true) ~= nil,
-    'BUG: because vim.str_utf_pos returns a table, not an iterator'
-  )
-  eq(type(vim.str_utf_pos('äbc')), 'table', 'vim.str_utf_pos really is a table')
+  eq(parser.get_byte_offset('äbc', 0), 0, 'get_byte_offset(0) short-circuits before any lookup')
+  eq(parser.get_byte_offset('äbc', 1), 2, 'byte offset of the 2nd character, past the 2-byte ä')
+  eq(parser.get_byte_offset('äbc', 2), 3, 'byte offset of the 3rd character')
+  eq(parser.get_byte_offset('äbc', 3), #'äbc', 'a column past the last character returns the byte length')
 
   -- ------------------------------------------------------------------- BUG
   --

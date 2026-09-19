@@ -67,9 +67,9 @@ local function replace_block_with_ref(bufnr, block, path)
   api.nvim_buf_set_lines(bufnr, block.open_row, block.close_row + 1, false, { ref })
 end
 
---- Yes/No confirm: kit.confirm (soft dependency, matching
---- lib.nvim.fs.write.to_file's convention just below) when lib.nvim is
---- installed, else the native vim.fn.confirm.
+--- Yes/No confirm: kit.confirm (soft dependency -- ui.nvim is optional, see
+--- docs/requirements.md) when ui.nvim is installed, else the native
+--- vim.fn.confirm.
 ---@internal
 ---@param question string
 ---@param on_answer fun(yes: boolean)
@@ -83,9 +83,9 @@ local function confirm(question, on_answer)
 end
 
 --- Prompt for a path with file completion: kit.input (soft dependency, same
---- convention as confirm() above) when lib.nvim is installed -- its
---- completion = "file" now covers the cmdline-style Tab-completion this
---- needs (lib.nvim Phase 11) -- else the native vim.ui.input.
+--- convention as confirm() above) when ui.nvim is installed -- its
+--- completion = "file" covers the cmdline-style Tab-completion this
+--- needs -- else the native vim.ui.input.
 ---@internal
 ---@param prompt string
 ---@param default string
@@ -119,22 +119,11 @@ end
 ---@param path string
 ---@param flags { open?: boolean, replace?: boolean }
 local function write_content(bufnr, block, content, path, flags)
-  -- mkdir -p + write: prefer lib.nvim.fs.write.to_file (soft dependency,
-  -- matching bindings/keymaps.lua's convention) when installed; it takes a
-  -- single string, so the lines are joined first. Falls back to the
-  -- original mkdir+writefile sequence otherwise.
-  local ok_lib_write, lib_write_to_file = pcall(require, 'lib.nvim.fs.write.to_file')
-  local ok, err
-  if ok_lib_write then
-    ok, err = lib_write_to_file(path, table.concat(content, '\n'))
-  else
-    local dir = vim.fn.fnamemodify(path, ':h')
-    if vim.fn.isdirectory(dir) == 0 then
-      pcall(vim.fn.mkdir, dir, 'p')
-    end
-    ok = pcall(vim.fn.writefile, content, path)
-    err = ok and nil or 'write failed'
-  end
+  -- mkdir -p + write via lib.nvim.fs.write.to_file. lib.nvim is a required
+  -- dependency (see the module requires at the top of this file and
+  -- docs/requirements.md) -- no fallback here, matching that. It takes a
+  -- single string, so the lines are joined first.
+  local ok, err = require('lib.nvim.fs.write.to_file')(path, table.concat(content, '\n'))
   if not ok then
     util.notify('export: failed to write ' .. path .. (err and (': ' .. err) or ''), vim.log.levels.ERROR)
     return

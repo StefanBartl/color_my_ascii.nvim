@@ -298,18 +298,14 @@ function M.get_byte_offset(line, col)
     return 0
   end
 
-  local byte_offset = 0
-  local char_count = 0
-
-  for _, char in vim.str_utf_pos(line) do
-    if char_count >= col then
-      break
-    end
-    byte_offset = byte_offset + #char
-    char_count = char_count + 1
+  -- `vim.str_utf_pos` returns a list of the 1-based byte position of each
+  -- character's start, not an iterator; index into it directly.
+  local positions = vim.str_utf_pos(line)
+  if col >= #positions then
+    return #line
   end
 
-  return byte_offset
+  return positions[col + 1] - 1
 end
 
 --- Find all inline code segments in a buffer.

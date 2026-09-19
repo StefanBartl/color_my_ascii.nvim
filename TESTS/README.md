@@ -213,7 +213,7 @@ not `BUG:`):
   (`data_tables_spec`). The clash list itself is still pinned, so a ninth
   collision is a deliberate decision in the data, not a silent loss.
 
-Four remain open:
+Three remain open:
 
 1. **comment_ascii highlights land `#prefix + 1` bytes too far left**
    (`byte_offsets_spec`). `comment_ascii.find_blocks` strips the buffer's
@@ -223,22 +223,14 @@ Four remain open:
    an arrow at byte 9 of the real line is painted at byte 6, and the
    default-text span stops three bytes short of the line's end.
 
-2. **`parser.get_byte_offset` raises for every column > 0**
-   (`byte_offsets_spec`). It drives `vim.str_utf_pos(line)` as a generic-for
-   iterator, but that function answers with a *table* of byte positions:
-   "attempt to call a table value". Only `col == 0` survives, via the early
-   return above the loop. Nothing in the plugin calls it today, which is the
-   only reason it has never been seen — but it is a public, documented function
-   on a module other code requires.
-
-3. **`enable_bracket_highlighting` cannot switch bracket highlighting off**
+2. **`enable_bracket_highlighting` cannot switch bracket highlighting off**
    (`highlighter_spec`). The lookup adds the six brackets in a step that skips
    any character a *group* already claims — and the bundled
    `groups/operators.lua` claims all six. Its own comment there calls them
    "optional, can be controlled by enable_bracket_highlighting"; they are not.
    The flag only takes effect once the groups stop covering them.
 
-4. **Twelve keywords are listed twice inside their own language file**
+3. **Twelve keywords are listed twice inside their own language file**
    (`data_tables_spec`): `bash:unset`, `cpp:constexpr`, `cpp:decltype`,
    `llvm:label`, `llvm:uge`, `llvm:ugt`, `llvm:ule`, `llvm:ult`, `lua:goto`,
    `typescript:default`, `vim:map`, `zig:volatile`. Harmless to the character
@@ -263,6 +255,15 @@ to explain why. `health.lua` now reuses the module it already tried to load
 instead of requiring it a second time, and only hands off when that succeeded.
 `health_menu_spec` simulates a missing lib.nvim at the require seam and asserts
 the report completes and still names the missing dependency.
+
+A sixth defect, found the same way, is fixed too: `parser.get_byte_offset`
+drove `vim.str_utf_pos(line)` — which returns a *table* of each character's
+byte start, not an iterator function — as a generic-for loop, so every call
+with `col > 0` raised "attempt to call a table value" instead of converting
+anything. Nothing in the plugin called it, which is the only reason it had
+never been seen, but it is a public, documented function on a module other
+code requires. It now indexes into the table directly. `byte_offsets_spec`
+pins the converted byte offsets instead of the crash.
 
 ## The manual fixtures
 

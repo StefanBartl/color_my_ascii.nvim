@@ -55,6 +55,16 @@ return function(H)
   eq(written[2], 'console.log(a);', 'export: second content line')
   eq(#written, 2, 'export: only fence interior (no markers)')
 
+  -- ---- export path is expanded, never run as a shell/Vim-special -----------
+  --
+  -- `vim.fn.expand()` treats a backtick span as command substitution through
+  -- 'shell' and `%`/`#`/`<cfile>` as Vim specials; the export path is raw
+  -- user/prompt text, so only `~`/env-var expansion is appropriate (SEC-34).
+  api.nvim_win_set_cursor(0, { 4, 0 })
+  local injected = tmp .. '/`echo pwned`.js'
+  export.run({ injected })
+  ok(vim.fn.filereadable(injected) == 1, 'export: written to the literal path, backtick span not substituted')
+
   -- ---- --html exports the block's applied highlighting as HTML -------------
   api.nvim_win_set_cursor(0, { 4, 0 })
   local html_out = tmp .. '/snippet.html'

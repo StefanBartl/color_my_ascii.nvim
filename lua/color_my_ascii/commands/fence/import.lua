@@ -5,6 +5,7 @@ local M = {}
 
 local api = vim.api
 local util = require('color_my_ascii.commands.fence.util')
+local expand_path = require('lib.nvim.cross.fs.expand_path')
 
 --- `:Fence import <file>` entry point.
 ---@param argv string[] Tokens after `import`; `argv[1]` is the source file path.
@@ -14,7 +15,10 @@ function M.run(argv)
     util.notify('usage: :Fence import <file>', vim.log.levels.WARN)
     return
   end
-  path = vim.fn.expand(path)
+  -- `~`/env-var expansion only -- not vim.fn.expand(), which also runs
+  -- backtick spans through 'shell' and resolves %/#/<cfile> on this raw,
+  -- user-typed argument.
+  path = expand_path(path)
   if vim.fn.filereadable(path) == 0 then
     util.notify('file not readable: ' .. path, vim.log.levels.ERROR)
     return

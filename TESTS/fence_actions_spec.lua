@@ -69,6 +69,27 @@ return function(H)
     api.nvim_buf_delete(buf, { force = true })
   end
 
+  -- ---- import: path is expanded, never run as a shell/Vim-special ----------
+  --
+  -- `vim.fn.expand()` treats a backtick span as command substitution through
+  -- 'shell' and `%`/`#`/`<cfile>` as Vim specials; the import path is raw
+  -- user/argv text, so only `~`/env-var expansion is appropriate (SEC-34).
+  do
+    local buf = md_buf()
+    api.nvim_win_set_cursor(0, { 4, 0 })
+    local msgs = H.capture_notify(function()
+      require('color_my_ascii.commands.fence.import').run({ '`echo pwned`' })
+    end)
+    local reported = false
+    for _, m in ipairs(msgs) do
+      if tostring(m.msg):find('`echo pwned`', 1, true) then
+        reported = true
+      end
+    end
+    ok(reported, 'import: the backtick span is reported literally, not run through the shell')
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
   -- ---- wrap (current line) + unwrap ---------------------------------------
   do
     local buf = H.scratch('markdown', { 'plain one', 'plain two' })

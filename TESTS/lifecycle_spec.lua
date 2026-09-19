@@ -34,6 +34,24 @@ return function(H)
   eq(require('color_my_ascii.config').get().language_detection_threshold, 4, 'with effect')
   cma.setup({})
 
+  -- ERR-03 regression: a thrown config.setup() must always be reported, not
+  -- only when debug_enabled happens to already be on -- the default config is
+  -- exactly the one that must not go blind. Patched on the shared config
+  -- module table, which `color_my_ascii`'s own `pcall(config.setup, opts)`
+  -- reads as a field lookup at call time, not a captured function reference.
+  do
+    local config_mod = require('color_my_ascii.config')
+    local original_setup = config_mod.setup
+    config_mod.setup = function()
+      error('synthetic config.setup failure')
+    end
+    local ok2, err2 = cma.setup({})
+    config_mod.setup = original_setup
+    eq(ok2, false, 'a thrown config.setup() is reported as failure')
+    ok(tostring(err2):find('synthetic config.setup failure', 1, true) ~= nil, 'with the underlying error')
+  end
+  cma.setup({})
+
   -- ---------------------------------------------------------- setup_buffer
 
   local dead = vim.api.nvim_create_buf(false, true)
@@ -85,6 +103,24 @@ return function(H)
   cma.highlight_buffer(buf)
   eq(cache.get_stats().hits, 1, 'the second is a hit')
   ok(#H.marks(buf, NS) > 0, 'and the cached pass still paints')
+
+  -- LLS-31 regression: `string.format(('...'):format(), err)` -- a double
+  -- format call, the inner one with no argument -- raised "bad argument #2
+  -- to 'format' (no value)" instead of ever reporting the real failure. This
+  -- pins the cache-hit clear-buffer error path; the same bug at the same
+  -- fix on the debug-mode inline-code-highlight path is unchanged code.
+  do
+    local highlighter_mod = require('color_my_ascii.highlighter')
+    local original_clear = highlighter_mod.clear_buffer
+    highlighter_mod.clear_buffer = function()
+      error('synthetic clear_buffer failure')
+    end
+    -- Still a cache hit: nothing has edited `buf` since the pass above.
+    local painted2, err4 = cma.highlight_buffer(buf)
+    highlighter_mod.clear_buffer = original_clear
+    eq(painted2, false, 'a clear_buffer failure on a cache hit is reported, not raised')
+    ok(tostring(err4):find('Failed to clear buffer (cache hit)', 1, true) ~= nil, 'and names the failing step')
+  end
 
   -- An edit takes the miss path again -- and the marks follow the new content.
   vim.api.nvim_buf_set_lines(buf, 1, 2, false, { '+----+' })

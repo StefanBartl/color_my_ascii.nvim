@@ -44,8 +44,10 @@ end
 local created_highlight_groups = {}
 
 ---@internal
---- What the last `setup()` had to reject, one human-readable line each, for
---- `:checkhealth` (ERR-50). Empty when every key was recognized.
+--- What the last `setup()` had to reject or degrade, one human-readable line
+--- each, for `:checkhealth` -- an unknown/mistyped option key (ERR-50) or a
+--- known key whose value was the wrong type/out of range and fell back to
+--- its default (ERR-22). Empty when every key and value was accepted as-is.
 ---@type string[]
 local _issues = {}
 
@@ -174,6 +176,45 @@ local function sanitize(user_opts)
   end
   table.sort(issues)
   return clean, issues
+end
+
+---@internal
+--- Degrade a merged numeric option to `default` when the value is not a
+--- number, or clamp it into `[min, max]` when it is a number but out of
+--- range (ERR-22): a known key with a wrong-typed or out-of-range value must
+--- not reach the code that consumes it as-is. `language_detection_threshold`
+--- feeds a numeric comparison in `language_detector.lua` and a `%d` format in
+--- `commands/config.lua` -- a non-numeric value there raises on every ASCII
+--- block and on `:ColorMyAscii show-config`, not just a cosmetic glitch.
+--- `fence_*_highlight.right_pad`/`fence_content_highlight.amount` were
+--- already clamped where fence_hl.lua consumes them, but that left the
+--- *reported* config value -- e.g. on `:checkhealth` -- silently wrong; this
+--- corrects `cfg[key]` itself and reports it on the same `issues` list
+--- ERR-50's key validation already surfaces there.
+---@param cfg table Table to mutate in place (current_config or a nested sub-table of it)
+---@param key string
+---@param min number
+---@param max number
+---@param default number
+---@param label string Dotted path used in the issue message
+---@param issues string[]
+---@return nil
+local function degrade_number(cfg, key, min, max, default, label, issues)
+  local raw = cfg[key]
+  local n = tonumber(raw)
+  local clamped = n and math.max(min, math.min(max, n))
+  if n == nil or clamped ~= n then
+    cfg[key] = clamped or default
+    local range = max == math.huge and ('>= %s'):format(min) or ('%s-%s'):format(min, max)
+    local issue = ("option '%s' must be a number (%s), got %s -- using %s"):format(
+      label,
+      range,
+      vim.inspect(raw),
+      tostring(cfg[key])
+    )
+    issues[#issues + 1] = issue
+    notify('color_my_ascii: ' .. issue, vim.log.levels.WARN)
+  end
 end
 
 --- Load all language definitions from the languages/ directory
@@ -590,6 +631,48 @@ function M.setup(opts)
     current_config = vim.deepcopy(defaults)
   end
 
+  -- A known key can still carry an invalid VALUE through the merge above --
+  -- unknown/mistyped *keys* are caught before the merge (ERR-50), but a
+  -- wrong-typed or out-of-range value on a real key sails through
+  -- `vim.tbl_deep_extend` unexamined. Degrade those here, before anything
+  -- reads `current_config` (ERR-22).
+  degrade_number(
+    current_config,
+    'language_detection_threshold',
+    0,
+    math.huge,
+    defaults.language_detection_threshold,
+    'language_detection_threshold',
+    _issues
+  )
+  degrade_number(
+    current_config.fence_line_highlight,
+    'right_pad',
+    0,
+    20,
+    defaults.fence_line_highlight.right_pad,
+    'fence_line_highlight.right_pad',
+    _issues
+  )
+  degrade_number(
+    current_config.fence_content_highlight,
+    'right_pad',
+    0,
+    20,
+    defaults.fence_content_highlight.right_pad,
+    'fence_content_highlight.right_pad',
+    _issues
+  )
+  degrade_number(
+    current_config.fence_content_highlight,
+    'amount',
+    0,
+    100,
+    defaults.fence_content_highlight.amount,
+    'fence_content_highlight.amount',
+    _issues
+  )
+
   for _, err in ipairs(merge_user_languages()) do
     notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
   end
@@ -634,9 +717,10 @@ function M.generation()
   return generation
 end
 
---- What the last `setup()` rejected: unknown/mistyped option keys, one
---- human-readable line each. Empty when every key was recognized. For
---- `:checkhealth color_my_ascii`.
+--- What the last `setup()` rejected or degraded: unknown/mistyped option
+--- keys (ERR-50) and known keys whose value fell back to its default
+--- (ERR-22), one human-readable line each. Empty when every key and value
+--- was accepted as-is. For `:checkhealth color_my_ascii`.
 ---@return string[]
 function M.issues()
   return vim.list_extend({}, _issues)

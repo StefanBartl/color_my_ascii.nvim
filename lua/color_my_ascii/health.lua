@@ -132,12 +132,14 @@ function M.check()
     health.info(string.format('  Empty fence as ASCII: %s', cfg.treat_empty_fence_as_ascii and 'enabled' or 'disabled'))
     health.info(string.format('  Default text highlight: %s', cfg.default_text_hl or 'none'))
 
-    -- Unknown/mistyped setup() options never reach the merge (ERR-50); report
-    -- what the last call had to reject so a typo doesn't just look like a
+    -- Unknown/mistyped setup() options never reach the merge (ERR-50), and a
+    -- known option's out-of-range/wrong-typed value is degraded to its
+    -- default rather than used as-is (ERR-22); report what the last call had
+    -- to reject or degrade so a typo or bad value doesn't just look like a
     -- feature that silently does nothing.
     local cfg_issues = type(config.issues) == 'function' and config.issues() or {}
     if #cfg_issues == 0 then
-      health.ok('Configuration options: all recognized')
+      health.ok('Configuration options: all recognized and in range')
     else
       for _, issue in ipairs(cfg_issues) do
         health.warn(issue, { "Fix the option in require('color_my_ascii').setup({ ... })" })

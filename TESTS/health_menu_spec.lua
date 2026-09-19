@@ -5,8 +5,9 @@
 -- substituted for the reporting API, asserting on *what was reported* rather
 -- than on a return value neither of them has. `ui.nvim` is a soft dependency
 -- and not a CI checkout, so `ui.contextmenu` is replaced in `package.loaded`
--- before `integrations/menu.lua` is required -- it binds it to an upvalue at
--- load time, which a later field patch would never reach.
+-- before any menu entries are requested -- `integrations/menu.lua` resolves
+-- it lazily per call rather than at require time, so the stub only needs to
+-- be in place when `items()`/`submenu()` actually run.
 
 return function(H)
   local eq, ok = H.eq, H.ok

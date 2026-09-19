@@ -80,6 +80,17 @@ function M.run(_argv)
       if not sp[1] or not ep[1] or ep[1] < sp[1] then
         return
       end
+
+      -- The extmarks track a *shifted* region, not an *edited* one: re-verify
+      -- the interior against what was actually sent to the formatter, so an
+      -- edit made inside the block while it was formatting is not silently
+      -- overwritten by output computed from the pre-edit text.
+      local current = table.concat(api.nvim_buf_get_lines(buf, sp[1], ep[1], false), '\n')
+      if current ~= input then
+        util.notify('formatter result discarded: block content changed while formatting', vim.log.levels.WARN)
+        return
+      end
+
       local out = vim.split(res.stdout:gsub('\n$', ''), '\n')
       api.nvim_buf_set_lines(buf, sp[1], ep[1], false, out)
       util.notify('formatted ' .. lang .. ' block')

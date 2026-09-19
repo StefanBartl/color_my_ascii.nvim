@@ -13,6 +13,7 @@ local M = {}
 
 local api = vim.api
 local util = require('color_my_ascii.commands.fence.util')
+local expand_path = require('lib.nvim.cross.fs.expand_path')
 
 local function cfg()
   return require('color_my_ascii.config').get().fence_export or {}
@@ -162,7 +163,10 @@ end
 ---@param path string
 ---@param flags { open?: boolean, replace?: boolean }
 local function write_and_finish(bufnr, block, content, path, flags)
-  path = vim.fn.expand(path)
+  -- `~`/env-var expansion only -- not vim.fn.expand(), which also runs
+  -- backtick spans through 'shell' and resolves %/#/<cfile> on this raw,
+  -- user-typed argument (or prompt input).
+  path = expand_path(path)
   path = vim.fn.fnamemodify(path, ':p')
 
   local function do_write()

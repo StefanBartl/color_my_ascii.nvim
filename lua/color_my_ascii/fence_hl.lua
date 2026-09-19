@@ -152,7 +152,10 @@ local function resolve_content_spec(cfg)
   end
 
   local color = require('color_my_ascii.utils.color')
-  local shaded = color.shade(bg, fch.amount or 6, direction)
+  -- `tonumber(...) or 6`, not `fch.amount or 6`: an invalid (non-numeric)
+  -- `amount` must degrade to the default rather than reach math.min/max
+  -- below and throw ahead of the pcall in M.setup_hl's caller.
+  local shaded = color.shade(bg, tonumber(fch.amount) or 6, direction)
   return { bg = shaded or bg }
 end
 

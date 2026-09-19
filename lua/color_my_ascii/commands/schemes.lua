@@ -17,6 +17,24 @@ function M.get_scheme_names()
   return vim.deepcopy(SCHEME_NAMES)
 end
 
+--- Apply `scheme_tbl` on top of the user's *current* configuration, not a
+--- bare defaults + scheme merge: `config.setup()` always rebuilds
+--- current_config from scratch, so calling it with just the scheme table
+--- would silently reset every option the user passed to their own setup()
+--- that the scheme doesn't mention -- fence_line_highlight, comment_ascii,
+--- custom languages, treesitter, menu, keymaps, and so on (LUA-87).
+---@internal
+---@param scheme_tbl table
+---@param name? string Scheme name to record on the merged config
+local function apply_scheme(scheme_tbl, name)
+  local current = require('color_my_ascii.config').get()
+  local merged = vim.tbl_deep_extend('force', vim.deepcopy(current), scheme_tbl)
+  if name then
+    merged.scheme = name
+  end
+  require('color_my_ascii').setup(merged)
+end
+
 --- List all available schemes
 function M.list_schemes()
   local lines = {}
@@ -86,7 +104,7 @@ function M.switch_scheme(name)
   end
 
   -- Apply scheme
-  require('color_my_ascii').setup(scheme)
+  apply_scheme(scheme, name)
 
   -- Re-highlight all buffers
   local state = require('color_my_ascii').get_state()
@@ -150,16 +168,25 @@ function M.telescope_picker()
       }),
       sorter = conf.generic_sorter({}),
       attach_mappings = function(prompt_bufnr, _)
-        -- Preview on cursor move
+        -- Preview on cursor move, guarded by "same selection as last time"
+        -- (PERF-93): every j/k inside the picker fires CursorMoved, but the
+        -- handler's body is the plugin's most expensive operation end to end
+        -- (full config merge, all lookup tables rebuilt, every managed
+        -- buffer re-parsed and re-extmarked) -- cheap to skip when the
+        -- highlighted entry hasn't actually changed.
+        local last_previewed = nil
         local function preview_scheme()
           local selection = action_state.get_selected_entry()
-          if selection then
-            require('color_my_ascii').setup(selection.scheme)
+          if not selection or selection.value == last_previewed then
+            return
+          end
+          last_previewed = selection.value
 
-            local state = require('color_my_ascii').get_state()
-            for bufnr, _ in pairs(state.buffers) do
-              require('color_my_ascii').highlight_buffer(bufnr)
-            end
+          apply_scheme(selection.scheme, selection.value)
+
+          local state = require('color_my_ascii').get_state()
+          for bufnr, _ in pairs(state.buffers) do
+            require('color_my_ascii').highlight_buffer(bufnr)
           end
         end
 

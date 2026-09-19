@@ -166,6 +166,18 @@ return function(H)
   end)
   ok(H.notified(seen, 'Switched to scheme: nord'), 'switch_scheme applies a known scheme')
 
+  -- LUA-87 regression: a scheme switch must not silently reset options the
+  -- user passed to their own setup() that the chosen scheme doesn't mention.
+  config.setup({ fence_line_highlight = { enable = false }, comment_ascii = { enable = true } })
+  seen = H.capture_notify(function()
+    schemes.switch_scheme('nord')
+  end)
+  ok(H.notified(seen, 'Switched to scheme: nord'), 'switch_scheme still applies the scheme')
+  eq(config.get().fence_line_highlight.enable, false, "an option nord.lua doesn't mention survives the switch")
+  eq(config.get().comment_ascii.enable, true, 'so does another one')
+  eq(config.get().enable_bracket_highlighting, false, "and the scheme's own keys still win")
+  config.setup({})
+
   seen = H.capture_notify(function()
     schemes.switch_scheme('nosuchscheme')
   end)
@@ -376,6 +388,32 @@ return function(H)
     table.concat(vim.api.nvim_buf_get_lines(fbuf, 0, -1, false), '|'),
     table.concat(before_fail, '|'),
     'and the buffer is left exactly as it was'
+  )
+
+  -- ERR-30 regression: an edit made inside the block between spawn and the
+  -- formatter's callback must not be silently overwritten by output computed
+  -- from the pre-edit text -- the position-tracking extmarks only defend
+  -- against lines shifting, not against the interior itself changing.
+  vim.api.nvim_win_set_cursor(0, { 3, 0 })
+  calls = without_spawning(function()
+    fmt_mod.run({})
+  end)
+  eq(calls[1].opts.stdin, 'local x = 2\nlocal y = 3', 'formatter spawned on the current interior')
+  vim.api.nvim_buf_set_lines(fbuf, 2, 3, false, { 'local x = 999 -- edited mid-format' })
+  local stale = H.capture_notify(function()
+    calls[1].on_exit({ stdout = 'local x = formatted\nlocal y = formatted\n', stderr = '', code = 0 })
+    vim.wait(100, function()
+      return false
+    end)
+  end)
+  ok(
+    H.notified(stale, 'block content changed while formatting'),
+    'a mid-flight edit is reported, not silently replaced'
+  )
+  eq(
+    vim.api.nvim_buf_get_lines(fbuf, 2, 3, false)[1],
+    'local x = 999 -- edited mid-format',
+    'the buffer keeps the edit made while the formatter was running'
   )
 
   vim.api.nvim_buf_delete(fbuf, { force = true })

@@ -152,5 +152,24 @@ return function(H)
     vim.o.background = saved_bg
   end
 
+  -- An invalid (non-numeric) `amount` degrades to the default of 6 rather
+  -- than raising ahead of the pcall in M.setup_hl's caller -- `color.shade`'s
+  -- own `math.min(100, percent)` throws on a non-number, so the guard has to
+  -- sit at the call site, before that comparison ever runs (ERR-22).
+  do
+    require('color_my_ascii.config').setup({
+      fence_line_highlight = { enable = true, preset = 'catppuccin' },
+      fence_content_highlight = { enable = true, shade = 'darken', amount = '6%' },
+    })
+    local setup_ok = pcall(fence_hl.setup_hl, require('color_my_ascii.config').get())
+    ok(setup_ok, 'an invalid amount does not raise')
+
+    local themes = require('color_my_ascii.theme_presets')
+    local base = themes.presets.catppuccin.bg
+    local hl = api.nvim_get_hl(0, { name = 'ColorMyAsciiFenceContent' })
+    local shaded = string.format('#%06x', hl.bg)
+    ok(shaded ~= base, 'invalid amount still shades, using the default of 6 instead of aborting')
+  end
+
   require('color_my_ascii.config').setup({})
 end

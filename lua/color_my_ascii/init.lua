@@ -39,11 +39,15 @@ local safe_api = require('color_my_ascii.utils.safe_api')
 ---@return boolean success True if initialization succeeded
 ---@return string|nil error Error message if initialization failed
 function M.setup(opts)
-  -- Safe config setup with error recovery
+  -- Safe config setup with error recovery. A failed config.setup must abort
+  -- here and report it -- continuing would leave current_config already
+  -- replaced (config/init.lua applies it before validating derived data)
+  -- while the lookup tables built from it stayed empty or stale, and report
+  -- success regardless.
   local ok, err = pcall(config.setup, opts)
   local cfg = require('color_my_ascii.config').get()
 
-  if not ok and cfg.debug_enabled then
+  if not ok then
     notify.error(string.format('Failed to initialize configuration: %s', err))
     return false, tostring(err)
   end
@@ -212,7 +216,7 @@ function M.highlight_buffer(bufnr)
     -- Use cached data
     local success, err = pcall(highlighter.clear_buffer, bufnr)
     if not success then
-      return false, string.format(('Failed to clear buffer (cache hit): %s'):format(), err)
+      return false, string.format('Failed to clear buffer (cache hit): %s', err)
     end
 
     -- Check if cached_blocks is valid
@@ -275,7 +279,7 @@ function M.highlight_buffer(bufnr)
   -- Highlight inline codes
   success, err = pcall(highlighter.highlight_inline_codes, bufnr)
   if not success and cfg.debug_enabled then
-    notify.warn(string.format(('Inline code highlighting error: %s'):format(), err))
+    notify.warn(string.format('Inline code highlighting error: %s', err))
   end
 
   pcall(fence_hl.apply, bufnr, cfg)

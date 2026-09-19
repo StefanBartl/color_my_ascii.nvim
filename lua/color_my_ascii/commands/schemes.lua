@@ -28,7 +28,15 @@ end
 ---@param name? string Scheme name to record on the merged config
 local function apply_scheme(scheme_tbl, name)
   local current = require('color_my_ascii.config').get()
-  local merged = vim.tbl_deep_extend('force', vim.deepcopy(current), scheme_tbl)
+  -- No `vim.deepcopy(current)` here: `vim.tbl_deep_extend` already builds a
+  -- fresh result table and never mutates its inputs (verified -- a shared
+  -- leaf/list value from `current` that survives the merge unchanged is
+  -- returned by reference, exactly as a pre-copy would have left it, at a
+  -- fraction of the cost). `current` is the *live* config -- with the
+  -- hundreds of bundled keyword/group entries it carries, a deep copy on
+  -- every distinct picker selection was pure waste on this hot path
+  -- (PERF-93 already guards call frequency, not per-call cost).
+  local merged = vim.tbl_deep_extend('force', current, scheme_tbl)
   if name then
     merged.scheme = name
   end

@@ -21,7 +21,7 @@ return {
   default_text_hl = nil,
   enable_keywords = true,
   enable_language_detection = true,
-  language_detection_threshold = 2,
+  language_detection_threshold = 2, -- minimum unique keyword matches; must be a number >= 0
   -- Optional treesitter-based block detection and syntax highlighting.
   -- On by default: both sub-features silently fall back to heuristic-only
   -- behavior when the relevant parser isn't installed, so there's no downside

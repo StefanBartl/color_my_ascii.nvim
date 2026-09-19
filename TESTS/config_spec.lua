@@ -170,6 +170,56 @@ return function(H)
   config.setup({})
   eq(#config.issues(), 0, 'a clean setup() reports no issues')
 
+  -- ------------------------------------------------ invalid option VALUES (ERR-22)
+  --
+  -- A known key with a wrong-typed or out-of-range value degrades to its
+  -- default instead of being used as-is: `language_detection_threshold`
+  -- feeds a numeric comparison in language_detector.lua and a `%d` format in
+  -- commands/config.lua, so a non-numeric value there used to raise on every
+  -- ASCII block instead of just doing nothing useful. The degradation is
+  -- recorded on the same `issues()` list ERR-50 already reports through, so
+  -- it shows up on `:checkhealth` too.
+
+  do
+    local seen_bad_threshold = H.reload_notify({ 'color_my_ascii.config' }, function(mods)
+      local c = mods['color_my_ascii.config']
+      c.setup({ language_detection_threshold = 'two' })
+      eq(c.get().language_detection_threshold, 2, 'a non-numeric threshold degrades to the default')
+      ok(#c.issues() > 0, 'the degradation is recorded for :checkhealth')
+    end)
+    ok(H.notified(seen_bad_threshold, 'language_detection_threshold'), 'the bad value is reported by name')
+  end
+
+  do
+    local seen_negative_threshold = H.reload_notify({ 'color_my_ascii.config' }, function(mods)
+      local c = mods['color_my_ascii.config']
+      c.setup({ language_detection_threshold = -5 })
+      eq(c.get().language_detection_threshold, 0, 'an out-of-range threshold is clamped, not used as-is')
+    end)
+    ok(H.notified(seen_negative_threshold, 'language_detection_threshold'), 'the out-of-range value is reported')
+  end
+
+  do
+    local seen_bad_right_pad = H.reload_notify({ 'color_my_ascii.config' }, function(mods)
+      local c = mods['color_my_ascii.config']
+      c.setup({ fence_line_highlight = { right_pad = 999 } })
+      eq(c.get().fence_line_highlight.right_pad, 20, 'an out-of-range right_pad clamps into 0-20')
+    end)
+    ok(H.notified(seen_bad_right_pad, 'fence_line_highlight.right_pad'), 'the dotted path is named in the report')
+  end
+
+  do
+    local seen_bad_amount = H.reload_notify({ 'color_my_ascii.config' }, function(mods)
+      local c = mods['color_my_ascii.config']
+      c.setup({ fence_content_highlight = { amount = '6%' } })
+      eq(c.get().fence_content_highlight.amount, 6, 'a non-numeric amount degrades to the default in current_config')
+    end)
+    ok(H.notified(seen_bad_amount, 'fence_content_highlight.amount'), 'the bad amount is reported')
+  end
+
+  config.setup({})
+  eq(#config.issues(), 0, 'a clean setup() reports no issues (values included)')
+
   -- ------------------------------------------------- generated highlight groups
   --
   -- A `{ fg = ..., bold = ... }` highlight spec is turned into a real, named

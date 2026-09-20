@@ -136,7 +136,7 @@ Characters can be:
 
 Two options for `hl`:
 
-**Built-in highlight group:**
+#### Built-in highlight group
 
 ```lua
 hl = 'Keyword'
@@ -144,7 +144,7 @@ hl = 'Function'
 hl = 'Special'
 ```
 
-**Custom colors:**
+#### Custom colors
 
 ```lua
 hl = {

@@ -176,7 +176,7 @@ See [configuration.md](configuration.md#treesitter-integration) for details.
 
 ### 1. Language Detection
 
-**Explicit**:
+#### Explicit
 
 ```ascii-c
 ┌──────────────┐
@@ -184,7 +184,7 @@ See [configuration.md](configuration.md#treesitter-integration) for details.
 └──────────────┘
 ```
 
-**Automatic** (via keywords):
+#### Automatic (via keywords)
 
 ```ascii
 ┌─────────────────────┐

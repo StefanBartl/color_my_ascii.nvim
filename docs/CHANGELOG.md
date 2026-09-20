@@ -125,14 +125,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 If you're using `treat_empty_fence_as_ascii = true`:
 
-**Before:**
+#### Before
+
 ````lua
 require('color_my_ascii').setup({
   treat_empty_fence_as_ascii = true,
 })
 ````
 
-**After:**
+#### After
+
 The behavior is now more robust. Empty fences are correctly interpreted based on context:
 - If outside a block: opening fence
 - If inside a block: closing fence

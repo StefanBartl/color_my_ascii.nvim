@@ -123,7 +123,7 @@ Temp files are `vim.fn.tempname()` and are deleted again.
 
 ## Spec register
 
-**Positions and parsing**
+### Positions and parsing
 
 | Spec | Covers |
 |---|---|
@@ -133,7 +133,7 @@ Temp files are `vim.fn.tempname()` and are deleted again.
 | `fence_api_contract_spec` | the fence API *as a contract* for markdown.nvim: reachability, call shapes, caching, invalidation |
 | `comment_ascii_spec` | the `-- ascii` … `-- /ascii` marker scanner |
 
-**Highlighting**
+### Highlighting
 
 | Spec | Covers |
 |---|---|
@@ -143,7 +143,7 @@ Temp files are `vim.fn.tempname()` and are deleted again.
 | `box_align_spec` | box-drawing edge alignment |
 | `hover_spec` | the per-character highlight report |
 
-**Configuration and state**
+### Configuration and state
 
 | Spec | Covers |
 |---|---|
@@ -156,7 +156,7 @@ Temp files are `vim.fn.tempname()` and are deleted again.
 | `lifecycle_spec` | `setup`, per-buffer attachment, cached highlight passes, teardown through every deletion route, `toggle`, the `plugin/` bootstrap |
 | `toggle_buffer_spec` | the per-buffer switch vs. the global one |
 
-**Commands, wiring, reporting**
+### Commands, wiring, reporting
 
 | Spec | Covers |
 |---|---|

@@ -45,12 +45,12 @@ literate-programming toolkit over the same blocks.
 Start at [docs/README.md](./docs/README.md) — what's where, and which question
 each page answers.
 
-**Getting started**
+### Getting started
 
 - [Requirements](./docs/requirements.md) — Neovim version, the required lib.nvim dependency, and what's optional.
 - [Installation & Quickstart](./docs/QUICKSTART.md) — plugin managers, the first coloured block, and typical configurations.
 
-**Reference**
+### Reference
 
 - [Configuration](./docs/configuration.md) — full `setup()` reference, treesitter integration, fence-line and fence-content highlighting.
 - [Commands](./docs/commands.md) — all user commands, the `:Fence` toolkit, and its configuration.
@@ -59,7 +59,7 @@ each page answers.
 - [Color schemes](./docs/schemes.md) — built-in schemes and how to create your own.
 - [Bindings cheatsheet](./docs/BINDINGS.md) — every command, keymap and autocommand in one table.
 
-**The rest**
+### The rest
 
 - [What you get](./docs/FEATURES/README.md) — the full capability catalog, grouped by theme: highlighting, languages, fences, schemes, tools.
 - [Integrations](./docs/integrations.md) — the context-menu integration.

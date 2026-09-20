@@ -376,7 +376,7 @@ Functions:
 
 ### Before/After
 
-**Without function detection**:
+#### Without function detection
 
 ```
 result = calculate(x);
@@ -385,7 +385,7 @@ result = calculate(x);
 - `calculate` = normal text
 - `x` = normal text
 
-**With function detection**:
+#### With function detection
 ```
 result = calculate(x);
 ```

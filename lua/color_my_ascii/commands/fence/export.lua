@@ -144,20 +144,25 @@ local function write_content(bufnr, block, content, path, flags)
   end
 end
 
---- Write `content` to `path` and run the requested follow-ups.
+--- Normalize a user- or prompt-supplied export path.
+---@param path string
+---@return string
+local function resolve_target_path(path)
+  -- `~`/env-var expansion only -- not vim.fn.expand(), which also runs
+  -- backtick spans through 'shell' and resolves %/#/<cfile> on this raw,
+  -- user-typed argument (or prompt input).
+  path = expand_path(path)
+  return vim.fn.fnamemodify(path, ':p')
+end
+
+--- Write `content` to an already-resolved `path`, confirming overwrite first.
 ---@internal
 ---@param bufnr integer
 ---@param block table
 ---@param content string[]
 ---@param path string
 ---@param flags { open?: boolean, replace?: boolean }
-local function write_and_finish(bufnr, block, content, path, flags)
-  -- `~`/env-var expansion only -- not vim.fn.expand(), which also runs
-  -- backtick spans through 'shell' and resolves %/#/<cfile> on this raw,
-  -- user-typed argument (or prompt input).
-  path = expand_path(path)
-  path = vim.fn.fnamemodify(path, ':p')
-
+local function write_with_confirm(bufnr, block, content, path, flags)
   local function do_write()
     write_content(bufnr, block, content, path, flags)
   end
@@ -212,7 +217,7 @@ function M.run(argv)
   end
 
   if path then
-    write_and_finish(bufnr, block, content, path, flags)
+    write_with_confirm(bufnr, block, content, resolve_target_path(path), flags)
     return
   end
 
@@ -223,7 +228,7 @@ function M.run(argv)
       util.notify('export cancelled')
       return
     end
-    write_and_finish(bufnr, block, content, chosen_path, flags)
+    write_with_confirm(bufnr, block, content, resolve_target_path(chosen_path), flags)
   end)
 end
 

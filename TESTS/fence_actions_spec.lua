@@ -151,6 +151,40 @@ return function(H)
     api.nvim_buf_delete(buf, { force = true })
   end
 
+  -- ---- open: a finished session takes back its autocmd records and group ---
+  -- The group is named after the temp buffer, which nothing ever asks for twice,
+  -- so deleting the group alone (or nothing) left two records in lib.nvim's
+  -- registry per `:Fence open` for the rest of the session.
+  do
+    local lib_autocmd = require('lib.nvim.bindings.autocmd')
+    local open = require('color_my_ascii.commands.fence.open')
+    local function records_for(b)
+      return #lib_autocmd.registered({ group = 'ColorMyAsciiFenceOpen_' .. b })
+    end
+
+    local buf = md_buf()
+    api.nvim_win_set_cursor(0, { 4, 0 })
+    open.run({ '--split' })
+    local tbuf = api.nvim_get_current_buf()
+    ok(records_for(tbuf) > 0, 'open: a session records its autocmds')
+    open.cleanup(tbuf)
+    eq(records_for(tbuf), 0, 'open: cleanup takes the records back')
+    ok(not pcall(api.nvim_get_autocmds, { group = 'ColorMyAsciiFenceOpen_' .. tbuf }), 'open: ...and the augroup')
+    pcall(api.nvim_buf_delete, tbuf, { force = true })
+
+    -- Closing the temp buffer is the usual way out: its own hook runs cleanup.
+    local before = #lib_autocmd.registered()
+    for _ = 1, 5 do
+      api.nvim_win_set_cursor(0, { 4, 0 })
+      open.run({ '--split' })
+      local b = api.nvim_get_current_buf()
+      api.nvim_buf_delete(b, { force = true })
+      eq(records_for(b), 0, 'open: wiping the temp buffer takes the records back')
+    end
+    eq(#lib_autocmd.registered(), before, 'open: repeated sessions do not grow the registry')
+    api.nvim_buf_delete(buf, { force = true })
+  end
+
   -- ---- align (:Fence align wiring; algorithm itself in box_align_spec) -----
   do
     local buf = H.scratch('markdown', {

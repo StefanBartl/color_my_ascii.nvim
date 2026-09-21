@@ -16,8 +16,10 @@ local autocmd = require('lib.nvim.bindings.autocmd')
 --- Extmark namespace for the source-buffer region anchors.
 local ns = api.nvim_create_namespace('ColorMyAsciiFenceOpen')
 
---- Active edit sessions, keyed by the temp buffer number.
----@type table<integer, { src: integer, start_id: integer, end_id: integer, tmpfile: string }>
+--- Active edit sessions, keyed by the temp buffer number. `group`/`ids` are the
+--- session's augroup and the id of every autocmd made through the wrapper, so
+--- `cleanup` can take back their records too.
+---@type table<integer, { src: integer, start_id: integer, end_id: integer, tmpfile: string, group?: integer, ids?: integer[] }>
 local sessions = {}
 
 --- Sync the temp buffer's content back into the source fence.
@@ -40,12 +42,25 @@ function M.sync(tbuf)
   api.nvim_buf_set_lines(s.src, srow, erow, false, new_lines)
 end
 
---- Tear down a session: delete the temp file and the region anchors.
+--- Tear down a session: delete the temp file and the region anchors, and take
+--- back the session's autocmds, their records and the group.
+---
+--- `autocmd.delete(id)` for each autocmd rather than only deleting the group: the
+--- records in `lib.nvim.bindings.autocmd` survive a deleted group, and are only
+--- dropped through `delete(id)` or by asking for the same group again -- whose
+--- name here carries the temp buffer number, which is never asked for twice. So
+--- every `:Fence open` used to leave two records (and an empty group) behind.
 ---@param tbuf integer
 function M.cleanup(tbuf)
   local s = sessions[tbuf]
   if not s then
     return
+  end
+  for _, id in ipairs(s.ids or {}) do
+    pcall(autocmd.delete, id)
+  end
+  if s.group then
+    pcall(api.nvim_del_augroup_by_id, s.group)
   end
   pcall(vim.fn.delete, s.tmpfile)
   if api.nvim_buf_is_valid(s.src) then
@@ -103,14 +118,17 @@ function M.run(argv)
   -- re-opening a fence in the same scratch buffer cannot leave a stale row in
   -- the generated bindings table.
   local grp = autocmd.group('ColorMyAsciiFenceOpen_' .. tbuf, true)
-  autocmd.create('BufWritePost', function()
+  local ids = {}
+  sessions[tbuf].group = grp
+  sessions[tbuf].ids = ids
+  ids[#ids + 1] = autocmd.create('BufWritePost', function()
     M.sync(tbuf)
   end, {
     group = grp,
     buffer = tbuf,
     desc = '[color_my_ascii] Sync fence edit back to the source buffer',
   })
-  autocmd.create({ 'BufWipeout', 'BufDelete', 'BufUnload' }, function()
+  ids[#ids + 1] = autocmd.create({ 'BufWipeout', 'BufDelete', 'BufUnload' }, function()
     M.cleanup(tbuf)
   end, {
     group = grp,

@@ -213,4 +213,10 @@ return {
   menu = {
     enable = true,
   },
+  -- Which hosts may drive this plugin. `ui_menu = false` keeps ui.nvim's
+  -- right-click menu (ui.menu) from composing the ASCII fly-out; the entries
+  -- stay available to any other host through `menu`/`items()`.
+  integrations = {
+    ui_menu = true,
+  },
 }

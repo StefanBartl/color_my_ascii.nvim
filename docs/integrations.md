@@ -18,6 +18,15 @@ Entries appear in Markdown buffers only, mirroring where `:ColorMyAscii` and
 the cursor actually being inside a fenced block — so a right-click never offers a
 fence action with nothing to apply it to. Opt out with `config.menu.enable`.
 
+`integrations.ui_menu = false` keeps ui.nvim's right-click menu (`ui.menu`) from
+showing the fly-out while `items()`/`submenu()` keep working for any other host.
+The module also answers `enabled()` (`false` when that switch or `menu.enable`
+is off), which is what `ui.menu` asks first.
+
+```lua
+integrations = { ui_menu = true }
+```
+
 ## See also
 
 - [Requirements](requirements.md) — nvzone/menu is optional; the plugin runs fine without it.

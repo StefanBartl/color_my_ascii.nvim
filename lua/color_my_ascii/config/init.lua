@@ -113,6 +113,7 @@ local KNOWN = {
   cache = true,
   debounce = true,
   menu = { enable = true },
+  integrations = { ui_menu = true },
 }
 
 ---@internal

@@ -216,6 +216,15 @@ return function(H)
     local items = menu.items(menu_buf)
     ok(#items > 0, 'a markdown buffer gets menu entries')
 
+    -- enabled(): what ui.nvim's ui.menu asks first.
+    eq(menu.enabled(), true, 'enabled() is true by default')
+    config.setup({ integrations = { ui_menu = false } })
+    eq(menu.enabled(), false, 'integrations.ui_menu = false -> enabled() false')
+    ok(#menu.items(menu_buf) > 0, 'ui_menu = false leaves items() to other hosts')
+    config.setup({ menu = { enable = false } })
+    eq(menu.enabled(), false, 'menu.enable = false -> enabled() false')
+    config.setup({})
+
     local by_label = {}
     for _, item in ipairs(items) do
       if item.label then

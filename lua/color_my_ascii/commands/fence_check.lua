@@ -11,9 +11,7 @@
 --- This implements a simple state machine: outside block / inside block.
 
 local api = vim.api
----@type fun(msg: string, level?: integer, opts?: table)
-local notify = vim.notify
-local levels = vim.log.levels
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
 local M = {}
 
@@ -103,13 +101,13 @@ function M.check_current_buffer()
 
   -- Report results
   if #problems == 0 then
-    notify('No unmatched fenced code blocks found', levels.INFO)
+    notify.info('No unmatched fenced code blocks found')
     return
   end
 
-  notify('Unmatched fenced code blocks detected:', levels.WARN)
+  notify.warn('Unmatched fenced code blocks detected:')
   for _, msg in ipairs(problems) do
-    notify(msg, levels.WARN)
+    notify.warn(msg)
   end
 end
 

@@ -6,8 +6,7 @@
 
 local M = {}
 
----@type fun(msg: string, level?: integer, opts?: table)
-local notify = vim.notify
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 local fn = vim.fn
 
 local DEFAULTS = require('color_my_ascii.config.DEFAULTS')
@@ -214,7 +213,7 @@ local function degrade_number(cfg, key, min, max, default, label, issues)
       tostring(cfg[key])
     )
     issues[#issues + 1] = issue
-    notify('color_my_ascii: ' .. issue, vim.log.levels.WARN)
+    notify.warn(issue)
   end
 end
 
@@ -580,7 +579,7 @@ function M.setup(opts)
 
   local function notify_load_error(err)
     local level = err:match('^CRITICAL') and vim.log.levels.ERROR or vim.log.levels.WARN
-    notify('color_my_ascii: ' .. err, level)
+    notify.notify(err, level)
   end
   for _, err in ipairs(group_errors) do
     notify_load_error(err)
@@ -605,7 +604,7 @@ function M.setup(opts)
   end
   _issues = issues
   for _, issue in ipairs(issues) do
-    notify('color_my_ascii: ' .. issue, vim.log.levels.WARN)
+    notify.warn(issue)
   end
 
   -- Handle scheme parameter
@@ -615,7 +614,7 @@ function M.setup(opts)
     local scheme_config, err = scheme_loader.load_scheme(clean_opts.scheme)
 
     if not scheme_config then
-      notify(string.format('color_my_ascii: %s', err), vim.log.levels.ERROR)
+      notify.error(err)
       config_to_merge = vim.tbl_extend('force', {}, clean_opts)
       config_to_merge.scheme = nil -- Remove invalid scheme parameter
     else
@@ -675,7 +674,7 @@ function M.setup(opts)
   )
 
   for _, err in ipairs(merge_user_languages()) do
-    notify('color_my_ascii: ' .. err, vim.log.levels.WARN)
+    notify.warn(err)
   end
 
   -- Resolve default_text_hl if it's a custom highlight

@@ -7,6 +7,9 @@
 --- stats`, matching the old flat ColorMyAsciiInspect*/ColorMyAsciiStats
 --- commands' behavior exactly.
 
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
+local viewer = require('lib.nvim.output.viewer')
+
 local M = {}
 
 --- Debug subcommand routes: inspect {char,group,inline,highlight}, stats.
@@ -24,10 +27,11 @@ function M.routes()
         local char = ctx.args.char
         local result = inspect.inspect_char(char)
 
-        print('=== Character Inspection: "' .. char .. '" ===')
-        print('Highlight: ' .. (result.highlight or 'none'))
-        print('Override: ' .. tostring(result.override))
-        print('Groups: ' .. (#result.groups > 0 and table.concat(result.groups, ', ') or 'none'))
+        viewer.show_lines(('Character Inspection: "%s"'):format(char), {
+          'Highlight: ' .. (result.highlight or 'none'),
+          'Override: ' .. tostring(result.override),
+          'Groups: ' .. (#result.groups > 0 and table.concat(result.groups, ', ') or 'none'),
+        })
       end,
     },
 
@@ -39,14 +43,15 @@ function M.routes()
         local group_name = ctx.args.group
         local result = inspect.inspect_group(group_name)
         if not result then
-          print('Group not found: ' .. group_name)
+          notify.warn('Group not found: ' .. group_name)
           return
         end
 
-        print('=== Group Inspection: ' .. group_name .. ' ===')
-        print('Highlight: ' .. result.highlight)
-        print('Character count: ' .. result.count)
-        print('Characters: ' .. table.concat(result.chars, ' '))
+        viewer.show_lines(('Group Inspection: %s'):format(group_name), {
+          'Highlight: ' .. result.highlight,
+          'Character count: ' .. result.count,
+          'Characters: ' .. table.concat(result.chars, ' '),
+        })
       end,
     },
 
@@ -57,27 +62,31 @@ function M.routes()
         local line = vim.api.nvim_get_current_line()
         local results = inspect.inspect_inline_code(line)
 
-        print('=== Inline Code Inspection ===')
-        print('Line: ' .. line)
-        print('Found ' .. #results .. ' inline code segment(s)')
+        local lines = {
+          'Line: ' .. line,
+          'Found ' .. #results .. ' inline code segment(s)',
+        }
 
         for idx, result in ipairs(results) do
-          print('\n[' .. idx .. '] "' .. result.content .. '" [' .. result.start_col .. '-' .. result.end_col .. ']')
+          lines[#lines + 1] = ''
+          lines[#lines + 1] = ('[%d] "%s" [%d-%d]'):format(idx, result.content, result.start_col, result.end_col)
 
           if #result.chars > 0 then
-            print('  Characters:')
+            lines[#lines + 1] = '  Characters:'
             for _, char_info in ipairs(result.chars) do
-              print('    "' .. char_info.char .. '" -> ' .. char_info.highlight)
+              lines[#lines + 1] = ('    "%s" -> %s'):format(char_info.char, char_info.highlight)
             end
           end
 
           if #result.keywords > 0 then
-            print('  Keywords:')
+            lines[#lines + 1] = '  Keywords:'
             for _, kw_info in ipairs(result.keywords) do
-              print('    "' .. kw_info.token .. '" -> ' .. kw_info.languages[1].highlight)
+              lines[#lines + 1] = ('    "%s" -> %s'):format(kw_info.token, kw_info.languages[1].highlight)
             end
           end
         end
+
+        viewer.show_lines('Inline Code Inspection', lines)
       end,
     },
 
@@ -89,11 +98,12 @@ function M.routes()
         local highlight = ctx.args.hl_group
         local groups = inspect.groups_by_highlight(highlight)
 
-        print('=== Highlight Group Inspection: ' .. highlight .. ' ===')
-        print('Used by ' .. #groups .. ' group(s):')
+        local lines = { 'Used by ' .. #groups .. ' group(s):' }
         for _, group_name in ipairs(groups) do
-          print('  - ' .. group_name)
+          lines[#lines + 1] = '  - ' .. group_name
         end
+
+        viewer.show_lines(('Highlight Group Inspection: %s'):format(highlight), lines)
       end,
     },
 
@@ -103,26 +113,31 @@ function M.routes()
       run = function()
         local stats = inspect.get_statistics()
 
-        print('=== color_my_ascii.nvim Statistics ===')
-        print('\nGroups:')
-        print('  Total: ' .. stats.groups.count)
-        print('  By highlight:')
+        local lines = {
+          'Groups:',
+          '  Total: ' .. stats.groups.count,
+          '  By highlight:',
+        }
         for hl, groups in pairs(stats.groups.by_highlight) do
-          print('    ' .. hl .. ': ' .. table.concat(groups, ', '))
+          lines[#lines + 1] = '    ' .. hl .. ': ' .. table.concat(groups, ', ')
         end
 
-        print('\nLanguages:')
-        print('  Total: ' .. stats.languages.count)
-        print('  Keywords per language:')
+        lines[#lines + 1] = ''
+        lines[#lines + 1] = 'Languages:'
+        lines[#lines + 1] = '  Total: ' .. stats.languages.count
+        lines[#lines + 1] = '  Keywords per language:'
         for lang, count in pairs(stats.languages.by_keywords) do
-          print('    ' .. lang .. ': ' .. count)
+          lines[#lines + 1] = '    ' .. lang .. ': ' .. count
         end
 
-        print('\nLookups:')
-        print('  Character mappings: ' .. stats.lookups.char_count)
-        print('  Keyword mappings: ' .. stats.lookups.keyword_count)
-        print('  Unique keywords: ' .. stats.lookups.unique_keyword_count)
-        print('  Overrides: ' .. stats.overrides)
+        lines[#lines + 1] = ''
+        lines[#lines + 1] = 'Lookups:'
+        lines[#lines + 1] = '  Character mappings: ' .. stats.lookups.char_count
+        lines[#lines + 1] = '  Keyword mappings: ' .. stats.lookups.keyword_count
+        lines[#lines + 1] = '  Unique keywords: ' .. stats.lookups.unique_keyword_count
+        lines[#lines + 1] = '  Overrides: ' .. stats.overrides
+
+        viewer.show_lines('color_my_ascii.nvim Statistics', lines)
       end,
     },
   }

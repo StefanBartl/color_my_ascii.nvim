@@ -80,9 +80,12 @@ char <char>` (which groups/highlight a character resolves to),
 segments and shows what each character/keyword resolved to), `:ColorMyAscii
 inspect highlight <hl>` (every group using a given highlight), and
 `:ColorMyAscii stats` (group/language/lookup-table counts and override
-counts across the whole resolved config). These routes are only registered
-while debug mode is on — enabling `debug_enabled` at runtime re-registers
-the whole `:ColorMyAscii` command to add them.
+counts across the whole resolved config). Each opens its result in a
+read-only viewer panel (`q`/`<Esc>` closes) rather than dumping to
+`:messages`, so a long stats/inline-code report stays yankable instead of
+scrolling past. These routes are only registered while debug mode is on —
+enabling `debug_enabled` at runtime re-registers the whole `:ColorMyAscii`
+command to add them.
 
 - **Module:** `debug/commands.lua`, `debug/inspect.lua`
 - **Config:** `opts.debug_enabled` (default `false`), `opts.debug_verbose`

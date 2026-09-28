@@ -11,9 +11,7 @@ local safe_api = require('color_my_ascii.utils.safe_api')
 local highlighter_ts = require('color_my_ascii.highlighter_ts')
 
 local api = vim.api
----@type fun(msg: string, level?: integer, opts?: table)
-local notify = vim.notify
-local levels = vim.log.levels
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
 --- Namespace ID for extmarks
 ---@type integer
@@ -51,7 +49,7 @@ local function highlight_range(bufnr, line, col_start, col_end, hl_group, contex
     buffer_extmarks[bufnr] = buffer_extmarks[bufnr] or {}
     table.insert(buffer_extmarks[bufnr], id)
   elseif cfg.debug_enabled then
-    notify(string.format('line %d %s: Failed to set extmark: %s', line + 1, context, tostring(err)), levels.WARN)
+    notify.warn(string.format('line %d %s: Failed to set extmark: %s', line + 1, context, tostring(err)))
   end
 end
 
@@ -214,7 +212,7 @@ function M.highlight_block(bufnr, block)
   if ts_cfg and ts_cfg.enabled and ts_cfg.syntax_highlight then
     local ok, err = pcall(highlighter_ts.highlight_block, bufnr, block, detected_language, namespace)
     if not ok and user_config.debug_enabled then
-      notify(string.format('color_my_ascii: Treesitter syntax highlighting error: %s', err), levels.WARN)
+      notify.warn(string.format('Treesitter syntax highlighting error: %s', err))
     end
   end
 end

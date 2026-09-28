@@ -4,9 +4,7 @@
 local M = {}
 
 local api = vim.api
----@type fun(msg: string, level?: integer, opts?: table)
-local notify = vim.notify
-local levels = vim.log.levels
+local notify = require('lib.nvim.notify').create('[color_my_ascii]')
 
 --- Ensure blank lines before and after all fenced code blocks
 function M.ensure_blank_lines()
@@ -15,7 +13,7 @@ function M.ensure_blank_lines()
   local line_count = #lines
 
   if line_count == 0 then
-    notify('Empty buffer', levels.WARN)
+    notify.warn('Empty buffer')
     return
   end
 
@@ -60,9 +58,9 @@ function M.ensure_blank_lines()
   if changes > 0 then
     -- Apply changes
     api.nvim_buf_set_lines(bufnr, 0, -1, false, new_lines)
-    notify(string.format('Added %d blank line(s)', changes), levels.INFO)
+    notify.info(string.format('Added %d blank line(s)', changes))
   else
-    notify('No changes needed', levels.INFO)
+    notify.info('No changes needed')
   end
 end
 

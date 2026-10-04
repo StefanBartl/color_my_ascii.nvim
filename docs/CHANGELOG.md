@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ### Changed
+- Removed the `custom_groups` option and its `ColorMyAscii.CustomGroup` type from the LuaLS annotations. It was never read anywhere, so setting it had no effect; use `overrides` (character to highlight group) or `languages` instead.
 - Complete rewrite of fence detection logic using state machine approach
 - Parser now tracks all code blocks but only highlights ASCII blocks
 - Empty fences (```` ``` ````) are now contextually interpreted (opening vs closing)

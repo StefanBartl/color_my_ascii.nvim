@@ -34,10 +34,6 @@
 ---@field hl string|ColorMyAscii.CustomHighlight Highlight group name or custom highlight definition
 ---@field unique_words? string[] Keywords unique to this language (for heuristic detection)
 
----@class ColorMyAscii.CustomGroup
----@field chars string Characters to highlight with this group
----@field hl string|ColorMyAscii.CustomHighlight Highlight specification
-
 --- Fence-line look. "auto" matches the current colorscheme (falling back to
 --- "subtle"); the generic looks are theme-adaptive links; the theme names apply
 --- a hand-tuned palette (see color_my_ascii/theme_presets.lua).
@@ -124,7 +120,6 @@
 ---@field groups? table<string, ColorMyAscii.CharGroup> Named character groups with their highlight settings
 ---@field keywords? table<string, ColorMyAscii.KeywordGroup> Language-specific keyword definitions (built-ins + `languages`, merged; usually left alone in favor of `languages` below)
 ---@field languages? table<string, ColorMyAscii.KeywordGroup> User-defined languages, merged on top of the built-in languages/*.lua set at setup() (same entry shape: { words, unique_words?, hl }; reusing a built-in name overrides it). The intended extension point for adding a language without forking the plugin - see |color_my_ascii-config-languages|
----@field custom_groups? table<string, ColorMyAscii.CustomGroup> User-defined character groups with custom highlights
 ---@field overrides? table<string, string|ColorMyAscii.CustomHighlight> Individual character to highlight group mappings (highest priority)
 ---@field default_hl? string|ColorMyAscii.CustomHighlight Default highlight group for characters not matching any rules
 ---@field default_text_hl? string|ColorMyAscii.CustomHighlight Optional highlight group for normal text in blocks (nil = no change)

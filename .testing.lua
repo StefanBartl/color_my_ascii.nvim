@@ -13,5 +13,21 @@ return {
   deps = { 'lib.nvim' },
   -- "none" = all specs in one nvim, "file" = one nvim per spec file
   -- (nothing leaks from one file into the next).
-  isolated = 'none',
+  isolated = 'file',
+  -- Guards (docs/GUARDS.md): every spec file runs in its own child editor, so the global state that
+  -- setup() leaves (autocmd groups, :ColorMyAscii, highlight groups) cannot leak into the next file.
+  guards = {
+    fs = 'error',
+    state = 'error',
+    scheduled_error = 'error',
+    prompt = 'error',
+    deprecation = 'error',
+  },
+  guard_allow = {
+    fs = {
+      -- plugin/color_my_ascii.lua runs `helptags` on the plugin's own doc/ directory when the
+      -- plugin loader spec sources it, which rewrites doc/tags (git-ignored generated file).
+      'doc',
+    },
+  },
 }

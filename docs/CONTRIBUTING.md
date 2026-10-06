@@ -37,19 +37,21 @@ luacheck lua/ plugin/ TESTS/        # lint
 
 ## Tests
 
-The headless suite runs in Neovim, with no test framework and no network or
-subprocess access:
+The headless suite runs in Neovim on [testing.nvim](https://github.com/StefanBartl/testing.nvim),
+with no network or subprocess access:
 
 ```sh
-nvim --headless -u NONE -c "set rtp+=." -l TESTS/run.lua
+bash scripts/test.sh
 ```
 
-It needs [lib.nvim](https://github.com/StefanBartl/lib.nvim) — set
-`$LIB_NVIM_PATH`, or check it out next to this repository. CI runs the same
-command as a third job alongside stylua and luacheck.
+It needs testing.nvim and [lib.nvim](https://github.com/StefanBartl/lib.nvim) —
+set `$TESTING_NVIM_DIR` / `$LIB_NVIM_DIR`, clone them to `.deps/<name>`, or
+check them out next to this repository (a missing one fails loudly, naming all
+searched places). CI runs the same command as a third job alongside stylua and
+luacheck.
 
-`TESTS/run.lua` holds an explicit spec list, so a new `*_spec.lua` file has to
-be added there to run at all. [`TESTS/README.md`](../TESTS/README.md) describes
+Spec files (`TESTS/*_spec.lua`) are discovered automatically, so a new one runs
+without being registered anywhere. [`TESTS/README.md`](../TESTS/README.md) describes
 the harness, the seams used to keep subprocesses and soft dependencies out of
 the suite, what is covered, what is deliberately left out and why, and the
 behaviour that is currently pinned as a known bug.

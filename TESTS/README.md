@@ -18,30 +18,31 @@ The headless suite for color_my_ascii.nvim, plus the two hand-driven fixtures.
 
 ## Running the suite
 
-From the repo root, exactly as CI does:
+From the repo root, exactly as CI does (Git Bash on Windows):
 
 ```sh
-nvim --headless -u NONE -c "set rtp+=." -l TESTS/run.lua
+bash scripts/test.sh                 # all specs
+bash scripts/test.sh --file fence    # only spec files whose name contains "fence"
+bash scripts/test.sh --json ir.json  # also write the machine-readable result
 ```
 
-It prints one line per spec, exits non-zero on the first failing one, and ends
-with `COLOR_MY_ASCII_TESTS_OK` when everything passed.
-
-`TESTS/run.lua` holds an explicit spec list — a new `*_spec.lua` file is *not*
-picked up automatically and has to be added there.
+It runs on [testing.nvim](https://github.com/StefanBartl/testing.nvim)
+(configured by `.testing.lua`), prints one line per spec, exits non-zero when
+any spec fails, and ends with `COLOR_MY_ASCII_TESTS_OK` when everything passed.
+`*_spec.lua` files under `TESTS/` are discovered automatically; a new spec
+needs no registration.
 
 **lib.nvim is a runtime dependency** (notifications, the `:ColorMyAscii`
-composer, autocommand/keymap registries, `safe_api`), so the runner puts it on
-the runtimepath *and* on `package.path` before loading anything. It looks, in
-order, at:
+composer, autocommand/keymap registries, `safe_api`), and testing.nvim itself
+is needed to run anything. `scripts/test.sh` looks for each of them, in order,
+at:
 
-1. `$LIB_NVIM_PATH`
-2. `../lib.nvim` next to this checkout (what CI arranges)
-3. `stdpath("data")/lazy/lib.nvim`
+1. `$LIB_NVIM_DIR` / `$TESTING_NVIM_DIR`
+2. `.deps/<name>` inside this checkout
+3. `../<name>` next to this checkout (what CI arranges)
+4. `stdpath("data")/lazy/<name>`
 
-A sibling checkout deliberately wins over the plugin-manager copy: the
-bootstrap clone is frequently older than the working checkout, and testing
-against a stale lib.nvim produces misleading failures.
+A missing dependency stops the run with exit code 1 and lists all four places.
 
 Nothing else is required. `ui.nvim` and `telescope.nvim` are soft dependencies
 and are **not** checked out in CI — the specs that touch them substitute a stub
@@ -69,9 +70,9 @@ return function(H)
 end
 ```
 
-An assertion that fails raises; `run.lua` catches it, prints `FAIL <spec>` with
-the message, and the process exits non-zero. Specs run in one Neovim instance,
-in the order listed in `run.lua`, and share global state — so a spec that
+An assertion that fails raises; testing.nvim catches it, prints `FAIL <spec>`
+with the message, and the process exits non-zero. Specs run in one Neovim
+instance (`isolated = 'none'`), in file-name order, and share global state — so a spec that
 changes the configuration puts it back with `config.setup({})` when it is done,
 and one that creates buffers deletes them.
 

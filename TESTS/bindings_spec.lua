@@ -27,7 +27,24 @@ return function(H)
   ---@param cmdline string
   ---@return boolean
   local function run(cmdline)
-    return (pcall(vim.cmd, cmdline))
+    local before = {}
+    for _, w in ipairs(vim.api.nvim_list_wins()) do
+      before[w] = true
+    end
+    local home = vim.api.nvim_get_current_win()
+    local done = pcall(vim.cmd, cmdline)
+    -- A route may open a float (lib.nvim's surfaces are `winfixbuf`, and take
+    -- focus): close what it opened and go back, or the next buffer switch in
+    -- this spec fails with E1513.
+    for _, w in ipairs(vim.api.nvim_list_wins()) do
+      if not before[w] and vim.api.nvim_win_is_valid(w) then
+        pcall(vim.api.nvim_win_close, w, true)
+      end
+    end
+    if vim.api.nvim_win_is_valid(home) then
+      vim.api.nvim_set_current_win(home)
+    end
+    return done
   end
 
   local md = H.scratch('markdown', { '```ascii', '+--+', '```', '', 'text' })

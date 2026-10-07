@@ -261,9 +261,24 @@ return function(H)
   -- `plugin/`), so they are executed explicitly here: the double-load guard,
   -- and the wiring the guard protects.
 
-  local plugin_dir = debug.getinfo(1, 'S').source:sub(2):match('(.*[/\\])') .. '../plugin/'
+  -- The bootstrap registers the plugin's own doc/ on the runtimepath and runs
+  -- `:helptags` there, so it is executed from a throwaway copy of plugin/ and
+  -- doc/: the checkout's doc/tags is never rewritten and the runtimepath entry
+  -- points into the temp dir. Everything global the files touch is restored.
+  local repo_root = vim.fn.fnamemodify(debug.getinfo(1, 'S').source:sub(2), ':h:h')
+  local copy_root = vim.fn.tempname()
+  for _, sub in ipairs({ 'plugin', 'doc' }) do
+    vim.fn.mkdir(copy_root .. '/' .. sub, 'p')
+    for _, f in ipairs(vim.fn.glob(repo_root .. '/' .. sub .. '/*', false, true)) do
+      if vim.fn.isdirectory(f) == 0 and vim.fn.fnamemodify(f, ':t') ~= 'tags' then
+        vim.fn.writefile(vim.fn.readfile(f, 'b'), copy_root .. '/' .. sub .. '/' .. vim.fn.fnamemodify(f, ':t'), 'b')
+      end
+    end
+  end
+  local plugin_dir = copy_root .. '/plugin/'
 
   local loaded_before = vim.g.loaded_color_my_ascii
+  local rtp_before = vim.o.runtimepath
   vim.g.loaded_color_my_ascii = 1
   ok(pcall(dofile, plugin_dir .. 'color_my_ascii.lua'), 'a second load returns at the guard')
   eq(vim.g.loaded_color_my_ascii, 1, 'leaving the flag as it found it')
@@ -274,9 +289,12 @@ return function(H)
   eq(vim.g.loaded_color_my_ascii, 1, 'setting the guard flag')
   eq(vim.fn.exists(':ColorMyAscii'), 2, 'registering the user command')
   ok(#vim.api.nvim_get_autocmds({ group = 'ColorMyAscii' }) > 0, 'and the static autocommands')
-  vim.g.loaded_color_my_ascii = loaded_before or 1
 
   ok(pcall(dofile, plugin_dir .. 'color_my_ascii_autodoc.lua'), 'the helptag generator loads without raising')
+
+  vim.g.loaded_color_my_ascii = loaded_before
+  vim.o.runtimepath = rtp_before
+  vim.fn.delete(copy_root, 'rf')
 
   -- ------------------------------------------------------------- clean up
 

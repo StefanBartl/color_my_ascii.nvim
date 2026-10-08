@@ -21,7 +21,7 @@ function M.routes()
   return {
     {
       path = { 'inspect', 'char' },
-      args = { { name = 'char', type = 'STRING' } },
+      args = { { name = 'char', type = 'STRING', desc = 'A single character to look up, e.g. +' } },
       desc = 'Inspect which groups and highlights a character belongs to',
       run = function(ctx)
         local char = ctx.args.char
@@ -37,7 +37,14 @@ function M.routes()
 
     {
       path = { 'inspect', 'group' },
-      args = { { name = 'group', type = 'STRING', values = group_names } },
+      args = {
+        {
+          name = 'group',
+          type = 'STRING',
+          values = group_names,
+          desc = 'Name of a character group from config.groups',
+        },
+      },
       desc = 'Inspect all characters in a specific group',
       run = function(ctx)
         local group_name = ctx.args.group
@@ -92,7 +99,9 @@ function M.routes()
 
     {
       path = { 'inspect', 'highlight' },
-      args = { { name = 'hl_group', type = 'STRING' } },
+      args = {
+        { name = 'hl_group', type = 'STRING', desc = 'Highlight group whose character groups to list' },
+      },
       desc = 'Show all groups using a specific highlight',
       run = function(ctx)
         local highlight = ctx.args.hl_group

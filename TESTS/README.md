@@ -162,6 +162,7 @@ Temp files are `vim.fn.tempname()` and are deleted again.
 | Spec | Covers |
 |---|---|
 | `bindings_spec` | `:ColorMyAscii` (every route, run for real), the optional keymaps, the static autocommands, the debug module |
+| `usrcmds_help_spec` | every positional argument of `:ColorMyAscii` (incl. the debug-only `inspect` routes) has a line in lib.nvim's option float: `composer.help.undocumented('ColorMyAscii', { args = true })` is empty, the texts stay one line |
 | `commands_spec` | the report commands, `ensure-blank-lines`, `check-fences`, the scheme commands, the `:Fence` helpers, `:Fence run`/`format` without spawning |
 | `fence_actions_spec`, `fence_export_spec`, `fence_jump_spec` | the `:Fence` subcommands |
 | `health_menu_spec` | `:checkhealth` and the opt-in context-menu entries |

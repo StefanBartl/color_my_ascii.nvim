@@ -277,6 +277,15 @@ return function(H)
   end
   local plugin_dir = copy_root .. '/plugin/'
 
+  -- Size and mtime of the checkout's generated doc/tags ("absent" when there is none): the
+  -- bootstrap must neither create nor rewrite it.
+  local tags_path = repo_root .. '/doc/tags'
+  local function tags_stamp()
+    local st = vim.uv.fs_stat(tags_path)
+    return st and ('%d:%d.%d'):format(st.size, st.mtime.sec, st.mtime.nsec) or 'absent'
+  end
+  local tags_before = tags_stamp()
+
   local loaded_before = vim.g.loaded_color_my_ascii
   local rtp_before = vim.o.runtimepath
   vim.g.loaded_color_my_ascii = 1
@@ -291,6 +300,9 @@ return function(H)
   ok(#vim.api.nvim_get_autocmds({ group = 'ColorMyAscii' }) > 0, 'and the static autocommands')
 
   ok(pcall(dofile, plugin_dir .. 'color_my_ascii_autodoc.lua'), 'the helptag generator loads without raising')
+  -- The generator schedules its `:helptags`; let it run before looking at the checkout.
+  vim.wait(50)
+  eq(tags_stamp(), tags_before, "the checkout's doc/tags is neither created nor rewritten by the bootstrap")
 
   vim.g.loaded_color_my_ascii = loaded_before
   vim.o.runtimepath = rtp_before

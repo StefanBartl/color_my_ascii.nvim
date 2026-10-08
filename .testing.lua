@@ -23,11 +23,6 @@ return {
     prompt = 'error',
     deprecation = 'error',
   },
-  guard_allow = {
-    fs = {
-      -- plugin/color_my_ascii.lua runs `helptags` on the plugin's own doc/ directory when the
-      -- plugin loader spec sources it, which rewrites doc/tags (git-ignored generated file).
-      'doc',
-    },
-  },
+  -- No guard_allow: the plugin loader spec runs plugin/ from a temp copy, so nothing in the suite
+  -- writes into the checkout (doc/tags included); the fs guard reports it if that ever changes.
 }

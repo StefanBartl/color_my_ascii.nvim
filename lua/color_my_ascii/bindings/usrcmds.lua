@@ -22,7 +22,19 @@ function M.enable()
   local routes = {
     {
       path = { 'toggle' },
-      args = { { name = 'scope', type = 'STRING', enum = { 'global', 'buffer' }, optional = true } },
+      args = {
+        {
+          name = 'scope',
+          type = 'STRING',
+          enum = { 'global', 'buffer' },
+          optional = true,
+          desc = 'What to toggle; default: global',
+          enum_desc = {
+            global = 'Highlighting in every managed buffer',
+            buffer = 'Highlighting in the current buffer only',
+          },
+        },
+      },
       desc = 'Toggle ASCII art highlighting  :ColorMyAscii toggle [global|buffer]',
       run = function(ctx)
         -- Defaults to `global`, which is what this subcommand has always done
@@ -93,7 +105,14 @@ function M.enable()
     },
     {
       path = { 'schemes', 'switch' },
-      args = { { name = 'name', type = 'STRING', values = schemes.get_scheme_names() } },
+      args = {
+        {
+          name = 'name',
+          type = 'STRING',
+          values = schemes.get_scheme_names(),
+          desc = 'Color scheme to switch to (see schemes list)',
+        },
+      },
       desc = 'Switch to a different color scheme',
       run = function(ctx)
         schemes.switch_scheme(ctx.args.name)

@@ -39,13 +39,25 @@ local DEFAULT_MARKDOWN_LANGS = {
 ---@type table<integer, { tick: integer, gen: integer, blocks: ColorMyAscii.FenceBlock[] }>
 local cache = {}
 
-local cache_augroup = autocmd.augroup.create.clear('ColorMyAsciiFenceApiCache')
-autocmd.create({ 'BufDelete', 'BufWipeout' }, function(ev)
-  cache[ev.buf] = nil
-end, {
-  group = cache_augroup,
-  desc = 'Invalidate color_my_ascii fence API cache on buffer delete',
-})
+local cache_hooked = false
+
+--- Create the buffer-delete invalidation autocmds on first use, so that merely
+--- requiring this module has no side effect (the cache is empty until the first
+--- range query, which is the only thing the autocmds protect).
+---@internal
+local function ensure_cache_hooks()
+  if cache_hooked then
+    return
+  end
+  cache_hooked = true
+  local group = autocmd.augroup.create.clear('ColorMyAsciiFenceApiCache')
+  autocmd.create({ 'BufDelete', 'BufWipeout' }, function(ev)
+    cache[ev.buf] = nil
+  end, {
+    group = group,
+    desc = 'Invalidate color_my_ascii fence API cache on buffer delete',
+  })
+end
 
 --- Classify a fence language tag as markdown-family (case-insensitive).
 ---@param lang string|nil Fence language tag
@@ -102,6 +114,7 @@ local function scan_cached(bufnr)
     return entry.blocks
   end
   local blocks = require('color_my_ascii.parser').find_all_blocks(bufnr, { lines = 'none' })
+  ensure_cache_hooks()
   cache[bufnr] = { tick = tick, gen = gen, blocks = blocks }
   return blocks
 end

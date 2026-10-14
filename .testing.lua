@@ -25,4 +25,6 @@ return {
   },
   -- No guard_allow: the plugin loader spec runs plugin/ from a temp copy, so nothing in the suite
   -- writes into the checkout (doc/tags included); the fs guard reports it if that ever changes.
+  -- gated: a failed conformance check makes `scripts/test.sh conformance` exit 1 (docs/CONFORMANCE.md of testing.nvim)
+  conformance = { gate = true },
 }

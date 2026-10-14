@@ -278,6 +278,15 @@ function M.check()
     health.error('lib.nvim not found - :ColorMyAscii will fail to load', { 'Install "StefanBartl/lib.nvim"' })
   end
 
+  -- telescope.nvim is optional: only the scheme picker (:ColorMyAscii schemes) uses it.
+  if check_module('telescope') then
+    health.ok('telescope found - the interactive scheme picker is available')
+  else
+    health.info(
+      'telescope not installed - the interactive scheme picker is unavailable (schemes can still be set by name)'
+    )
+  end
+
   -- Public fence API (consumed by other plugins, e.g. markdown.nvim's fenced_scope)
   health.info('Checking public fence API...')
   local fences_ok, fences = pcall(require, 'color_my_ascii.api.fences')

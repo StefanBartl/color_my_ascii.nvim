@@ -13,6 +13,8 @@ local fences = require('color_my_ascii').fences   -- available without setup()
 -- Each block: { open_row, close_row, content_start, content_end (0-indexed,
 -- content is the half-open range [content_start, content_end)), lang,
 -- fence_char, fence_len, is_ascii, fence_line, lines? }
+-- start_line/end_line also appear: compat aliases of open_row/close_row for
+-- older internal callers; new code should use open_row/close_row.
 local blocks = fences.list_blocks(bufnr, {
   lines    = 'none',       -- 'none' | 'ascii' | 'all' (collect content lines?)
   markdown = false,        -- true = only markdown-family langs

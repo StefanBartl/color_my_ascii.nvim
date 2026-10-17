@@ -77,6 +77,69 @@ consumer should always have that fallback.
 
 ---
 
+## Calling the API from outside Neovim (RPC)
+
+Both APIs above are plain Lua functions behind `require('color_my_ascii')`, so
+an external tool can reach them through Neovim's RPC server without any extra
+code in this plugin. Start (or reuse) a Neovim instance with a fixed listen
+address:
+
+```sh
+nvim --listen /tmp/cma.sock notes.md                 # Linux / macOS
+nvim --listen \\.\pipe\cma notes.md                  # Windows named pipe
+```
+
+On Windows, always pass `--listen` with a fixed name: the automatic `v:servername`
+pipe belongs to the `--embed` child process, not to the visible wrapper, so
+guessing it from the wrapper's PID does not work.
+
+**One-shot query from a shell** (`--remote-expr` evaluates a Vimscript
+expression, `luaeval()` runs the Lua; `_A` is the second `luaeval` argument):
+
+```sh
+nvim --headless --server '\\.\pipe\cma' --remote-expr \
+  "luaeval('vim.json.encode(require([[color_my_ascii]]).fences.list_blocks(0))')"
+# [{"lang":"text","open_row":2,"close_row":6,"content_start":3,"content_end":6,...}, ...]
+
+nvim --headless --server '\\.\pipe\cma' --remote-expr \
+  "luaeval('#require([[color_my_ascii]]).fences.list_blocks(0, {lang = _A})', 'lua')"
+# 1
+```
+
+`bufnr = 0` means the server's current buffer; use `vim.fn.bufnr(_A)` with a
+file name to address another loaded buffer. Pass `--headless` to the client:
+without it, a client whose stdout is not a terminal (a pipe, a script, CI)
+prints terminal control sequences instead of the result.
+
+**From an RPC client** (any msgpack-rpc library, or another Neovim), call
+`nvim_exec_lua` and get the blocks back as native data, no JSON round trip:
+
+```lua
+-- nvim --headless -u NONE -l client.lua
+local chan = vim.fn.sockconnect('pipe', [[\\.\pipe\cma]], { rpc = true })
+local blocks = vim.rpcrequest(chan, 'nvim_exec_lua', [[
+  local bufnr, langs = ...
+  return require('color_my_ascii').fences.list_blocks(bufnr, { lang = langs })
+]], { 0, { 'lua', 'text' } })
+for _, b in ipairs(blocks) do
+  print(('%s rows %d-%d'):format(b.lang, b.content_start, b.content_end))
+end
+vim.fn.chanclose(chan)
+```
+
+Limits:
+
+- **Read-only.** Over RPC you get data (block ranges, languages, content lines,
+  highlight runs and colors) or remote control of that instance. Registering an
+  external highlighter for a fence language is not possible yet; that is planned
+  as the fence highlighter registry.
+- **A running instance is required.** Without Neovim there is no highlighting at
+  all; `highlight.runs_for_block` only reports what the instance has painted.
+- The `filter` option of `list_blocks` takes a Lua function and therefore only
+  works inside the `luaeval`/`nvim_exec_lua` chunk, not as an RPC argument.
+
+---
+
 ## See Also
 
 - [../README.md](../README.md) — project overview and quickstart

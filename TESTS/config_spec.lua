@@ -230,6 +230,42 @@ return function(H)
   config.setup({})
   eq(#config.issues(), 0, 'a clean setup() reports no issues (values included)')
 
+  -- ------------------------------------- malformed definitions never stick
+  --
+  -- The name-keyed tables are open in the schema, so a bad entry must be
+  -- dropped and reported by resolve - and a later setup() must still work.
+  do
+    local bad_inputs = {
+      { groups = { zzbad = { chars = 'ab' } } },
+      { groups = { box_drawing = false } },
+      { keywords = { zzbad = { hl = 'Error' } } },
+      { keywords = { lua = false } },
+      { overrides = { a = true } },
+    }
+    for i, bad in ipairs(bad_inputs) do
+      local done, err = pcall(config.setup, bad)
+      ok(done, 'malformed definition #' .. i .. ' does not throw: ' .. tostring(err))
+      ok(#config.issues() > 0, 'malformed definition #' .. i .. ' is reported')
+      local again, err2 = pcall(config.setup, {})
+      ok(again, 'setup() works again after malformed definition #' .. i .. ': ' .. tostring(err2))
+      eq(#config.issues(), 0, 'and reports nothing once the bad layer is gone (#' .. i .. ')')
+    end
+    config.setup({ keywords = { lua = false } })
+    ok(config.get().keywords.lua == nil, 'a dropped built-in language is gone from the config')
+    config.setup({})
+    ok(config.get().keywords.lua ~= nil, 'and back after the next setup()')
+  end
+
+  -- `default_text_hl = false` switches off the dimming a scheme sets.
+  do
+    config.setup({ scheme = 'catppuccin' })
+    ok(config.get().default_text_hl ~= nil, 'precondition: the scheme sets default_text_hl')
+    config.setup({ scheme = 'catppuccin', default_text_hl = false })
+    eq(config.get().default_text_hl, false, 'default_text_hl = false beats the scheme value')
+    eq(#config.issues(), 0, 'and is accepted without an issue')
+    config.setup({})
+  end
+
   -- ------------------------------------------------- generated highlight groups
   --
   -- A `{ fg = ..., bold = ... }` highlight spec is turned into a real, named

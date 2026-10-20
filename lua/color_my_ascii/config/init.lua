@@ -61,7 +61,7 @@ local SCHEMA = {
 --- Keys that are allowed but have no default (absent means off / inherit).
 ---@type table<string, string>
 local OPTIONAL = {
-  default_text_hl = 'string|table',
+  default_text_hl = 'string|table|false',
   cache = 'table',
   debounce = 'table',
   ['fence_line_highlight.open'] = 'string|table',
@@ -415,6 +415,48 @@ local function build_unique_keyword_lookup()
   return lookup
 end
 
+---@internal
+--- Drop the entries of `groups`, `keywords` and `overrides` the lookup builders
+--- could not digest (a group without `chars`/`hl`, a language without `words`,
+--- a non-table where a definition belongs, an override that is neither a
+--- highlight name nor an attribute table), and say so. The schema leaves these
+--- name-keyed tables open, and a thrown error in `on_change` would otherwise
+--- leave the offending layer in place for every later `setup()`.
+---@param cfg ColorMyAscii.Config The config being resolved (mutated)
+---@param found string[] Issue lines to append to
+---@return nil
+local function drop_invalid_definitions(cfg, found)
+  local function prune(section, valid, expected)
+    local entries = cfg[section]
+    if type(entries) ~= 'table' then
+      return
+    end
+    local names = vim.tbl_keys(entries)
+    table.sort(names, function(a, b)
+      return tostring(a) < tostring(b)
+    end)
+    for _, name in ipairs(names) do
+      if not valid(entries[name]) then
+        found[#found + 1] = ('%s.%s has an invalid structure (expected %s), skipping'):format(
+          section,
+          tostring(name),
+          expected
+        )
+        entries[name] = nil
+      end
+    end
+  end
+  prune('groups', function(def)
+    return type(def) == 'table' and type(def.chars) == 'string' and def.hl ~= nil
+  end, '{ chars = "...", hl = ... }')
+  prune('keywords', function(def)
+    return type(def) == 'table' and type(def.words) == 'table' and def.hl ~= nil
+  end, '{ words = {...}, hl = ... }')
+  prune('overrides', function(hl)
+    return type(hl) == 'string' or type(hl) == 'table'
+  end, 'a highlight group name or attribute table')
+end
+
 --- Merge user-declared `config.languages` into `current_config.keywords` - the
 --- extension point for adding a language without a languages/*.lua file (see
 --- |color_my_ascii-config-languages|). Same entry structure as the built-in
@@ -518,6 +560,7 @@ local function get_store()
       )
     end,
     resolve = function(cfg, found)
+      drop_invalid_definitions(cfg, found)
       for _, err in ipairs(merge_user_languages(cfg)) do
         found[#found + 1] = err
       end
@@ -575,8 +618,17 @@ function M.setup(opts)
       notify.error(err)
     end
   end
-  cfg.layer('scheme', scheme_config)
-  cfg.setup(user_opts)
+  -- A layer is stored before the config is rebuilt from it, so a failure in
+  -- the rebuild would otherwise keep failing every later setup(): start over
+  -- from the defaults and let the caller see the error.
+  local applied, apply_err = pcall(function()
+    cfg.layer('scheme', scheme_config)
+    cfg.setup(user_opts)
+  end)
+  if not applied then
+    pcall(cfg.reset)
+    error(apply_err, 0)
+  end
 
   -- Initialize debug module if enabled
   if current_config.debug_enabled then

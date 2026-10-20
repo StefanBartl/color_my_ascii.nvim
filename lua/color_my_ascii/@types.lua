@@ -122,7 +122,7 @@
 ---@field languages? table<string, ColorMyAscii.KeywordGroup> User-defined languages, merged on top of the built-in languages/*.lua set at setup() (same entry shape: { words, unique_words?, hl }; reusing a built-in name overrides it). The intended extension point for adding a language without forking the plugin - see |color_my_ascii-config-languages|
 ---@field overrides? table<string, string|ColorMyAscii.CustomHighlight> Individual character to highlight group mappings (highest priority)
 ---@field default_hl? string|ColorMyAscii.CustomHighlight Default highlight group for characters not matching any rules
----@field default_text_hl? string|ColorMyAscii.CustomHighlight Optional highlight group for normal text in blocks (nil = no change)
+---@field default_text_hl? string|ColorMyAscii.CustomHighlight|false Optional highlight group for normal text in blocks (nil = no change; false also switches off one a scheme sets)
 ---@field enable_keywords? boolean Whether to highlight keywords in ASCII blocks
 ---@field enable_language_detection? boolean Whether to use heuristic language detection
 ---@field language_detection_threshold? integer Minimum unique keyword matches for language detection

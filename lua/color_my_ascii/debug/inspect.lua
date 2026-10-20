@@ -102,26 +102,15 @@ function M.inspect_inline_code(line)
 
   ---@type table[]
   local results = {}
-  local i = 1
 
-  while i <= #line do
-    local start_pos = line:find('`', i, true)
-    if not start_pos then
-      break
-    end
-
-    local end_pos = line:find('`', start_pos + 1, true)
-    if not end_pos then
-      break
-    end
-
-    local content = line:sub(start_pos + 1, end_pos - 1)
+  for _, span in ipairs(parser.scan_inline_spans(line)) do
+    local content = span.content
 
     ---@type table
     local code_result = {
       content = content,
-      start_col = start_pos - 1,
-      end_col = end_pos,
+      start_col = span.start_col,
+      end_col = span.end_col,
       chars = {},
       keywords = {},
     }
@@ -162,7 +151,6 @@ function M.inspect_inline_code(line)
     end
 
     table.insert(results, code_result)
-    i = end_pos + 1
   end
 
   return results

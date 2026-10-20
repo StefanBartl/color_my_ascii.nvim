@@ -199,6 +199,7 @@
 ---@field line integer Line number (0-indexed)
 ---@field start_col integer Start column (0-indexed, byte offset)
 ---@field end_col integer End column (0-indexed, byte offset, exclusive)
+---@field delim integer Number of backticks of each delimiter (1 for `x`, 2 for ``x``)
 ---@field content string Content inside backticks
 
 ---@class OpenFenceInfo

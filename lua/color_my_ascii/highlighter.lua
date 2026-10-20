@@ -246,7 +246,8 @@ function M.highlight_inline_codes(bufnr, range, inline_codes)
 
   for _, inline in ipairs(inline_codes) do
     local line_content = inline.content
-    local content_start_col = inline.start_col + 1 -- After opening backtick
+    local delim = inline.delim or 1
+    local content_start_col = inline.start_col + delim -- After the opening backticks
     local full_line = get_full_line(inline.line)
 
     -- Pass 1: Apply default text highlight if configured
@@ -255,7 +256,7 @@ function M.highlight_inline_codes(bufnr, range, inline_codes)
         bufnr,
         inline.line,
         content_start_col,
-        inline.end_col,
+        inline.end_col - (delim - 1), -- content plus the first closing backtick, as for a single delimiter
         user_config.default_text_hl,
         'default',
         full_line

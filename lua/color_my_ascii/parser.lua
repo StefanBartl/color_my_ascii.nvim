@@ -334,7 +334,7 @@ end
 --- closes at the next run of exactly n backticks (an unmatched run is literal).
 --- Spans never cross lines.
 ---@param line string
----@return { start_col: integer, end_col: integer, content: string }[] spans 0-based `start_col`, exclusive `end_col` (byte offsets), raw `content` without the delimiters
+---@return { start_col: integer, end_col: integer, delim: integer, content: string }[] spans 0-based `start_col`, exclusive `end_col` (byte offsets, delimiters included), `delim` = backticks per delimiter, raw `content` without them
 function M.scan_inline_spans(line)
   local spans = {}
   local i = 1
@@ -364,7 +364,7 @@ function M.scan_inline_spans(line)
       if close then
         local content = line:sub(open + n, close - 1)
         if #content > 0 then
-          spans[#spans + 1] = { start_col = open - 1, end_col = close + n - 1, content = content }
+          spans[#spans + 1] = { start_col = open - 1, end_col = close + n - 1, delim = n, content = content }
         end
         i = close + n
       else
@@ -402,6 +402,7 @@ function M.find_inline_codes(bufnr)
         line = line_num - 1,
         start_col = span.start_col,
         end_col = span.end_col,
+        delim = span.delim,
         content = span.content,
       })
     end

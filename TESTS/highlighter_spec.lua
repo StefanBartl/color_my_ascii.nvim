@@ -251,6 +251,40 @@ return function(H)
   eq(count_hl(inline_marks, 'Function'), 1, 'and so are function names')
   vim.api.nvim_buf_delete(inline_buf, { force = true })
 
+  -- A span with a longer delimiter starts its content after ALL opening
+  -- backticks, and a default_text_hl mark stops before the closing ones.
+  config.setup({
+    default_text_hl = 'Comment',
+    enable_inline_code = true,
+    enable_keywords = true,
+    enable_bracket_highlighting = false,
+    languages = { probe = { words = { 'zzkw' }, hl = 'Keyword' } },
+    treesitter = NO_TS,
+  })
+  local multi_buf = H.scratch('markdown', { 'a ``zzkw x`` b' })
+  highlighter.clear_buffer(multi_buf)
+  highlighter.highlight_inline_codes(multi_buf)
+  local multi_marks = H.marks(multi_buf, NS)
+  local function mark_for(group)
+    for _, m in ipairs(multi_marks) do
+      if m.hl == group then
+        return m
+      end
+    end
+  end
+  local kw = mark_for('Keyword')
+  ok(kw ~= nil, 'multi-backtick: the keyword is highlighted')
+  eq(kw and kw.col, 4, 'multi-backtick: the keyword starts after both opening backticks')
+  local dim = mark_for('Comment')
+  ok(dim ~= nil, 'multi-backtick: default_text_hl is applied')
+  eq(dim and dim.col, 4, 'multi-backtick: default_text_hl starts after both opening backticks')
+  eq(
+    dim and dim.end_col,
+    11,
+    'multi-backtick: default_text_hl ends as for a single delimiter (content + one closing backtick)'
+  )
+  vim.api.nvim_buf_delete(multi_buf, { force = true })
+
   config.setup({ enable_inline_code = false, treesitter = NO_TS })
   local off_buf = H.scratch('markdown', { 'text `zzkw` here' })
   highlighter.clear_buffer(off_buf)

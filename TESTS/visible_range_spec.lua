@@ -76,6 +76,40 @@ return function(H)
   eq(marks_between(buf, 9, 11), 0, 'scroll: block left far behind is cleared')
   vim.api.nvim_buf_delete(buf, { force = true })
 
+  -- ---- the view nears the painted edge: repaint before it runs out ------------
+  cma.setup({ visible_range = { enable = true, margin = 40, min_lines = 100 } })
+  buf = fresh()
+  require('color_my_ascii.cache_manager').invalidate(buf)
+  cma.highlight_buffer(buf)
+  local cfg_now = require('color_my_ascii.config').get()
+  eq(vr.needs_repaint(buf, cfg_now), false, 'slack: top of the buffer needs nothing')
+  vim.fn.winrestview({ topline = 100 })
+  cma.highlight_buffer(buf) -- painted rows now ~60..165
+  eq(vr.needs_repaint(buf, cfg_now), false, 'slack: view in the middle of the painted rows')
+  vim.fn.winrestview({ topline = 70 })
+  eq(vr.needs_repaint(buf, cfg_now), true, 'slack: view within half a margin of the top edge asks for a repaint')
+  vim.api.nvim_buf_delete(buf, { force = true })
+
+  -- ---- a jump without a scroll event is picked up by the autocmd ---------------
+  cma.setup({ visible_range = { enable = true, margin = 20, min_lines = 100 } })
+  buf = fresh()
+  require('color_my_ascii.cache_manager').invalidate(buf)
+  cma.highlight_buffer(buf)
+  eq(marks_between(buf, 2299, 2301), 0, 'jump: far block not painted before the jump')
+  vim.fn.winrestview({ topline = 2290 })
+  vim.api.nvim_exec_autocmds('BufWinEnter', { buffer = buf })
+  ok(
+    vim.wait(1000, function()
+      return marks_between(buf, 2299, 2301) > 0
+    end, 20),
+    'jump: BufWinEnter repaints around the new view'
+  )
+  vim.api.nvim_buf_delete(buf, { force = true })
+
+  -- ---- option off: no autocmd group content ---------------------------------------
+  cma.setup({})
+  eq(#vim.api.nvim_get_autocmds({ group = 'ColorMyAsciiVisibleRange' }), 0, 'off: no visible_range autocmds registered')
+
   -- ---- buffers up to min_lines are always painted in full ---------------------
   cma.setup({ visible_range = { enable = true, margin = 20, min_lines = 5000 } })
   buf = fresh()

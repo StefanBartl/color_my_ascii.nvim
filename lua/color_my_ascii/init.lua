@@ -119,24 +119,27 @@ function M.setup(opts)
     desc = 'Recompute fence right-edge padding after a window resize',
   })
 
-  -- visible_range: paint more rows once the view scrolls past the painted ones.
-  autocmd.create('WinScrolled', function()
-    local c = require('color_my_ascii.config').get()
-    if not (c.visible_range and c.visible_range.enable) then
-      return
-    end
-    for _, win in ipairs(api.nvim_list_wins()) do
-      local b = api.nvim_win_get_buf(win)
-      if state.enabled and state.buffers[b] and visible_range.needs_repaint(b, c) then
-        debounce_manager.debounce(b, function()
-          M.highlight_buffer(b)
-        end)
+  -- visible_range: paint more rows once the view nears the edge of the
+  -- painted ones - after a scroll, but also when a buffer is shown (or the
+  -- view jumps at startup) without any scrolling event. Only registered while
+  -- the option is on; a short fixed delay, not the adaptive edit debounce.
+  local vr_group = autocmd.augroup.create.clear('ColorMyAsciiVisibleRange')
+  if cfg.visible_range and cfg.visible_range.enable then
+    autocmd.create({ 'WinScrolled', 'WinEnter', 'BufWinEnter', 'VimEnter' }, function()
+      local c = require('color_my_ascii.config').get()
+      for _, win in ipairs(api.nvim_list_wins()) do
+        local b = api.nvim_win_get_buf(win)
+        if state.enabled and state.buffers[b] and visible_range.needs_repaint(b, c) then
+          debounce_manager.debounce(b, function()
+            M.highlight_buffer(b)
+          end, 50)
+        end
       end
-    end
-  end, {
-    group = autocmd.augroup.create.clear('ColorMyAsciiVisibleRange'),
-    desc = 'Paint the newly visible rows of large buffers (visible_range)',
-  })
+    end, {
+      group = vr_group,
+      desc = 'Paint the newly visible rows of large buffers (visible_range)',
+    })
+  end
 
   -- Hot-reload: calling setup() again (e.g. after adding/editing a
   -- config.languages entry) invalidates the stale per-buffer parse cache and
@@ -232,7 +235,6 @@ function M.highlight_buffer(bufnr)
 
   -- nil = paint everything; otherwise only the rows around the window(s)
   local range = visible_range.compute(bufnr, cfg)
-  visible_range.set_painted(bufnr, range)
 
   -- Try cache first
   local cached_blocks, cached_inline, cache_hit = cache_manager.get(bufnr)
@@ -270,6 +272,7 @@ function M.highlight_buffer(bufnr)
     end
 
     pcall(fence_hl.apply, bufnr, cfg, range)
+    visible_range.set_painted(bufnr, range)
     return true, nil
   end
 
@@ -312,6 +315,7 @@ function M.highlight_buffer(bufnr)
   end
 
   pcall(fence_hl.apply, bufnr, cfg, range)
+  visible_range.set_painted(bufnr, range)
   return true, nil
 end
 

@@ -3,9 +3,10 @@
 ---@description
 --- Opt-in (`visible_range.enable`, default off) for very large buffers: only
 --- blocks, inline code and fence backgrounds that intersect the window's
---- visible rows plus `margin` rows on either side are painted; scrolling
---- past the painted rows repaints around the new position (see
---- `needs_repaint`). Buffers shorter than `min_lines`, and buffers that are
+--- visible rows plus `margin` rows on either side are painted; moving the
+--- view closer than half a margin to the painted edge repaints around the new
+--- position (see `needs_repaint`). With several windows on one buffer the rows
+--- between the windows are painted too (one range per buffer). Buffers shorter than `min_lines`, and buffers that are
 --- not shown in any window, are always painted in full.
 
 local M = {}
@@ -38,7 +39,9 @@ function M.compute(bufnr, cfg)
   for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
     local info = vim.fn.getwininfo(win)[1]
     if info then
-      local top, bot = info.topline - 1, info.botline - 1
+      -- botline is the last fully shown line (1-based): as a 0-based row that
+      -- is the row below it, which also covers a partly shown last line
+      local top, bot = info.topline - 1, info.botline
       first = first and math.min(first, top) or top
       last = last and math.max(last, bot) or bot
     end
@@ -80,10 +83,19 @@ function M.needs_repaint(bufnr, cfg)
   if type(vr) ~= 'table' or not vr.enable then
     return true
   end
+  -- Repaint before the view runs out of painted rows: half a margin from the
+  -- painted edge (an edge that is the buffer's own start or end never counts).
+  local slack = math.floor(math.max(0, tonumber(vr.margin) or 0) / 2)
+  local count = api.nvim_buf_line_count(bufnr)
   for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
     local info = vim.fn.getwininfo(win)[1]
-    if info and (info.topline - 1 < was.first and was.first > 0 or info.botline - 1 > was.last) then
-      return true
+    if info then
+      if was.first > 0 and info.topline - 1 < was.first + slack then
+        return true
+      end
+      if was.last < count - 1 and info.botline > was.last - slack then
+        return true
+      end
     end
   end
   return false

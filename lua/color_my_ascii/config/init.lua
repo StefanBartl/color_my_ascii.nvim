@@ -626,7 +626,7 @@ function M.setup(opts)
   end
 
   if config_to_merge then
-    current_config = vim.tbl_deep_extend('force', defaults, config_to_merge)
+    current_config = vim.tbl_deep_extend('force', vim.deepcopy(defaults), config_to_merge)
   else
     current_config = vim.deepcopy(defaults)
   end

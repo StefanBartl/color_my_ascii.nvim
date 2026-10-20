@@ -32,6 +32,16 @@ return function(H)
 
   -- Nested tables are deep-merged: naming one sub-key must not drop its
   -- siblings.
+  -- A section the user did not name is not shared with the defaults: writing into
+  -- the live config must not change what the next setup() starts from.
+  config.setup({ enable_keywords = false })
+  config.get().treesitter.enabled = false
+  config.get().fence_line_highlight.right_pad = 99
+  config.setup({ enable_keywords = false })
+  eq(config.get().treesitter.enabled, true, 'a write into an untouched section is gone after setup()')
+  config.setup({})
+  eq(config.get().fence_line_highlight.right_pad, 1, 'and so is one in a section a later call leaves out')
+
   config.setup({ treesitter = { syntax_highlight = false } })
   eq(config.get().treesitter.syntax_highlight, false, 'the named sub-key is taken')
   eq(config.get().treesitter.enabled, true, 'its siblings survive the merge')

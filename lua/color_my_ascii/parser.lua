@@ -308,6 +308,73 @@ function M.get_byte_offset(line, col)
   return positions[col + 1] - 1
 end
 
+--- Number of backticks in the run starting at byte `pos`.
+---@param line string
+---@param pos integer
+---@return integer
+local function backtick_run(line, pos)
+  local _, run_end = line:find('^`+', pos)
+  return run_end - pos + 1
+end
+
+--- Whether the byte at `pos` is escaped by an odd number of backslashes.
+---@param line string
+---@param pos integer
+---@return boolean
+local function is_escaped(line, pos)
+  local n = 0
+  while pos - n - 1 >= 1 and line:byte(pos - n - 1) == 92 do
+    n = n + 1
+  end
+  return n % 2 == 1
+end
+
+--- Find the inline code spans of one line the way CommonMark pairs them: a
+--- backslash-escaped backtick is a plain character, and a run of n backticks
+--- closes at the next run of exactly n backticks (an unmatched run is literal).
+--- Spans never cross lines.
+---@param line string
+---@return { start_col: integer, end_col: integer, content: string }[] spans 0-based `start_col`, exclusive `end_col` (byte offsets), raw `content` without the delimiters
+function M.scan_inline_spans(line)
+  local spans = {}
+  local i = 1
+  while i <= #line do
+    local open = line:find('`', i, true)
+    if not open then
+      break
+    end
+    if is_escaped(line, open) then
+      i = open + 1
+    else
+      local n = backtick_run(line, open)
+      local search = open + n
+      local close
+      while true do
+        local q = line:find('`', search, true)
+        if not q then
+          break
+        end
+        local m = backtick_run(line, q)
+        if m == n then
+          close = q
+          break
+        end
+        search = q + m
+      end
+      if close then
+        local content = line:sub(open + n, close - 1)
+        if #content > 0 then
+          spans[#spans + 1] = { start_col = open - 1, end_col = close + n - 1, content = content }
+        end
+        i = close + n
+      else
+        i = open + n
+      end
+    end
+  end
+  return spans
+end
+
 --- Find all inline code segments in a buffer.
 ---@param bufnr integer Buffer number
 ---@return ColorMyAscii.InlineCode[] inline_codes List of inline code segments
@@ -330,30 +397,13 @@ function M.find_inline_codes(bufnr)
   local lines = api.nvim_buf_get_lines(bufnr, 0, -1, false)
 
   for line_num, line in ipairs(lines) do
-    local i = 1
-    while i <= #line do
-      local start_pos = line:find('`', i, true)
-      if not start_pos then
-        break
-      end
-
-      local end_pos = line:find('`', start_pos + 1, true)
-      if not end_pos then
-        break
-      end
-
-      local content = line:sub(start_pos + 1, end_pos - 1)
-
-      if #content > 0 then
-        table.insert(inline_codes, {
-          line = line_num - 1,
-          start_col = start_pos - 1,
-          end_col = end_pos,
-          content = content,
-        })
-      end
-
-      i = end_pos + 1
+    for _, span in ipairs(M.scan_inline_spans(line)) do
+      table.insert(inline_codes, {
+        line = line_num - 1,
+        start_col = span.start_col,
+        end_col = span.end_col,
+        content = span.content,
+      })
     end
   end
 

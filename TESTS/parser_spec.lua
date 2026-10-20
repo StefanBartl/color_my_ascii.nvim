@@ -232,6 +232,25 @@ return function(H)
 
   eq(#parser.find_inline_codes(H.scratch('markdown', { 'a `` b' })), 0, 'an empty span is not reported')
 
+  -- escaped backticks are plain characters; an n-backtick run closes on the next run of exactly n
+  local esc = H.scratch('markdown', { 'Use \\`x\\` here and ``a `b` c`` plus `ok`' })
+  local esc_spans = parser.find_inline_codes(esc)
+  eq(#esc_spans, 2, 'escaped backticks open no span; the double-backtick pair is one span')
+  eq(esc_spans[1].content, 'a `b` c', 'double-backtick span keeps the inner single backticks')
+  eq(esc_spans[2].content, 'ok', 'the span after the double pair is still found')
+  vim.api.nvim_buf_delete(esc, { force = true })
+
+  local function spans(line)
+    return parser.scan_inline_spans(line)
+  end
+  eq(#spans('\\\\`x`'), 1, 'an escaped backslash does not escape the backtick')
+  eq(spans('\\\\`x`')[1].content, 'x', 'span after a backslash pair')
+  eq(#spans('\\`x`'), 0, 'one backslash escapes the opener, the closer is then unmatched')
+  eq(#spans('``a ` b'), 0, 'unbalanced: a run of 2 never meets a run of 2')
+  eq(spans('`a ``b`')[1].content, 'a ``b', 'a longer run inside a single-backtick span is content')
+  eq(spans('```x``` `y`')[2].content, 'y', 'triple-backtick span, then a single one')
+  eq(spans('```x```')[1].end_col, 7, 'end_col is exclusive and counts the closing run')
+
   config.setup({ enable_inline_code = false })
   eq(#parser.find_inline_codes(inline_buf), 0, 'the feature flag turns detection off wholesale')
   vim.api.nvim_buf_delete(inline_buf, { force = true })

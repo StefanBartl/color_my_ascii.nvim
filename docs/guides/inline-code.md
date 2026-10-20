@@ -25,8 +25,6 @@ The plugin can highlight keywords and symbols in inline code (`` `...` ``).
     - [Overhead](#overhead)
     - [Debouncing](#debouncing)
   - [Limitations](#limitations)
-    - [Escaped Backticks](#escaped-backticks)
-    - [Nested Backticks](#nested-backticks)
     - [Code Spans Across Lines](#code-spans-across-lines)
   - [Combination with ASCII Blocks](#combination-with-ascii-blocks)
   - [Language Detection](#language-detection)
@@ -229,27 +227,7 @@ Like ASCII blocks, inline code highlighting is also debounced:
 
 ## Limitations
 
-### Escaped Backticks
-
-Escaped backticks are not handled correctly:
-
-```markdown
-Use \`code\` for inline  → Not recognized as inline code
-```
-
-This is a limitation of the current parser.
-
----
-
-### Nested Backticks
-
-Not supported:
-
-```markdown
-``nested `code` here``  → Does not work correctly
-```
-
----
+A backtick escaped with a backslash is a plain character, and a span opened with n backticks closes at the next run of exactly n backticks (CommonMark pairing), so ``` ``a `b` c`` ``` is one span.
 
 ### Code Spans Across Lines
 

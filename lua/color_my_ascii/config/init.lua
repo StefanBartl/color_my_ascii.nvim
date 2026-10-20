@@ -43,144 +43,35 @@ end
 local created_highlight_groups = {}
 
 ---@internal
---- What the last `setup()` had to reject or degrade, one human-readable line
---- each, for `:checkhealth` -- an unknown/mistyped option key (ERR-50) or a
---- known key whose value was the wrong type/out of range and fell back to
---- its default (ERR-22). Empty when every key and value was accepted as-is.
----@type string[]
-local _issues = {}
-
----@internal
---- Top-level keys `M.setup()` accepts and, for the fixed-schema tables among
---- them, their own direct keys (one level, not recursive -- see `sanitize()`).
---- `true` means "any key goes": `groups`/`keywords`/`languages`/`overrides`/
---- `fence_language_map` are name-keyed extension points (a language or group
---- name, a character, a fence tag), not a fixed option schema, so their own
---- keys are never known in advance. `keymaps`/`cache`/`debounce` are nil or
---- false by default and validated by their own modules at configure() time.
----@type table<string, true|table<string, true>>
-local KNOWN = {
-  debug_enabled = true,
-  debug_verbose = true,
-  scheme = true,
-  groups = true,
-  keywords = true,
-  languages = true,
-  overrides = true,
-  default_hl = true,
-  default_text_hl = true,
-  enable_keywords = true,
-  enable_language_detection = true,
-  language_detection_threshold = true,
-  treesitter = { enabled = true, block_detection = true, syntax_highlight = true },
-  comment_ascii = { enable = true, filetypes = true },
-  treat_empty_fence_as_ascii = true,
-  enable_inline_code = true,
-  visible_range = { enable = true, margin = true, min_lines = true },
-  enable_function_names = true,
-  enable_bracket_highlighting = true,
-  fence_language_map = true,
-  fence_line_highlight = {
-    enable = true,
-    preset = true,
-    open = true,
-    close = true,
-    apply_to = true,
-    respect_indent = true,
-    right_pad = true,
-  },
-  fence_content_highlight = {
-    enable = true,
-    preset = true,
-    hl = true,
-    shade = true,
-    amount = true,
-    apply_to = true,
-    respect_indent = true,
-    right_pad = true,
-  },
-  fence_export = {
-    default_dir = true,
-    open_after = true,
-    open_cmd = true,
-    replace = true,
-    replace_format = true,
-    ext_map = true,
-  },
-  fence_run = { runners = true },
-  fence_format = { formatters = true },
-  keymaps = true,
-  cache = true,
-  debounce = true,
-  menu = { enable = true },
-  integrations = { ui_menu = true },
+--- What the schema inferred from `DEFAULTS` cannot say. `groups`/`keywords`
+--- are filled with the bundled definitions and `languages`/`overrides`/
+--- `fence_language_map` with the built-in tags, but all of them are
+--- name-keyed extension points whose keys are the user's to choose. `keymaps`
+--- is `false` by default and takes a table to enable and customize.
+---@type table<string, string|table>
+local SCHEMA = {
+  groups = { 'table' },
+  keywords = { 'table' },
+  fence_language_map = { 'table' },
+  keymaps = 'table|boolean',
+  default_hl = 'string|table',
 }
 
 ---@internal
---- `key` with the nearest known one as a hint when there is a plausible one
---- (edit distance <= 3).
----@param key any
----@param known table<string, any>
----@param prefix string
----@return string
-local function describe_unknown(key, known, prefix)
-  local levenshtein = require('lib.lua.strings.distance').levenshtein
-  local name = tostring(key)
-  local best, best_distance = nil, nil
-  for candidate in pairs(known) do
-    local d = levenshtein(name, candidate)
-    if d <= 3 and (best_distance == nil or d < best_distance) then
-      best, best_distance = candidate, d
-    end
-  end
-  if best then
-    return ("unknown option '%s%s' (did you mean '%s%s'?)"):format(prefix, name, prefix, best)
-  end
-  return ("unknown option '%s%s'"):format(prefix, name)
-end
+--- Keys that are allowed but have no default (absent means off / inherit).
+---@type table<string, string>
+local OPTIONAL = {
+  default_text_hl = 'string|table',
+  cache = 'table',
+  debounce = 'table',
+  ['fence_line_highlight.open'] = 'string|table',
+  ['fence_line_highlight.close'] = 'string|table',
+  ['fence_content_highlight.preset'] = 'string',
+  ['fence_content_highlight.hl'] = 'string|table',
+}
 
 ---@internal
---- Drop what cannot be merged, and say so, before the merge (ERR-50): a
---- misspelled key would otherwise land in the active config as a dead field
---- while the real option keeps its default, with no diagnostic anywhere.
----@param user_opts table
----@return table clean
----@return string[] issues
-local function sanitize(user_opts)
-  local clean, issues = {}, {}
-  for key, value in pairs(user_opts) do
-    local known = KNOWN[key]
-    if known == nil then
-      issues[#issues + 1] = describe_unknown(key, KNOWN, '')
-    elseif type(DEFAULTS[key]) == 'table' and type(value) ~= 'table' then
-      issues[#issues + 1] = ("option '%s' must be a table, got %s -- using the default"):format(key, type(value))
-    elseif type(known) == 'table' and type(value) == 'table' then
-      local nested = {}
-      for sub_key, sub_value in pairs(value) do
-        if known[sub_key] then
-          nested[sub_key] = sub_value
-        else
-          issues[#issues + 1] = describe_unknown(sub_key, known, key .. '.')
-        end
-      end
-      -- An empty table is what `config_to_merge`'s deep-extend would replace
-      -- the whole key with -- if every sub-key the user gave was rejected
-      -- above (e.g. a single typo'd sub-key), that would wipe every *other*
-      -- default under `key` instead of leaving them alone. Only set the key
-      -- at all when there is a real override left to apply.
-      if next(nested) ~= nil then
-        clean[key] = nested
-      end
-    else
-      clean[key] = value
-    end
-  end
-  table.sort(issues)
-  return clean, issues
-end
-
----@internal
---- Degrade a merged numeric option to `default` when the value is not a
+--- Degrade a numeric option of a layer to `default` when the value is not a
 --- number, or clamp it into `[min, max]` when it is a number but out of
 --- range (ERR-22): a known key with a wrong-typed or out-of-range value must
 --- not reach the code that consumes it as-is. `language_detection_threshold`
@@ -190,9 +81,9 @@ end
 --- `fence_*_highlight.right_pad`/`fence_content_highlight.amount` were
 --- already clamped where fence_hl.lua consumes them, but that left the
 --- *reported* config value -- e.g. on `:checkhealth` -- silently wrong; this
---- corrects `cfg[key]` itself and reports it on the same `issues` list
---- ERR-50's key validation already surfaces there.
----@param cfg table Table to mutate in place (current_config or a nested sub-table of it)
+--- corrects the value itself and reports it on the issues list. Runs in the
+--- `normalize` hook, so the schema check afterwards sees a number.
+---@param tbl any Layer table or nested sub-table; anything but a table is left to the schema check
 ---@param key string
 ---@param min number
 ---@param max number
@@ -200,21 +91,22 @@ end
 ---@param label string Dotted path used in the issue message
 ---@param issues string[]
 ---@return nil
-local function degrade_number(cfg, key, min, max, default, label, issues)
-  local raw = cfg[key]
+local function degrade_number(tbl, key, min, max, default, label, issues)
+  if type(tbl) ~= 'table' or tbl[key] == nil then
+    return
+  end
+  local raw = tbl[key]
   local n = tonumber(raw)
   local clamped = n and math.max(min, math.min(max, n))
   if n == nil or clamped ~= n then
-    cfg[key] = clamped or default
+    tbl[key] = clamped or default
     local range = max == math.huge and ('>= %s'):format(min) or ('%s-%s'):format(min, max)
-    local issue = ("option '%s' must be a number (%s), got %s -- using %s"):format(
+    issues[#issues + 1] = ("option '%s' must be a number (%s), got %s -- using %s"):format(
       label,
       range,
       vim.inspect(raw),
-      tostring(cfg[key])
+      tostring(tbl[key])
     )
-    issues[#issues + 1] = issue
-    notify.warn(issue)
   end
 end
 
@@ -362,13 +254,10 @@ local function bundled_defs()
   return _bundled_defs
 end
 
---- Default configuration (mutable copy; groups/keywords get populated at setup time)
+--- Current configuration: the table of the store (`get_store()`), kept here for
+--- the lookup builders below. Replaced by the store's `on_change` hook.
 ---@type ColorMyAscii.Config
-local defaults = vim.deepcopy(DEFAULTS)
-
---- Current configuration
----@type ColorMyAscii.Config
-local current_config = vim.deepcopy(defaults)
+local current_config = vim.deepcopy(DEFAULTS)
 
 --- Incremented on every M.setup() call. Consumers that cache data derived
 --- from the config but keyed only on e.g. (bufnr, changedtick) -- such as the
@@ -533,9 +422,10 @@ end
 --- built-in language's name overrides it. Invalid entries are skipped and
 --- reported back to the caller instead of breaking keyword-lookup construction.
 ---@internal
+---@param cfg ColorMyAscii.Config The config being resolved (mutated)
 ---@return string[] errors List of skipped-entry warnings (empty if none)
-local function merge_user_languages()
-  local user_languages = current_config.languages
+local function merge_user_languages(cfg)
+  local user_languages = cfg.languages
   if type(user_languages) ~= 'table' or vim.tbl_isempty(user_languages) then
     return {}
   end
@@ -560,9 +450,93 @@ local function merge_user_languages()
   -- language's entry wholesale (words/unique_words/hl together), not a
   -- field-by-field deep merge - deep-extending would splice the user's
   -- `words` into the built-in array index-by-index instead of replacing it.
-  current_config.keywords = vim.tbl_extend('force', current_config.keywords, valid)
+  cfg.keywords = vim.tbl_extend('force', cfg.keywords, valid)
 
   return errors
+end
+
+--- The config object (`lib.lua.config.new`), built on first use because its
+--- defaults carry the bundled groups/languages. Layers, lowest first: the
+--- `scheme` and the user's `setup` options.
+---@type Lib.Config.Instance|nil
+local store = nil
+
+---@internal
+---@return Lib.Config.Instance
+local function get_store()
+  if store then
+    return store
+  end
+  local defs = bundled_defs()
+  local defaults = vim.deepcopy(DEFAULTS)
+  defaults.groups = defs.groups
+  defaults.keywords = defs.languages
+
+  store = require('lib.lua.config').new(defaults, {
+    name = 'color_my_ascii',
+    schema = SCHEMA,
+    optional = OPTIONAL,
+    layers = { 'scheme', 'setup' },
+    -- A known key can carry an invalid VALUE the schema would only reject
+    -- wholesale; numbers are clamped or defaulted first (ERR-22).
+    normalize = function(opts, issues)
+      degrade_number(
+        opts,
+        'language_detection_threshold',
+        0,
+        math.huge,
+        DEFAULTS.language_detection_threshold,
+        'language_detection_threshold',
+        issues
+      )
+      degrade_number(
+        opts.fence_line_highlight,
+        'right_pad',
+        0,
+        20,
+        DEFAULTS.fence_line_highlight.right_pad,
+        'fence_line_highlight.right_pad',
+        issues
+      )
+      degrade_number(
+        opts.fence_content_highlight,
+        'right_pad',
+        0,
+        20,
+        DEFAULTS.fence_content_highlight.right_pad,
+        'fence_content_highlight.right_pad',
+        issues
+      )
+      degrade_number(
+        opts.fence_content_highlight,
+        'amount',
+        0,
+        100,
+        DEFAULTS.fence_content_highlight.amount,
+        'fence_content_highlight.amount',
+        issues
+      )
+    end,
+    resolve = function(cfg, found)
+      for _, err in ipairs(merge_user_languages(cfg)) do
+        found[#found + 1] = err
+      end
+      -- A custom highlight spec becomes a real, named group
+      if cfg.default_text_hl then
+        cfg.default_text_hl = resolve_highlight(cfg.default_text_hl)
+      end
+    end,
+    on_change = function(cfg)
+      current_config = cfg
+      M.char_lookup = build_char_lookup()
+      M.keyword_lookup = build_keyword_lookup()
+      M.unique_keyword_lookup = build_unique_keyword_lookup()
+    end,
+    notify = function(message)
+      notify.warn(message)
+    end,
+  })
+  return store
 end
 
 --- Setup the configuration with user options
@@ -570,123 +544,39 @@ end
 function M.setup(opts)
   generation = generation + 1
 
-  -- Load modular definitions (cached after the first call, see bundled_defs).
-  -- Both loaders return non-fatal error/warning lists rather than notifying
-  -- themselves - setup() is the boundary that decides whether and how to
-  -- surface them to the user.
+  -- Both bundled loaders return non-fatal error/warning lists rather than
+  -- notifying themselves - setup() is the boundary that decides whether and
+  -- how to surface them to the user.
   local defs = bundled_defs()
-  local loaded_groups, group_errors = defs.groups, defs.group_errors
-  local loaded_languages, language_errors = defs.languages, defs.language_errors
-
   local function notify_load_error(err)
     local level = err:match('^CRITICAL') and vim.log.levels.ERROR or vim.log.levels.WARN
     notify.notify(err, level)
   end
-  for _, err in ipairs(group_errors) do
+  for _, err in ipairs(defs.group_errors) do
     notify_load_error(err)
   end
-  for _, err in ipairs(language_errors) do
+  for _, err in ipairs(defs.language_errors) do
     notify_load_error(err)
   end
 
-  defaults.groups = loaded_groups
-  defaults.keywords = loaded_languages
+  local cfg = get_store()
 
-  -- Validate user options before anything is merged (ERR-50): an unknown or
-  -- mistyped key would otherwise land in current_config as dead data next to
-  -- the default it was meant to override, with no diagnostic anywhere.
-  local clean_opts, issues
-  if opts == nil then
-    clean_opts, issues = nil, {}
-  elseif type(opts) ~= 'table' then
-    clean_opts, issues = nil, { ('setup() expects a table, got %s -- using defaults'):format(type(opts)) }
-  else
-    clean_opts, issues = sanitize(opts)
-  end
-  _issues = issues
-  for _, issue in ipairs(issues) do
-    notify.warn(issue)
-  end
-
-  -- Handle scheme parameter
-  local config_to_merge = clean_opts
-  if clean_opts and clean_opts.scheme then
-    local scheme_loader = require('color_my_ascii.scheme_loader')
-    local scheme_config, err = scheme_loader.load_scheme(clean_opts.scheme)
-
-    if not scheme_config then
-      notify.error(err)
-      config_to_merge = vim.tbl_extend('force', {}, clean_opts)
-      config_to_merge.scheme = nil -- Remove invalid scheme parameter
+  -- The scheme is a layer of its own below the user's options. An unknown one
+  -- is reported and left out; the remaining options still apply.
+  local user_opts = opts
+  local scheme_config = nil
+  if type(opts) == 'table' and opts.scheme ~= nil then
+    user_opts = vim.tbl_extend('force', {}, opts)
+    user_opts.scheme = nil
+    local loaded, err = require('color_my_ascii.scheme_loader').load_scheme(opts.scheme)
+    if loaded then
+      scheme_config = loaded
     else
-      -- Merge user opts with scheme config (user opts take precedence)
-      local user_opts = vim.tbl_extend('force', {}, clean_opts)
-      user_opts.scheme = nil -- Remove scheme key from merge
-      config_to_merge = vim.tbl_deep_extend('force', scheme_config, user_opts)
+      notify.error(err)
     end
   end
-
-  if config_to_merge then
-    current_config = vim.tbl_deep_extend('force', vim.deepcopy(defaults), config_to_merge)
-  else
-    current_config = vim.deepcopy(defaults)
-  end
-
-  -- A known key can still carry an invalid VALUE through the merge above --
-  -- unknown/mistyped *keys* are caught before the merge (ERR-50), but a
-  -- wrong-typed or out-of-range value on a real key sails through
-  -- `vim.tbl_deep_extend` unexamined. Degrade those here, before anything
-  -- reads `current_config` (ERR-22).
-  degrade_number(
-    current_config,
-    'language_detection_threshold',
-    0,
-    math.huge,
-    defaults.language_detection_threshold,
-    'language_detection_threshold',
-    _issues
-  )
-  degrade_number(
-    current_config.fence_line_highlight,
-    'right_pad',
-    0,
-    20,
-    defaults.fence_line_highlight.right_pad,
-    'fence_line_highlight.right_pad',
-    _issues
-  )
-  degrade_number(
-    current_config.fence_content_highlight,
-    'right_pad',
-    0,
-    20,
-    defaults.fence_content_highlight.right_pad,
-    'fence_content_highlight.right_pad',
-    _issues
-  )
-  degrade_number(
-    current_config.fence_content_highlight,
-    'amount',
-    0,
-    100,
-    defaults.fence_content_highlight.amount,
-    'fence_content_highlight.amount',
-    _issues
-  )
-
-  for _, err in ipairs(merge_user_languages()) do
-    notify.warn(err)
-  end
-
-  -- Resolve default_text_hl if it's a custom highlight
-  if current_config.default_text_hl then
-    current_config.default_text_hl = resolve_highlight(current_config.default_text_hl)
-  end
-
-  -- Rebuild lookup tables after configuration change
-  M.char_lookup = build_char_lookup()
-  M.keyword_lookup = build_keyword_lookup()
-  M.unique_keyword_lookup = build_unique_keyword_lookup()
+  cfg.layer('scheme', scheme_config)
+  cfg.setup(user_opts)
 
   -- Initialize debug module if enabled
   if current_config.debug_enabled then
@@ -709,7 +599,7 @@ end
 --- the same table). Copy it yourself first if you need to mutate.
 ---@return ColorMyAscii.Config
 function M.get()
-  return current_config
+  return get_store().get()
 end
 
 --- Get the current config generation, incremented on every M.setup() call.
@@ -724,7 +614,7 @@ end
 --- was accepted as-is. For `:checkhealth color_my_ascii`.
 ---@return string[]
 function M.issues()
-  return vim.list_extend({}, _issues)
+  return get_store().issues()
 end
 
 --- Get the highlight group for a specific character
@@ -752,7 +642,7 @@ end
 ---@return string[] languages List of language names
 function M.get_available_languages()
   local langs = {}
-  for lang_name, _ in pairs(current_config.keywords) do
+  for lang_name, _ in pairs(M.get().keywords) do
     table.insert(langs, lang_name)
   end
   table.sort(langs)
@@ -762,7 +652,7 @@ end
 --- Check if function name detection is enabled
 ---@return boolean enabled True if function name detection is enabled
 function M.is_function_detection_enabled()
-  return current_config.enable_function_names
+  return M.get().enable_function_names
 end
 
 -- Initialize lookup tables (will be empty until setup() is called)

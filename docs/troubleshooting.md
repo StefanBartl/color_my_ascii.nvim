@@ -143,11 +143,10 @@ Config.unicode_version = 14
 
 ### Related limitation
 
-`:Fence align` / `box_align` count UTF-8 codepoints, not display cells, on the
-assumption that box-drawing glyphs are single-width. That holds under
-`ambiwidth=single`; under `ambiwidth=double`, or with a double-width character
-inside a box, an aligned box can still look crooked. Documented limitation, same
-root cause.
+`:Fence align` / `box_align` measure columns with Neovim's own display width
+(`nvim_strwidth`), so double-width characters (CJK, emoji) and `ambiwidth=double`
+are handled. What remains is the cause above: if your terminal uses a different
+width table than Neovim, an aligned box can still look crooked there.
 
 ---
 

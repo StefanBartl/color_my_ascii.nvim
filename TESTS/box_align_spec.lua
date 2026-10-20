@@ -119,6 +119,44 @@ return function(H)
     end
   end
 
+  -- ---- double-width chars: edges line up by display width, not codepoints --
+  do
+    local out, changed = align.align({
+      '┌────┐',
+      '│ 日本 │',
+      '│ ab │',
+      '│ 😀 │',
+      '└────┘',
+    })
+    eq(changed, 1, 'wide: one box changed')
+    eq(out[1], '┌──────┐', 'wide: top border widened to the CJK row')
+    eq(out[3], '│ ab   │', 'wide: ASCII row padded by display cells')
+    eq(out[4], '│ 😀   │', 'wide: emoji row padded by display cells')
+    for i, line in ipairs(out) do
+      eq(
+        vim.fn.strdisplaywidth(line),
+        vim.fn.strdisplaywidth(out[1]),
+        'wide: row ' .. i .. ' has the border display width'
+      )
+    end
+  end
+
+  -- ---- ambiwidth=double: box-drawing glyphs are two cells wide -------------
+  do
+    local saved = vim.o.ambiwidth
+    vim.o.ambiwidth = 'double'
+    local out = align.align({
+      '┌──┐',
+      '│ a │',
+      '└──┘',
+    })
+    local want = vim.fn.strdisplaywidth(out[1])
+    for i, line in ipairs(out) do
+      eq(vim.fn.strdisplaywidth(line), want, 'ambiwidth=double: row ' .. i .. ' has the border display width')
+    end
+    vim.o.ambiwidth = saved
+  end
+
   -- ---- empty input: no crash -------------------------------------------------
   do
     local out, changed = align.align({})

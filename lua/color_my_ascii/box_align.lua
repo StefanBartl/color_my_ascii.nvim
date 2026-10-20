@@ -9,10 +9,10 @@
 --- Deliberately narrow scope (v1): only the box's own width is touched.
 --- Directory-tree connectors (├──/└──/│ indentation) are left alone; only
 --- genuine 4-sided boxes (┌─┐ / │.../ └─┘, ╔═╗/║.../╚═╝, ╭─╮/│.../╰─╯, or
---- the ASCII +-|  style) are recognized. Column math counts UTF-8 codepoints
---- (all box-drawing glyphs are single-width), not full display width, so a
---- genuinely double-width character (CJK, emoji) inside a box can still
---- throw off visual alignment - a documented limitation, not a bug.
+--- the ASCII +-|  style) are recognized. Column math uses nvim's display
+--- width (`nvim_strwidth`, so double-width CJK/emoji and `ambiwidth=double`
+--- are honoured); a terminal whose width table differs from nvim's can still
+--- look off - that is outside what the plugin can see.
 
 local M = {}
 
@@ -35,6 +35,31 @@ local CORNERS = {
 }
 local HORIZ = { ['─'] = true, ['═'] = true, ['-'] = true }
 local VERT = { ['│'] = true, ['║'] = true, ['|'] = true }
+
+--- Display width of one char; a tab counts as one cell (same as the former
+--- codepoint math, its real width depends on the column).
+---@internal
+---@param c string
+---@return integer
+local function cw(c)
+  if c == '	' then
+    return 1
+  end
+  return vim.api.nvim_strwidth(c)
+end
+
+--- Display width of `chars[1..k-1]`, i.e. the 0-based start column of char `k`.
+---@internal
+---@param chars string[]
+---@param k integer
+---@return integer
+local function col(chars, k)
+  local w = 0
+  for i = 1, k - 1 do
+    w = w + cw(chars[i])
+  end
+  return w
+end
 
 ---@internal
 ---@param line string
@@ -155,11 +180,11 @@ end
 ---@return integer
 local function box_target(lines_chars, box)
   local left = box.left
-  local target = border_span(lines_chars[box.top], left) --[[@as integer]]
+  local target = col(lines_chars[box.top], border_span(lines_chars[box.top], left) --[[@as integer]])
 
   local bottom_right = border_span(lines_chars[box.bottom], left)
-  if bottom_right and bottom_right > target then
-    target = bottom_right
+  if bottom_right then
+    target = math.max(target, col(lines_chars[box.bottom], bottom_right))
   end
 
   for _, li in ipairs(box.interior) do
@@ -167,7 +192,7 @@ local function box_target(lines_chars, box)
     local right = last_vert_from(chars, left + 1)
     local need
     if right then
-      need = right
+      need = col(chars, right)
     else
       local last_nonblank = left
       for k = #chars, left + 1, -1 do
@@ -176,7 +201,7 @@ local function box_target(lines_chars, box)
           break
         end
       end
-      need = last_nonblank + 2 -- +1 pad space, +1 for the new right edge
+      need = col(chars, last_nonblank + 1) + 1 -- +1 pad space
     end
     if need > target then
       target = need
@@ -190,7 +215,7 @@ end
 ---@param chars string[]
 ---@param left integer
 ---@param right integer Current (possibly-too-narrow) right-corner index
----@param target integer
+---@param target integer Target display column of the right corner
 ---@return string
 local function rewrite_border(chars, left, right, target)
   local left_corner = chars[left]
@@ -211,7 +236,8 @@ local function rewrite_border(chars, left, right, target)
     out[#out + 1] = chars[k]
   end
   out[#out + 1] = left_corner
-  for _ = left + 1, target - 1 do
+  local fill = math.floor((target - col(chars, left) - cw(left_corner)) / math.max(cw(horiz), 1))
+  for _ = 1, fill do
     out[#out + 1] = horiz
   end
   out[#out + 1] = right_corner
@@ -244,7 +270,11 @@ local function rewrite_interior(chars, left, target)
   for _, c in ipairs(inner) do
     out[#out + 1] = c
   end
-  local pad = target - left - 1 - #inner
+  local inner_w = 0
+  for _, c in ipairs(inner) do
+    inner_w = inner_w + cw(c)
+  end
+  local pad = target - col(chars, left + 1) - inner_w
   for _ = 1, pad do
     out[#out + 1] = ' '
   end
@@ -276,16 +306,16 @@ function M.align(lines)
   for _, box in ipairs(boxes) do
     local target = box_target(lines_chars, box)
     local top_right = border_span(lines_chars[box.top], box.left) --[[@as integer]]
-    local box_changed = target ~= top_right
+    local box_changed = target ~= col(lines_chars[box.top], top_right)
 
     if not box_changed then
       local bottom_right = border_span(lines_chars[box.bottom], box.left)
-      box_changed = bottom_right ~= target
+      box_changed = not bottom_right or col(lines_chars[box.bottom], bottom_right) ~= target
     end
     if not box_changed then
       for _, li in ipairs(box.interior) do
         local right = last_vert_from(lines_chars[li], box.left + 1)
-        if right ~= target then
+        if not right or col(lines_chars[li], right) ~= target then
           box_changed = true
           break
         end

@@ -206,9 +206,9 @@ and bottom border, a vertical-edge interior in between — light, heavy, or
 rounded Unicode box-drawing, or ASCII `+-|`) and widens every row to the
 box's own widest row. Content is only ever **padded, never cut off**; a
 missing right edge on an interior row is added rather than treated as "not a
-box". Column math counts UTF-8 codepoints, not full display width — a
-genuinely double-width character (CJK, emoji) inside a box can still throw
-off visual alignment, a documented limitation rather than a bug.
+box". Column math uses Neovim's display width (`nvim_strwidth`), so
+double-width characters (CJK, emoji) and `ambiwidth=double` line up; a
+terminal whose width table differs from Neovim's can still look off.
 
 ### Deliberately narrow scope
 

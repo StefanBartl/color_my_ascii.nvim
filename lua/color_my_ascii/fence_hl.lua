@@ -320,8 +320,9 @@ end
 --- stale marks when disabled. No-op entirely if neither is enabled.
 ---@param bufnr integer
 ---@param cfg ColorMyAscii.Config
+---@param range? ColorMyAscii.RowRange Only paint blocks touching these rows (nil = all)
 ---@return nil
-function M.apply(bufnr, cfg)
+function M.apply(bufnr, cfg, range)
   local flh = cfg and cfg.fence_line_highlight
   local fch = cfg and cfg.fence_content_highlight
   M.clear(bufnr)
@@ -367,6 +368,12 @@ function M.apply(bufnr, cfg)
     return vim.bo[bufnr].tabstop
   end)
   tabstop = (ts_ok and type(tabstop) == 'number' and tabstop > 0) and tabstop or 8
+
+  if range then
+    blocks = vim.tbl_filter(function(b)
+      return b.close_row >= range.first and b.open_row <= range.last
+    end, blocks)
+  end
 
   for _, b in ipairs(blocks) do
     local want_line = line_on and (line_apply_to == 'all' or (line_apply_to == 'ascii' and b.is_ascii))

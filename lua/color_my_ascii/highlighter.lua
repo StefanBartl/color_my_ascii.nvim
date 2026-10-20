@@ -219,8 +219,15 @@ end
 
 --- Highlight inline code segments
 ---@param bufnr integer Buffer number
-function M.highlight_inline_codes(bufnr)
-  local inline_codes = parser.find_inline_codes(bufnr)
+---@param range? ColorMyAscii.RowRange Only paint spans on these rows (nil = all)
+---@param inline_codes? ColorMyAscii.InlineCode[] Already-parsed spans (nil = parse the buffer)
+function M.highlight_inline_codes(bufnr, range, inline_codes)
+  inline_codes = inline_codes or parser.find_inline_codes(bufnr)
+  if range then
+    inline_codes = vim.tbl_filter(function(inline)
+      return inline.line >= range.first and inline.line <= range.last
+    end, inline_codes)
+  end
   local user_config = config.get()
 
   -- Cache full-line content per line number, fetched at most once per inline code segment

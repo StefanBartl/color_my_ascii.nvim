@@ -69,6 +69,14 @@ return {
   },
   treat_empty_fence_as_ascii = true,
   enable_inline_code = true,
+  -- Very large buffers: paint only the rows around the window(s) and follow
+  -- the view on scroll. Off by default; buffers up to `min_lines` lines are
+  -- always painted in full.
+  visible_range = {
+    enable = false,
+    margin = 200,
+    min_lines = 2000,
+  },
   enable_function_names = true,
   enable_bracket_highlighting = true,
   -- Maps standard markdown fence language identifiers to plugin language names.

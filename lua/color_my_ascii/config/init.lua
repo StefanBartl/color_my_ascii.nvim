@@ -76,6 +76,7 @@ local KNOWN = {
   comment_ascii = { enable = true, filetypes = true },
   treat_empty_fence_as_ascii = true,
   enable_inline_code = true,
+  visible_range = { enable = true, margin = true, min_lines = true },
   enable_function_names = true,
   enable_bracket_highlighting = true,
   fence_language_map = true,

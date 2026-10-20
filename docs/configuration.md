@@ -50,6 +50,13 @@ require('color_my_ascii').setup({
   treat_empty_fence_as_ascii = true,
   enable_inline_code = true,
 
+  -- Very large buffers: paint only the rows around the window(s) (plus
+  -- `margin` rows) and follow the view when scrolling. Buffers up to
+  -- `min_lines` lines are always painted in full. Off by default.
+  -- Measured (800-line doc: no gain; 5 500 lines: ~200 ms -> ~120 ms per edit,
+  -- 12 000 lines: ~600 ms -> ~260 ms; parsing the whole buffer remains).
+  visible_range = { enable = false, margin = 200, min_lines = 2000 },
+
   -- Standard markdown fence tags treated as ASCII blocks.
   -- Maps the fence language identifier to the plugin's language name.
   fence_language_map = {

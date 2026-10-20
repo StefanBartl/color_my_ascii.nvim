@@ -130,6 +130,7 @@
 ---@field comment_ascii? ColorMyAscii.CommentAscii Optional detection/highlighting of explicitly-marked ASCII blocks inside code comments, outside markdown
 ---@field treat_empty_fence_as_ascii? boolean Treat `` without language as ASCII block
 ---@field enable_inline_code? boolean Enable highlighting in inline code ...`)
+---@field visible_range? ColorMyAscii.VisibleRangeConfig Paint only the rows around the visible window(s) in very large buffers
 ---@field enable_function_names? boolean Enable heuristic function name detection
 ---@field enable_bracket_highlighting? boolean Enable highlighting of brackets/parentheses
 ---@field fence_language_map? table<string, string> Map of markdown fence language tags to plugin language names (e.g., { vim = "vim" })
@@ -243,3 +244,8 @@
 ---@alias KeywordLookup table<string, {language: string, hl: string}[]>
 ---@alias CharLookup table<string, string>
 ---@alias UniqueKeywordLookup table<string, string>
+
+---@class ColorMyAscii.VisibleRangeConfig
+---@field enable? boolean Restrict painting to the visible rows plus `margin` (default false)
+---@field margin? integer Rows painted above and below the visible part (default 200)
+---@field min_lines? integer Buffers up to this many lines are always painted in full (default 2000)

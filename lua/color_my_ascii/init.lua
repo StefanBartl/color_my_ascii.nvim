@@ -32,6 +32,7 @@ M.highlight = require('color_my_ascii.api.highlight')
 local highlighter = require('color_my_ascii.highlighter')
 local cache_manager = require('color_my_ascii.cache_manager')
 local debounce_manager = require('color_my_ascii.debounce_manager')
+local visible_range = require('color_my_ascii.visible_range')
 local safe_api = require('color_my_ascii.utils.safe_api')
 
 --- Initialize the plugin with user configuration
@@ -118,6 +119,25 @@ function M.setup(opts)
     desc = 'Recompute fence right-edge padding after a window resize',
   })
 
+  -- visible_range: paint more rows once the view scrolls past the painted ones.
+  autocmd.create('WinScrolled', function()
+    local c = require('color_my_ascii.config').get()
+    if not (c.visible_range and c.visible_range.enable) then
+      return
+    end
+    for _, win in ipairs(api.nvim_list_wins()) do
+      local b = api.nvim_win_get_buf(win)
+      if state.enabled and state.buffers[b] and visible_range.needs_repaint(b, c) then
+        debounce_manager.debounce(b, function()
+          M.highlight_buffer(b)
+        end)
+      end
+    end
+  end, {
+    group = autocmd.augroup.create.clear('ColorMyAsciiVisibleRange'),
+    desc = 'Paint the newly visible rows of large buffers (visible_range)',
+  })
+
   -- Hot-reload: calling setup() again (e.g. after adding/editing a
   -- config.languages entry) invalidates the stale per-buffer parse cache and
   -- immediately re-highlights every already-managed buffer, so a changed
@@ -179,6 +199,7 @@ function M.setup_buffer(bufnr)
   -- Cleanup on buffer delete
   autocmd.create('BufDelete', function()
     state.buffers[bufnr] = nil
+    visible_range.forget(bufnr)
     highlighter.clear_buffer(bufnr)
     fence_hl.clear(bufnr)
     cache_manager.invalidate(bufnr)
@@ -209,8 +230,12 @@ function M.highlight_buffer(bufnr)
     return false, string.format('Invalid buffer: %d', bufnr)
   end
 
+  -- nil = paint everything; otherwise only the rows around the window(s)
+  local range = visible_range.compute(bufnr, cfg)
+  visible_range.set_painted(bufnr, range)
+
   -- Try cache first
-  local cached_blocks, _, cache_hit = cache_manager.get(bufnr)
+  local cached_blocks, cached_inline, cache_hit = cache_manager.get(bufnr)
 
   if cache_hit then
     -- Use cached data
@@ -226,9 +251,11 @@ function M.highlight_buffer(bufnr)
       -- Highlight cached blocks safely
       for _, block in ipairs(cached_blocks) do
         if type(block) == 'table' then
-          success, err = pcall(highlighter.highlight_block, bufnr, block)
-          if not success then
-            notify.error(string.format('Failed to highlight block: %s', err))
+          if visible_range.hits(range, block.start_line, block.end_line) then
+            success, err = pcall(highlighter.highlight_block, bufnr, block)
+            if not success then
+              notify.error(string.format('Failed to highlight block: %s', err))
+            end
           end
         else
           notify.warn('Skipped invalid block in cache (not a table)')
@@ -237,12 +264,12 @@ function M.highlight_buffer(bufnr)
     end
 
     -- Highlight inline codes
-    success, err = pcall(highlighter.highlight_inline_codes, bufnr)
+    success, err = pcall(highlighter.highlight_inline_codes, bufnr, range, cached_inline)
     if not success then
       return false, string.format('Failed to highlight inline codes: %s', err)
     end
 
-    pcall(fence_hl.apply, bufnr, cfg)
+    pcall(fence_hl.apply, bufnr, cfg, range)
     return true, nil
   end
 
@@ -269,20 +296,22 @@ function M.highlight_buffer(bufnr)
 
   -- Highlight each block
   for _, block in ipairs(blocks) do
-    success, err = pcall(highlighter.highlight_block, bufnr, block)
-    if not success and cfg.debug_enabled then
-      -- Log error but continue with other blocks
-      notify.warn(string.format('Block highlighting error: %s', err))
+    if visible_range.hits(range, block.start_line, block.end_line) then
+      success, err = pcall(highlighter.highlight_block, bufnr, block)
+      if not success and cfg.debug_enabled then
+        -- Log error but continue with other blocks
+        notify.warn(string.format('Block highlighting error: %s', err))
+      end
     end
   end
 
   -- Highlight inline codes
-  success, err = pcall(highlighter.highlight_inline_codes, bufnr)
+  success, err = pcall(highlighter.highlight_inline_codes, bufnr, range, inline_codes)
   if not success and cfg.debug_enabled then
     notify.warn(string.format('Inline code highlighting error: %s', err))
   end
 
-  pcall(fence_hl.apply, bufnr, cfg)
+  pcall(fence_hl.apply, bufnr, cfg, range)
   return true, nil
 end
 

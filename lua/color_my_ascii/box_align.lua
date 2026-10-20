@@ -172,6 +172,22 @@ local function find_boxes(lines_chars)
   return boxes
 end
 
+--- The horizontal glyph a border is drawn with (first one found, else the
+--- style's default for its left corner).
+---@internal
+---@param chars string[]
+---@param left integer
+---@param right integer
+---@return string
+local function border_horiz(chars, left, right)
+  for k = left + 1, right - 1 do
+    if chars[k] and HORIZ[chars[k]] then
+      return chars[k]
+    end
+  end
+  return (chars[left] == '+') and '-' or '─'
+end
+
 --- The right-edge column this box should be widened/narrowed... only ever
 --- widened... to: the widest row's own right-edge requirement.
 ---@internal
@@ -208,7 +224,13 @@ local function box_target(lines_chars, box)
     end
   end
 
-  return target
+  -- The border fills the gap between the corners with whole glyphs; round the
+  -- target up so a double-width glyph (ambiwidth=double) lands exactly on it
+  -- and borders and interior rows end in the same column.
+  local top = lines_chars[box.top]
+  local corner_end = col(top, left) + cw(top[left])
+  local hw = math.max(cw(border_horiz(top, left, border_span(top, left) --[[@as integer]])), 1)
+  return corner_end + math.ceil((target - corner_end) / hw) * hw
 end
 
 ---@internal
@@ -220,16 +242,7 @@ end
 local function rewrite_border(chars, left, right, target)
   local left_corner = chars[left]
   local right_corner = chars[right]
-  local horiz = nil
-  for k = left + 1, right - 1 do
-    if chars[k] and HORIZ[chars[k]] then
-      horiz = chars[k]
-      break
-    end
-  end
-  if not horiz then
-    horiz = (left_corner == '+') and '-' or '─'
-  end
+  local horiz = border_horiz(chars, left, right)
 
   local out = {}
   for k = 1, left - 1 do

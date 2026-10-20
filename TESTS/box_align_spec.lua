@@ -157,6 +157,24 @@ return function(H)
     vim.o.ambiwidth = saved
   end
 
+  -- ---- ambiwidth=double with an odd gap: borders and rows must end together ----
+  do
+    local saved = vim.o.ambiwidth
+    vim.o.ambiwidth = 'double'
+    local ok_run, err = pcall(function()
+      local out, changed = align.align({ '┌─┐', '│ a │', '└─┘' })
+      eq(changed, 1, 'odd gap: the box is changed')
+      local want = vim.fn.strdisplaywidth(out[1])
+      for i, line in ipairs(out) do
+        eq(vim.fn.strdisplaywidth(line), want, 'odd gap: row ' .. i .. ' has the border display width')
+      end
+      local _, again = align.align(out)
+      eq(again, 0, 'odd gap: a second pass changes nothing (idempotent)')
+    end)
+    vim.o.ambiwidth = saved
+    ok(ok_run, 'odd gap: ' .. tostring(err))
+  end
+
   -- ---- empty input: no crash -------------------------------------------------
   do
     local out, changed = align.align({})

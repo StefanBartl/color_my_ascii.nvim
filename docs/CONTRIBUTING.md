@@ -37,14 +37,14 @@ luacheck lua/ plugin/ TESTS/        # lint
 
 ## Tests
 
-The headless suite runs in Neovim on [testing.nvim](https://github.com/StefanBartl/testing.nvim),
+The headless suite runs in Neovim on [testing.nvim](https://github.com/WKDSteve/testing.nvim),
 with no network or subprocess access:
 
 ```sh
 bash scripts/test.sh
 ```
 
-It needs testing.nvim and [lib.nvim](https://github.com/StefanBartl/lib.nvim) —
+It needs testing.nvim and [lib.nvim](https://github.com/WKDSteve/lib.nvim) —
 set `$TESTING_NVIM_DIR` / `$LIB_NVIM_DIR`, clone them to `.deps/<name>`, or
 check them out next to this repository (a missing one fails loudly, naming all
 searched places). CI runs the same command as a third job alongside stylua and

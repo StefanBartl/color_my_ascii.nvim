@@ -94,7 +94,7 @@ following `link=` chains, leaving unset attributes nil.
 answer, and the consumer's cue to fall back to whatever it would otherwise have
 done. Not an edge case: `fence_language_map` covers all 31 built-in languages.
 
-First consumer: [mdview.nvim](https://github.com/StefanBartl/mdview.nvim)'s
+First consumer: [mdview.nvim](https://github.com/WKDSteve/mdview.nvim)'s
 `browser.highlighter = "nvim"`, which paints its browser preview with exactly
 what the buffer next to it shows and hands the rest to highlight.js.
 

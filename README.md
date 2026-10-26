@@ -15,9 +15,9 @@
 [![Neovim](https://img.shields.io/badge/Neovim-0.10%2B-57A143?logo=neovim&logoColor=white)](https://neovim.io)
 [![Lua](https://img.shields.io/badge/Lua-5.1%2FLuaJIT-2C2D72?logo=lua&logoColor=white)](https://www.lua.org)
 ![Status](https://img.shields.io/badge/status-beta-orange)
-[![wkd](https://img.shields.io/badge/wkd-family-c6ff3d)](https://stefanbartl.github.io/wkd/p/color_my_ascii/)
+[![wkd](https://img.shields.io/badge/wkd-family-c6ff3d)](https://wkdsteve.github.io/wkd/p/color_my_ascii/)
 
-> Part of the [wkd](https://stefanbartl.github.io/wkd/) family — see this plugin's [page](https://stefanbartl.github.io/wkd/p/color_my_ascii/) on the site.
+> Part of the [wkd](https://wkdsteve.github.io/wkd/) family — see this plugin's [page](https://wkdsteve.github.io/wkd/p/color_my_ascii/) on the site.
 
 Colorful highlighting for ASCII art in Markdown code blocks, with automatic
 language detection, custom highlights and predefined color schemes — a fenced
@@ -29,16 +29,16 @@ literate-programming toolkit over the same blocks.
 
 ## Around it
 
-> **[markdown.nvim](https://github.com/StefanBartl/markdown.nvim)** — structures
+> **[markdown.nvim](https://github.com/WKDSteve/markdown.nvim)** — structures
 > the document around the block (TOC, folding, tables); this one paints what is
 > inside the block.
 >
-> **[mdview.nvim](https://github.com/StefanBartl/mdview.nvim)** — the one real
+> **[mdview.nvim](https://github.com/WKDSteve/mdview.nvim)** — the one real
 > consumer of the highlight read-back API: it repaints the same colors in a
 > browser preview, so the rendered page and the buffer agree.
 >
 > Both are soft: without them everything else works unchanged.
-> [lib.nvim](https://github.com/StefanBartl/lib.nvim) is the one real
+> [lib.nvim](https://github.com/WKDSteve/lib.nvim) is the one real
 > dependency — see [Requirements](./docs/requirements.md).
 
 ---
@@ -71,7 +71,7 @@ each page answers.
 - [Tests](./TESTS/README.md) — how to run the headless suite, what it covers, and the behaviour currently pinned as a known bug.
 - [Manual fixture](./TESTS/FIXTURE.md) — a Markdown file that exercises every feature by hand, with [FIXTURE-CONFIG.md](./TESTS/FIXTURE-CONFIG.md) to turn them all on.
 - [Changelog](./docs/CHANGELOG.md) — version history.
-- Feedback — the [issue tracker](https://github.com/StefanBartl/color_my_ascii.nvim/issues) for bugs, features and usage questions; [discussions](https://github.com/StefanBartl/color_my_ascii.nvim/discussions) for anything more open-ended.
+- Feedback — the [issue tracker](https://github.com/WKDSteve/color_my_ascii.nvim/issues) for bugs, features and usage questions; [discussions](https://github.com/WKDSteve/color_my_ascii.nvim/discussions) for anything more open-ended.
 
 `:help color_my_ascii` is the same reference inside the editor.
 

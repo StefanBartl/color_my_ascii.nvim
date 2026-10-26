@@ -26,7 +26,7 @@ bash scripts/test.sh --file fence    # only spec files whose name contains "fenc
 bash scripts/test.sh --json ir.json  # also write the machine-readable result
 ```
 
-It runs on [testing.nvim](https://github.com/StefanBartl/testing.nvim)
+It runs on [testing.nvim](https://github.com/WKDSteve/testing.nvim)
 (configured by `.testing.lua`), prints one line per spec, exits non-zero when
 any spec fails, and ends with `COLOR_MY_ASCII_TESTS_OK` when everything passed.
 `*_spec.lua` files under `TESTS/` are discovered automatically; a new spec

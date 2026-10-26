@@ -275,7 +275,7 @@ function M.check()
   if composer_ok then
     health.ok('lib.nvim found - :ColorMyAscii command + keymap/notify integration available')
   else
-    health.error('lib.nvim not found - :ColorMyAscii will fail to load', { 'Install "StefanBartl/lib.nvim"' })
+    health.error('lib.nvim not found - :ColorMyAscii will fail to load', { 'Install "WKDSteve/lib.nvim"' })
   end
 
   -- telescope.nvim is optional: only the scheme picker (:ColorMyAscii schemes) uses it.

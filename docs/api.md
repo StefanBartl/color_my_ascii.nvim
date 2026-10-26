@@ -3,7 +3,7 @@
 color_my_ascii owns robust, CommonMark-compatible fenced-block detection
 (heuristic state machine + treesitter). Other plugins can consume it instead of
 reimplementing fence parsing — this is how
-[markdown.nvim](https://github.com/StefanBartl/markdown.nvim) implements its
+[markdown.nvim](https://github.com/WKDSteve/markdown.nvim) implements its
 "treat a `` ```markdown `` block as its own document scope" feature.
 
 ````lua
@@ -42,7 +42,7 @@ only inside the buffer: copy a block out, render it somewhere else, and the
 colors are gone. This API hands the same information out **as data**, so
 another plugin can reproduce the buffer's look in its own medium.
 
-Its first consumer is [mdview.nvim](https://github.com/StefanBartl/mdview.nvim),
+Its first consumer is [mdview.nvim](https://github.com/WKDSteve/mdview.nvim),
 which paints fenced code blocks in its browser preview with exactly what the
 buffer next to it shows (`browser.highlighter = "nvim"`), instead of guessing
 the language again with a JavaScript highlighter.

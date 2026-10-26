@@ -42,7 +42,7 @@ Quick introduction to color_my_ascii.nvim with all important features.
 
 ## Installation
 
-Requires [lib.nvim](https://github.com/StefanBartl/lib.nvim) — declare it as a
+Requires [lib.nvim](https://github.com/WKDSteve/lib.nvim) — declare it as a
 dependency in whichever manager you use; see [requirements.md](requirements.md)
 for the full list.
 
@@ -50,9 +50,9 @@ for the full list.
 
 ```lua
 {
-  "StefanBartl/color_my_ascii.nvim",
+  "WKDSteve/color_my_ascii.nvim",
   ft = "markdown",
-  dependencies = { "StefanBartl/lib.nvim" }, -- required
+  dependencies = { "WKDSteve/lib.nvim" }, -- required
   opts = {},
 }
 ```
@@ -68,8 +68,8 @@ if your plugin manager does not.
 
 ```lua
 use {
-  'StefanBartl/color_my_ascii.nvim',
-  requires = { 'StefanBartl/lib.nvim' }, -- required
+  'WKDSteve/color_my_ascii.nvim',
+  requires = { 'WKDSteve/lib.nvim' }, -- required
   ft = 'markdown',
   config = function()
     require('color_my_ascii').setup()

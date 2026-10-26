@@ -53,7 +53,7 @@ Features:~
 2. REQUIREMENTS                                 *color_my_ascii-requirements*
 
   • Neovim >= 0.10
-  • lib.nvim (github.com/StefanBartl/lib.nvim) - required, not optional:
+  • lib.nvim (github.com/WKDSteve/lib.nvim) - required, not optional:
     the commands, keymaps, autocommands and notifications are built on it,
     and every module requires it at the top level
   • Markdown files (filetype=markdown)
@@ -72,9 +72,9 @@ actually being edited.
 Using lazy.nvim:~
 >lua
     {
-      'StefanBartl/color_my_ascii.nvim',
+      'WKDSteve/color_my_ascii.nvim',
       ft = 'markdown',
-      dependencies = { 'StefanBartl/lib.nvim' }, -- required
+      dependencies = { 'WKDSteve/lib.nvim' }, -- required
       opts = {}
     }
 <
@@ -82,9 +82,9 @@ Using lazy.nvim:~
 Using packer.nvim:~
 >lua
     use {
-      'StefanBartl/color_my_ascii.nvim',
+      'WKDSteve/color_my_ascii.nvim',
       ft = 'markdown',
-      requires = { 'StefanBartl/lib.nvim' }, -- required
+      requires = { 'WKDSteve/lib.nvim' }, -- required
       config = function()
         require('color_my_ascii').setup()
       end
@@ -925,7 +925,7 @@ adds behavior, it doesn't take anything away.
 
 Each mapping is set with a `desc`, so which-key.nvim picks them up
 automatically without extra configuration. lib.nvim
-(github.com/StefanBartl/lib.nvim) is a required dependency (the
+(github.com/WKDSteve/lib.nvim) is a required dependency (the
 |:ColorMyAscii| command itself is built on it); lib.nvim.bindings.keymap specifically
 stays soft-guarded for keymap registration, falling back to vim.keymap.set.
 

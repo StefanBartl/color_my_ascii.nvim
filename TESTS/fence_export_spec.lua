@@ -119,6 +119,34 @@ return function(H)
   ok(captured_question ~= nil, 'overwrite: the shared dialog was asked')
   eq(vim.fn.readfile(existing)[1], 'OLD', 'overwrite: Cancel leaves the file untouched')
 
+  -- A late 'Yes' after the buffer moved: the file is overwritten (that was the answer), but `--replace` leaves
+  -- the lines alone, since the block it knew is no longer where it was.
+  local buf_late = H.scratch('markdown', {
+    '```javascript',
+    'let late = 1;',
+    '```',
+  })
+  api.nvim_win_set_cursor(0, { 2, 0 })
+  local late_cb
+  package.loaded['lib.nvim.ui.dialog'] = {
+    yesno = function(_, _, cb)
+      late_cb = cb
+    end,
+  }
+  package.loaded['color_my_ascii.commands.fence.export'] = nil
+  export = require('color_my_ascii.commands.fence.export')
+  export.run({ existing, '--replace' })
+  package.loaded['lib.nvim.ui.dialog'] = real_dialog
+  ok(late_cb ~= nil, 'late answer: the question is open')
+  api.nvim_buf_set_lines(buf_late, 0, 0, false, { 'inserted while asking' })
+  late_cb(true)
+  eq(vim.fn.readfile(existing)[1], 'let late = 1;', 'late answer: the file is overwritten')
+  eq(
+    table.concat(api.nvim_buf_get_lines(buf_late, 0, -1, false), '|'),
+    table.concat({ 'inserted while asking', '```javascript', 'let late = 1;', '```' }, '|'),
+    'late answer: the moved block is not replaced by the link'
+  )
+
   -- ---- no path given prompts via kit.input(completion="file") -------------
   local buf3 = H.scratch('markdown', {
     '```javascript',

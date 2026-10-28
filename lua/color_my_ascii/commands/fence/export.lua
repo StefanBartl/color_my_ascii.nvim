@@ -76,8 +76,8 @@ local function confirm(question, on_answer)
   require('lib.nvim.ui.dialog').yesno(question, 'overwrite', on_answer, { kind = 'danger' })
 end
 
---- Prompt for a path with file completion: kit.input (soft dependency, same
---- convention as confirm() above) when ui.nvim is installed -- its
+--- Prompt for a path with file completion: kit.input (soft dependency: ui.nvim
+--- may be missing) when ui.nvim is installed -- its
 --- completion = "file" covers the cmdline-style Tab-completion this
 --- needs -- else the native vim.ui.input.
 ---@internal
@@ -111,7 +111,7 @@ end
 ---@param block table
 ---@param content string[]
 ---@param path string
----@param flags { open?: boolean, replace?: boolean }
+---@param flags { open?: boolean, replace?: boolean, no_replace?: boolean }
 local function write_content(bufnr, block, content, path, flags)
   -- mkdir -p + write via lib.nvim.fs.write.to_file. lib.nvim is a required
   -- dependency (see the module requires at the top of this file and
@@ -125,7 +125,7 @@ local function write_content(bufnr, block, content, path, flags)
   util.notify(('exported %d line(s) to %s'):format(#content, vim.fn.fnamemodify(path, ':~:.')))
 
   local c = cfg()
-  if flags.replace or c.replace then
+  if (flags.replace or c.replace) and not flags.no_replace then
     pcall(replace_block_with_ref, bufnr, block, path)
   end
   if flags.open or c.open_after then
@@ -162,9 +162,21 @@ local function write_with_confirm(bufnr, block, content, path, flags)
   end
 
   if vim.fn.filereadable(path) == 1 then
+    -- The answer comes later: a buffer that changed meanwhile has moved the block, and `--replace` would
+    -- swap other lines for the link. The file is still written (the user said yes to that), the block stays.
+    local tick = vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_get_changedtick(bufnr) or nil
     confirm(("'%s' exists. Overwrite?"):format(vim.fn.fnamemodify(path, ':~')), function(yes)
       if not yes then
         util.notify('export cancelled')
+        return
+      end
+      local c = cfg()
+      if
+        (flags.replace or c.replace)
+        and (tick == nil or not vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_get_changedtick(bufnr) ~= tick)
+      then
+        util.notify('the buffer changed while the question was open: the block was not replaced', vim.log.levels.WARN)
+        write_content(bufnr, block, content, path, vim.tbl_extend('force', flags, { no_replace = true }))
         return
       end
       do_write()

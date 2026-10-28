@@ -90,7 +90,7 @@ return function(H)
   ok(okrun, 'no-fence: does not error')
   ok(vim.fn.filereadable(tmp .. '/never.js') == 0, 'no-fence: nothing written')
 
-  -- ---- overwrite of an existing path asks kit.confirm, not vim.fn.confirm --
+  -- ---- overwrite of an existing path asks the shared dialog, not vim.fn.confirm --
   -- Fresh buffer: the previous --replace step already swapped this buffer's
   -- only fence for a link reference, so it no longer has a fence to export.
   local buf2 = H.scratch('markdown', {
@@ -104,17 +104,19 @@ return function(H)
   vim.fn.writefile({ 'OLD' }, existing)
 
   local captured_question
-  package.loaded['ui.kit'] = {
-    confirm = function(opts)
-      captured_question = opts.question
-      opts.on_answer(false) -- Cancel: must not overwrite
+  local real_dialog = package.loaded['lib.nvim.ui.dialog']
+  package.loaded['lib.nvim.ui.dialog'] = {
+    yesno = function(question, _, cb)
+      captured_question = question
+      cb(false) -- No: must not overwrite
     end,
   }
   package.loaded['color_my_ascii.commands.fence.export'] = nil
   export = require('color_my_ascii.commands.fence.export')
 
   export.run({ existing })
-  ok(captured_question ~= nil, 'overwrite: kit.confirm was asked')
+  package.loaded['lib.nvim.ui.dialog'] = real_dialog
+  ok(captured_question ~= nil, 'overwrite: the shared dialog was asked')
   eq(vim.fn.readfile(existing)[1], 'OLD', 'overwrite: Cancel leaves the file untouched')
 
   -- ---- no path given prompts via kit.input(completion="file") -------------

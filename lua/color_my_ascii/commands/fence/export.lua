@@ -67,19 +67,13 @@ local function replace_block_with_ref(bufnr, block, path)
   api.nvim_buf_set_lines(bufnr, block.open_row, block.close_row + 1, false, { ref })
 end
 
---- Yes/No confirm: kit.confirm (soft dependency -- ui.nvim is optional, see
---- docs/requirements.md) when ui.nvim is installed, else the native
---- vim.fn.confirm.
+--- Yes/No confirm through lib.nvim's shared dialog (`dialog.yesno`: "No" is first and focused, `n`/`y` are keys; a native
+--- question when no float can open). `on_answer(yes)` runs once, never inside this call.
 ---@internal
 ---@param question string
 ---@param on_answer fun(yes: boolean)
 local function confirm(question, on_answer)
-  local ok_kit, kit = pcall(require, 'ui.kit')
-  if ok_kit then
-    kit.confirm({ question = question, on_answer = on_answer })
-    return
-  end
-  on_answer(vim.fn.confirm(question, '&Yes\n&No', 2) == 1)
+  require('lib.nvim.ui.dialog').yesno(question, 'overwrite', on_answer, { kind = 'danger' })
 end
 
 --- Prompt for a path with file completion: kit.input (soft dependency, same
